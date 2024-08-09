@@ -1,3 +1,5 @@
+import 'server-only';
+
 import Axios from 'axios';
 import { cookies } from 'next/headers';
 
