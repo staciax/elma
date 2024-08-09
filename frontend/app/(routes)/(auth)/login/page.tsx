@@ -1,7 +1,12 @@
-import React from 'react';
+import SignInForm from '@/components/forms/signin';
+import type React from 'react';
 
-function Page() {
-	return <div>Page</div>;
+async function Page() {
+	return (
+		<div>
+			<SignInForm />
+		</div>
+	);
 }
 
 export default Page;
