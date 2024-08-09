@@ -1,10 +1,7 @@
 'use server';
 
 import axios from '@/lib/axios';
-
-type Token = {
-	accessToken: string;
-};
+import type { Token } from '@/lib/elma/types';
 
 export const signin = async (email: string, password: string): Promise<Token> => {
 	console.log(`signin: ${email}, ${password}`);
