@@ -1,4 +1,4 @@
-import SignInForm from '@/components/forms/signin';
+import SignInForm from '@/components/forms/sign-in';
 import type React from 'react';
 
 async function Page() {
