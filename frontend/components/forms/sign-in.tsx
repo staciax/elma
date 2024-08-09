@@ -6,7 +6,7 @@ import type React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { signin } from '@/lib/elma/actions/signin';
+import { signin } from '@/lib/elma/actions/sign-in';
 
 const schema = z.object({
 	email: z.string().email(),
