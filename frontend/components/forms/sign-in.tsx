@@ -6,7 +6,7 @@ import type React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { signin } from '@/lib/elma/actions/sign-in';
+import { signIn } from '@/lib/elma/actions/sign-in';
 
 const schema = z.object({
 	email: z.string().email(),
@@ -36,7 +36,7 @@ function SignInForm() {
 	});
 
 	async function onSubmit(values: Schema) {
-		const { accessToken } = await signin(values.email, values.password);
+		const { accessToken } = await signIn(values.email, values.password);
 		setCookie('ac-token', accessToken, {
 			// httpOnly: true,
 			// secure: process.env.NODE_ENV === 'production',
