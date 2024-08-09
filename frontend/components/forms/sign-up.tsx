@@ -1,13 +1,11 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { setCookie } from 'cookies-next';
-import type React from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
 import { signIn } from '@/lib/elma/actions/sign-in';
 import { signUp } from '@/lib/elma/actions/sign-up';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { setCookie } from 'cookies-next';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const schema = z.object({
 	email: z.string().email(),

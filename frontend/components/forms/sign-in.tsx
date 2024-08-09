@@ -1,12 +1,11 @@
 'use client';
 
+import { signIn } from '@/lib/elma/actions/sign-in';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { setCookie } from 'cookies-next';
-import type React from 'react';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-import { signIn } from '@/lib/elma/actions/sign-in';
+import { z } from 'zod';
 
 const schema = z.object({
 	email: z.string().email(),
@@ -77,6 +76,7 @@ function SignInForm() {
 					type="password"
 				/>
 				{errors.password && <span role="alert">{errors.password.message}</span>}
+
 				<button type="submit">SUBMIT</button>
 			</div>
 		</form>
