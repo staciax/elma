@@ -7,27 +7,39 @@ import { setCookie } from 'cookies-next';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const schema = z.object({
-	email: z.string().email(),
-	password1: z
-		.string()
-		.min(8, {
-			message: 'min length is 8',
-		})
-		.max(512, {
-			message: 'max length is 128',
-		}),
-	password2: z
-		.string()
-		.min(8, {
-			message: 'min length is 8',
-		})
-		.max(512, {
-			message: 'max length is 128',
-		}),
-	firstName: z.string().min(1).max(128),
-	lastName: z.string().min(1).max(128),
-});
+const schema = z
+	.object({
+		email: z.string().email(),
+		password: z
+			.string()
+			.min(8, {
+				message: 'min length is 8',
+			})
+			.max(512, {
+				message: 'max length is 128',
+			}),
+		confirmPassword: z.string(),
+		firstName: z
+			.string()
+			.min(1, {
+				message: 'min length is 1',
+			})
+			.max(128, {
+				message: 'max length is 128',
+			}),
+		lastName: z
+			.string()
+			.min(1, {
+				message: 'min length is 1',
+			})
+			.max(128, {
+				message: 'max length is 128',
+			}),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: 'passwords do not match',
+		path: ['confirmPassword'],
+	});
 
 function SignUpForm() {
 	type Schema = z.infer<typeof schema>;
@@ -40,24 +52,18 @@ function SignUpForm() {
 		resolver: zodResolver(schema),
 		defaultValues: {
 			email: '',
-			password1: '',
-			password2: '',
+			password: '',
+			confirmPassword: '',
 			firstName: '',
 			lastName: '',
 		},
 	});
 
 	async function onSubmit(values: Schema) {
-		const { email, password1, password2, firstName, lastName } = values;
+		const { email, password, firstName, lastName } = values;
 
-		// TODO: zod validation should catch this
-		if (password1 !== password2) {
-			console.log('passwords do not match');
-			return;
-		}
-
-		const user = await signUp(email, password1, firstName, lastName);
-		const { accessToken } = await signIn(values.email, values.password1);
+		const user = await signUp(email, password, firstName, lastName);
+		const { accessToken } = await signIn(user.email, values.password);
 		setCookie('ac-token', accessToken, {
 			// httpOnly: true,
 			// secure: process.env.NODE_ENV === 'production',
@@ -101,10 +107,10 @@ function SignUpForm() {
 				/>
 				{errors.email && <span role="alert">{errors.email.message}</span>}
 
-				<label htmlFor="password1">password</label>
+				<label htmlFor="password">password</label>
 				<input
-					id="password1"
-					{...register('password1', {
+					id="password"
+					{...register('password', {
 						required: true,
 						minLength: {
 							value: 8,
@@ -117,12 +123,12 @@ function SignUpForm() {
 					})}
 					type="password"
 				/>
-				{errors.password1 && <span role="alert">{errors.password1.message}</span>}
+				{errors.password && <span role="alert">{errors.password.message}</span>}
 
-				<label htmlFor="password2">confirm password</label>
+				<label htmlFor="confirmPassword">confirm password</label>
 				<input
-					id="password2"
-					{...register('password2', {
+					id="confirmPassword"
+					{...register('confirmPassword', {
 						required: true,
 						minLength: {
 							value: 8,
@@ -135,7 +141,7 @@ function SignUpForm() {
 					})}
 					type="password"
 				/>
-				{errors.password2 && <span role="alert">{errors.password2.message}</span>}
+				{errors.confirmPassword && <span role="alert">{errors.confirmPassword.message}</span>}
 
 				<button type="submit">SUBMIT</button>
 			</div>
