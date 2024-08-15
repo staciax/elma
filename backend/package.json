@@ -1,0 +1,25 @@
+{
+	"name": "backend2",
+	"version": "1.0.50",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"build": "bun build src/index.ts",
+		"start": "NODE_ENV=production bun src/index.ts",
+		"test": "bun test",
+		"lint": "biome check . && biome format .",
+		"format": "biome check --write . && biome format . --write"
+	},
+	"dependencies": {
+		"@elysiajs/cors": "^1.0.4",
+		"@elysiajs/jwt": "^1.0.2",
+		"@elysiajs/swagger": "^1.0.5",
+		"elysia": "latest",
+		"mysql2": "^3.10.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@types/node": "^20.14.10",
+		"bun-types": "latest"
+	},
+	"module": "src/index.js"
+}
