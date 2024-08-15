@@ -1,0 +1,28 @@
+services:
+  backend:
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./backend
+      args:
+        - NODE_ENV=production
+    platform: linux/amd64 # Patch for M1 Mac
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
+
+  frontend:
+    restart: always
+    networks:
+      - default
+    build:
+      context: ./frontend
+      args:
+        - NODE_ENV=production
+    platform: linux/amd64 # Patch for M1 Mac
+    # env_file:
+    #   - ./frontend/.env
+    ports:
+      - 3000:3000
