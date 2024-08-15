@@ -2,7 +2,7 @@
 	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
 	"files": {
 		"include": ["./**/*.js", "./**/*.ts", "./**/*.json"],
-		"ignore": ["dist/**", ".vscode", "node_modules"]
+		"ignore": [".vscode", "node_modules"]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -16,6 +16,16 @@
 		"indentWidth": 2,
 		"lineWidth": 80,
 		"lineEnding": "lf"
+	},
+	"linter": {
+		"enabled": true,
+		"ignore": [],
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedVariables": "warn"
+			}
+		}
 	},
 	"javascript": {
 		"formatter": {
@@ -31,13 +41,6 @@
 	"json": {
 		"formatter": {
 			"trailingCommas": "none"
-		}
-	},
-	"linter": {
-		"enabled": true,
-		"ignore": [],
-		"rules": {
-			"recommended": true
 		}
 	}
 }

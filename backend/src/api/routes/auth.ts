@@ -1,25 +1,46 @@
-import { Elysia } from 'elysia';
-import { jwt } from '../../core/security';
+import { prisma } from '@/lib/prisma';
+import { security } from '@/security';
+import { Elysia, t } from 'elysia';
 
-export const router = new Elysia({ prefix: '/auth' })
-	.use(jwt)
-	.get('/access-token', async ({ jwt, cookie: { auth } }) => {
-		auth.set({
-			value: await jwt.sign({ name: 'test' }),
-			httpOnly: true,
-			maxAge: 7 * 86400,
-			path: '/me',
-		});
-		return {
-			access_token: auth.value,
-		};
+import { HTTPError } from '@/errors';
+import { Message } from '@/schemas/message';
+import { SignInDTO } from '@/schemas/users';
+import { verifyPassword } from '@/security';
+
+const Token = t.Object({
+	accessToken: t.String(),
+});
+
+export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
+	.use(security)
+	.model({
+		'user.sign-in': SignInDTO,
+		token: Token,
+		message: Message,
 	})
-	.get('/test-token', async ({ jwt, set, cookie: { auth } }) => {
-		const profile = await jwt.verify(auth.value);
-		if (!profile) {
-			set.status = 401;
-			return 'Unauthorized';
-		}
+	.post(
+		'/sign',
+		async ({ jwt, body: { email, password } }) => {
+			const user = await prisma.user.findUnique({
+				where: { email },
+			});
 
-		return `Hello ${profile.name}`;
-	});
+			if (!user) {
+				throw new HTTPError(404, 'User not found');
+			}
+
+			const isMatch = await verifyPassword(password, user.hashed_password);
+
+			if (!isMatch) {
+				throw new HTTPError(400, 'Invalid password');
+			}
+
+			const accessToken = await jwt.sign({ sub: user.id });
+
+			return { accessToken };
+		},
+		{
+			body: 'user.sign-in',
+			response: { 200: 'token' },
+		},
+	);

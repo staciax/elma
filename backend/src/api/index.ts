@@ -1,5 +1,12 @@
 import { Elysia } from 'elysia';
 
-import { router as auth_router } from './routes/auth';
+import { router as authRouter } from './routes/auth';
+import { router as productRouter } from './routes/products';
+import { router as userRouter } from './routes/users';
 
-export const router = new Elysia({ prefix: '/api' }).use(auth_router);
+const API_V1_STR = Bun.env.API_V1_STR || '/api/v1';
+
+export const router = new Elysia({ prefix: API_V1_STR }) //
+	.use(authRouter)
+	.use(userRouter)
+	.use(productRouter);
