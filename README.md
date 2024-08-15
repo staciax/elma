@@ -10,6 +10,7 @@
     - [TailwindCSS](https://tailwindcss.com) for styling.
     - [shadcn/ui](https://ui.shadcn.com) for the frontend UI components.
     - [Axios](https://axios-http.com) for making HTTP requests.
+    - [React hook form](https://react-hook-form.com) for form handling.
     - [Zod](https://zod.dev) for schema validation.
 - [Docker Compose](https://www.docker.com) for development and production.
 - Secure password hashing using [bun hashing](https://bun.sh/docs/api/hashing) with [bcrypt](https://www.npmjs.com/package/bcrypt).
