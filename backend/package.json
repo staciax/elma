@@ -3,7 +3,8 @@
 	"version": "1.0.50",
 	"scripts": {
 		"dev": "bun --watch src/index.ts",
-		"start": "NODE_ENV=production bun src/index.ts",
+		"start": "bun src/index.ts",
+		"build": "bun build src/index.ts --outdir=dist --target=bun",
 		"test": "bun test",
 		"lint": "biome check . && biome format .",
 		"format": "biome check --write . && biome format . --write",
