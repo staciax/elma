@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 import path from 'path';
 const nextConfig = {
-	// output: 'standalone',
+	output: 'standalone',
 	webpack: (config) => {
 		config.resolve.alias['@'] = path.resolve();
 		return config;
