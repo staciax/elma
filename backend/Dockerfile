@@ -1,4 +1,4 @@
-FROM oven/bun:1.0
+FROM oven/bun:1.1
 
 RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
