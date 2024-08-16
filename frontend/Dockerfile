@@ -8,7 +8,6 @@ WORKDIR /app
 
 COPY package.json .
 COPY yarn.lock .
-COPY tsconfig.json .
 
 RUN yarn install --production && yarn cache clean
 
