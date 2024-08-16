@@ -15,6 +15,6 @@ COPY . .
 
 RUN yarn build
 
-CMD yarn start
+CMD ["yarn", "start"]
 
 EXPOSE 3000
