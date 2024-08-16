@@ -29,7 +29,40 @@
 						"attributes": ["classList"],
 						"functions": ["clsx", "cva", "tw"]
 					}
-				}
+				},
+				"useThrowOnlyError": "error"
+			},
+			"performance": {
+				"noAccumulatingSpread": "error"
+			},
+			"correctness": {
+				"noUnusedVariables": "warn",
+				// "noUnusedImports": "warn",
+				"noInvalidUseBeforeDeclaration": "error",
+				// React
+				"useExhaustiveDependencies": "error",
+				"useHookAtTopLevel": "error"
+			},
+			"style": {
+				"useConst": "warn",
+				"useExportType": "warn",
+				"useImportType": "warn"
+				// "useConsistentArrayType": "warn",
+				// "useNamingConvention": "warn",
+				// "useLiteralEnumMembers": "warn",
+				// "useForOf": "warn",
+				// "useEnumInitializers": "warn"
+			},
+			"complexity": {
+				"noBannedTypes": "error",
+				"noUselessTypeConstraint": "error",
+				"noUselessEmptyExport": "warn"
+				// "useOptionalChain": "warn",
+			},
+			"suspicious": {
+				"noUnsafeDeclarationMerging": "error",
+				"noEmptyInterface": "warn"
+				// "useNamespaceKeyword": "warn"
 			}
 		}
 	},
