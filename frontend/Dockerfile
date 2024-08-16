@@ -13,7 +13,7 @@ RUN yarn install --production && yarn cache clean
 
 COPY . .
 
-RUN yarn build
+RUN yarn run build
 
 CMD ["yarn", "start"]
 
