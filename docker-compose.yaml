@@ -21,7 +21,7 @@ services:
       context: ./frontend
       args:
         - NODE_ENV=production
-    platform: linux/amd64 # Patch for M1 Mac
+    # platform: linux/amd64 # Patch for M1 Mac
     # env_file:
     #   - ./frontend/.env
     ports:
