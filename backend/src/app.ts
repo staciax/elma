@@ -7,6 +7,7 @@ import cors from '@elysiajs/cors';
 import staticPlugin from '@elysiajs/static';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
+import { env } from './config';
 
 export const app = new Elysia()
 	.use(
@@ -40,7 +41,14 @@ export const app = new Elysia()
 
 	.onBeforeHandle(() => {})
 	.onAfterHandle(() => {})
-	.use(cors())
+	.use(
+		cors({
+			origin: env.BACKEND_CORS_ORIGINS,
+			credentials: true,
+			methods: ['*'],
+			allowedHeaders: ['*'],
+		}),
+	)
 	.use(swagger({ path: '/docs' }))
 	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
 	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
