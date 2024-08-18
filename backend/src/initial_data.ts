@@ -5,13 +5,7 @@ import { Prisma } from '@prisma/client';
 
 async function init() {
 	const email = env.FIRST_SUPERUSER;
-	if (!email) {
-		throw new Error('No superuser email provided');
-	}
 	const password = env.FIRST_SUPERUSER_PASSWORD;
-	if (!password) {
-		throw new Error('No superuser password provided');
-	}
 	const hashed_password = await getPasswordHash(password);
 
 	const user = await prisma.user.findUnique({
