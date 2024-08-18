@@ -19,8 +19,8 @@ const envSchema = z.object({
 	PORT: z.number({ coerce: true }).positive().max(65535).default(8000),
 	SECRET_KEY: z.string().default(new Bun.CryptoHasher('sha256').digest('hex')),
 	ACCESS_TOKEN_EXPIRE_MINUTES: z.string().default('1d'),
-	FIRST_SUPERUSER: z.string().email().default('admin@test.com'),
-	FIRST_SUPERUSER_PASSWORD: z.string().default('admin'),
+	FIRST_SUPERUSER: z.string().email(),
+	FIRST_SUPERUSER_PASSWORD: z.string(),
 });
 
 const envServer = envSchema.safeParse(Bun.env);
