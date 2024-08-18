@@ -1,9 +1,10 @@
 import { app } from './app';
+import { env } from './config';
 
 app.listen(
 	{
-		port: Bun.env.PORT || 8000,
-		// hostname: env.HOSTNAME,
+		port: env.PORT,
+		hostname: env.HOSTNAME,
 	},
 	// (server) => {},
 );
