@@ -26,7 +26,8 @@ const envSchema = z.object({
 const envServer = envSchema.safeParse(Bun.env);
 
 if (!envServer.success) {
-	console.error(envServer.error);
+	console.error('Invalid environment variables, check the errors below!');
+	console.error(envServer.error.issues);
 	process.exit(1);
 }
 
