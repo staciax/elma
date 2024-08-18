@@ -32,3 +32,6 @@ if (!envServer.success) {
 }
 
 export const env = envServer.data;
+export type Environment = z.infer<typeof envSchema>;
+
+export const env: Environment = envServer.data;
