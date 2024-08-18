@@ -3,7 +3,7 @@ function Header() {
 		<header>
 			<div className="container mx-auto flex flex-row items-center justify-between ">
 				<div>
-					<span className=" text-2xl">STACIA.</span>
+					<span className="text-2xl">STACIA.</span>
 				</div>
 				<div>
 					<input type="text" className="indent-2" />
