@@ -23,7 +23,7 @@ const envSchema = z.object({
 	API_V1_STR: z.string().default('/api/v1'),
 });
 
-const envServer = envSchema.safeParse(process.env);
+const envServer = envSchema.safeParse(Bun.env);
 
 if (!envServer.success) {
 	console.error(envServer.error);
