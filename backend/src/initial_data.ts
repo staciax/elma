@@ -1,13 +1,14 @@
+import { env } from '@/config';
 import { prisma } from '@/lib/prisma';
 import { getPasswordHash } from '@/security';
 import { Prisma } from '@prisma/client';
 
 async function init() {
-	const email = Bun.env.FIRST_SUPERUSER;
+	const email = env.FIRST_SUPERUSER;
 	if (!email) {
 		throw new Error('No superuser email provided');
 	}
-	const password = Bun.env.FIRST_SUPERUSER_PASSWORD;
+	const password = env.FIRST_SUPERUSER_PASSWORD;
 	if (!password) {
 		throw new Error('No superuser password provided');
 	}

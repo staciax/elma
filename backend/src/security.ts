@@ -1,3 +1,5 @@
+import { env } from '@/config';
+
 import { jwt } from '@elysiajs/jwt';
 import { t } from 'elysia';
 
@@ -5,9 +7,9 @@ const ALGORITHM = 'HS256';
 
 export const security = jwt({
 	name: 'jwt',
-	secret: Bun.env.SECRET_KEY || new Bun.CryptoHasher('sha256').digest('hex'),
+	secret: env.SECRET_KEY,
 	alg: ALGORITHM,
-	exp: Bun.env.EXPIRES_IN || '1d',
+	exp: env.ACCESS_TOKEN_EXPIRE_MINUTES,
 	schema: t.Object({
 		sub: t.String(),
 	}),
