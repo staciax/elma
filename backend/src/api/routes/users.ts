@@ -26,7 +26,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		'user.sign-up': SignUpDTO,
 		'update.password': UpdatePasswordDTO,
 	})
-	.guard({}, (app) =>
+	.guard((app) =>
 		app
 			.use(superuser())
 			.get(
@@ -190,7 +190,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				},
 			),
 	)
-	.guard({}, (app) =>
+	.guard((app) =>
 		app
 			.use(currentUser())
 			.get(
