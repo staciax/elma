@@ -9,7 +9,7 @@ export const security = jwt({
 	name: 'jwt',
 	secret: env.SECRET_KEY,
 	alg: ALGORITHM,
-	exp: env.ACCESS_TOKEN_EXPIRE_MINUTES,
+	exp: env.ACCESS_TOKEN_EXPIRE,
 	schema: t.Object({
 		sub: t.String(),
 	}),
