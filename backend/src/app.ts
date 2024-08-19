@@ -23,6 +23,8 @@ export const app = new Elysia()
 			500: Message,
 		},
 	})
+
+	// Error handlers
 	.error({ HTTPError })
 	.onError(({ code, error, set }) => {
 		switch (code) {
@@ -39,21 +41,42 @@ export const app = new Elysia()
 		}
 	})
 
+	// Middleware
 	.onBeforeHandle(() => {})
 	.onAfterHandle(() => {})
-	.use(
+
+	// CORS
+	// .use(
+	// 	cors(
+	// 		env.BACKEND_CORS_ORIGINS.length
+	// 			? {
+	// 					origin: env.BACKEND_CORS_ORIGINS,
+	// 					credentials: true,
+	// 					methods: ['*'],
+	// 					allowedHeaders: ['*'],
+	// 				}
+	// 			: undefined,
+	// 	),
+	// )
+
+	// Docs
+	.use(swagger({ path: '/docs' }))
+	.get('/', ({ redirect }) => redirect('/docs'))
+
+	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
+	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
+	.use(apiRouter);
+
+if (env.BACKEND_CORS_ORIGINS.length) {
+	app.use(
 		cors({
 			origin: env.BACKEND_CORS_ORIGINS,
 			credentials: true,
 			methods: ['*'],
 			allowedHeaders: ['*'],
 		}),
-	)
-	.use(swagger({ path: '/docs' }))
-	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
-	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
-	.get('/', ({ redirect }) => redirect('/docs'))
-	.use(apiRouter);
+	);
+}
 
 // TODO: @bogeychan/elysia-logger https://github.com/bogeychan/elysia-logger
 // TODO: logger: https://github.com/pinojs/pino
