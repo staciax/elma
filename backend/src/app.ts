@@ -1,4 +1,5 @@
 import { router as apiRouter } from '@/api';
+import { env } from '@/config';
 import { HTTPError } from '@/errors';
 import { Message } from '@/schemas/message';
 
@@ -7,7 +8,6 @@ import cors from '@elysiajs/cors';
 import staticPlugin from '@elysiajs/static';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
-import { env } from './config';
 
 export const app = new Elysia()
 	.use(
