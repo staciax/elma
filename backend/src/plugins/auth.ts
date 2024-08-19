@@ -20,11 +20,13 @@ type UserRole = {
 	isSuperuser?: boolean;
 };
 
+// TODO: remove duplicate code
+
 export const currentUser = (_role?: UserRole) =>
 	new Elysia({ name: 'current-user' })
 		.use(bearer())
 		.use(security)
-		.derive({ as: 'global' }, async ({ set, jwt, bearer }) => {
+		.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
 			if (!bearer) {
 				set.headers['WWW-Authenticate'] = 'Bearer';
 				throw new HTTPError(401, 'Unauthorized');
@@ -42,9 +44,19 @@ export const currentUser = (_role?: UserRole) =>
 
 export const superuser = () =>
 	new Elysia({ name: 'superuser' })
-		.use(currentUser())
-		.derive({ as: 'scoped' }, async ({ user }) => {
-			if (typeof user === 'undefined') {
+		.use(bearer())
+		.use(security)
+		.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
+			if (!bearer) {
+				set.headers['WWW-Authenticate'] = 'Bearer';
+				throw new HTTPError(401, 'Unauthorized');
+			}
+			const data = await jwt.verify(bearer);
+			if (!data) {
+				throw new HTTPError(401, 'Unauthorized');
+			}
+			const user = await findUserById(data.sub);
+			if (!user) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
 			if (!user.is_superuser) {
