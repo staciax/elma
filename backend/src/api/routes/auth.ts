@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { pool } from '@/db';
 import { security } from '@/security';
 import { Elysia, t } from 'elysia';
 

@@ -1,8 +1,6 @@
-// import { prisma } from '@/lib/prisma';
 import type { UserCreate, UserUpdate } from '@/schemas/users';
 import { getPasswordHash } from '@/security';
 
-// import type { Prisma, User } from '@prisma/client';
 import type { UnwrapSchema } from 'elysia';
 
 // async function findUserById(id: string, omit?: Prisma.UserOmit) {
