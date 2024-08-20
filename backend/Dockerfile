@@ -24,8 +24,6 @@ COPY public public
 COPY package.json .
 COPY tsconfig.json .
 
-# TODO: prisma generate
-
 ENV NODE_ENV=production
 
 RUN bun run build

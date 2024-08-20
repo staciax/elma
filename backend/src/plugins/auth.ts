@@ -1,5 +1,4 @@
 import { HTTPError } from '@/errors';
-// import { prisma } from '@/lib/prisma';
 import { security } from '@/security';
 
 import { bearer } from '@elysiajs/bearer';

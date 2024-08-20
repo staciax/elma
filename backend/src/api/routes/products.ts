@@ -1,8 +1,6 @@
 import { HTTPError } from '@/errors';
-// import { prisma } from '@/lib/prisma';
 import { superuser } from '@/plugins/auth';
 
-// import { Prisma } from '@prisma/client';
 import { Elysia, t } from 'elysia';
 import { v7 as uuidv7 } from 'uuid';
 

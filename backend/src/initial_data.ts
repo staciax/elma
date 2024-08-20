@@ -1,7 +1,5 @@
 import { env } from '@/config';
-import { prisma } from '@/lib/prisma';
 import { getPasswordHash } from '@/security';
-import { Prisma } from '@prisma/client';
 
 async function init() {
 	const email = env.FIRST_SUPERUSER;

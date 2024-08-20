@@ -1,5 +1,4 @@
 import { HTTPError } from '@/errors';
-// import { prisma } from '@/lib/prisma';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
 import {
