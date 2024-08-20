@@ -14,7 +14,7 @@ import { getPasswordHash, verifyPassword } from '@/security';
 
 import { Elysia, t } from 'elysia';
 
-// export const router = new Elysia({ prefix: '/users', tags: ['users'] })
+export const router = new Elysia({ prefix: '/users', tags: ['users'] });
 // 	.model({
 // 		message: Message,
 // 		user: UserPublic,
