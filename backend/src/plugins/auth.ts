@@ -1,5 +1,5 @@
 import { HTTPError } from '@/errors';
-import { prisma } from '@/lib/prisma';
+// import { prisma } from '@/lib/prisma';
 import { security } from '@/security';
 
 import { bearer } from '@elysiajs/bearer';
@@ -7,11 +7,12 @@ import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
 
 async function findUserById(userId: string) {
-	return prisma.user.findUnique({
-		where: {
-			id: userId,
-		},
-	});
+	// return prisma.user.findUnique({
+	// 	where: {
+	// 		id: userId,
+	// 	},
+	// });
+	return {};
 }
 
 // TODO: role-based access control

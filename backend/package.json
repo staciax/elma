@@ -8,9 +8,7 @@
 		"build": "bun build src/index.ts --outdir=dist --target=bun",
 		"test": "bun test",
 		"lint": "biome check . && biome format .",
-		"format": "biome check --write . && biome format . --write",
-		"prisma:migrate": "prisma migrate dev",
-		"prisma:generate": "prisma generate"
+		"format": "biome check --write . && biome format . --write"
 	},
 	"dependencies": {
 		"@bogeychan/elysia-logger": "^0.1.1",
@@ -19,7 +17,6 @@
 		"@elysiajs/jwt": "^1.1.0",
 		"@elysiajs/static": "^1.1.0",
 		"@elysiajs/swagger": "^1.1.1",
-		"@prisma/client": "^5.18.0",
 		"elysia": "1.1.4",
 		"mysql2": "^3.11.0",
 		"uuid": "^10.0.0",
@@ -28,8 +25,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
 		"@types/uuid": "^10.0.0",
-		"bun-types": "latest",
-		"prisma": "^5.18.0"
+		"bun-types": "latest"
 	},
 	"module": "src/index.ts"
 }
