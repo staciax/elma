@@ -20,8 +20,8 @@ const envSchema = z
 			})
 			.url(),
 		NODE_ENV: z
-			.enum(['development', 'production', 'test'], {
-				message: 'NODE_ENV must be one of "development", "production", "test"',
+			.enum(['development', 'test', 'production'], {
+				message: 'NODE_ENV must be one of "development", "test", "production"',
 				description: 'Node environment',
 			})
 			.default('development'),
@@ -35,7 +35,7 @@ const envSchema = z
 				z
 					.union([z.string().trim().url(), z.literal('*')])
 					.array()
-					.default([]),
+					.optional(),
 			),
 		HOSTNAME: z
 			.string({
@@ -48,6 +48,7 @@ const envSchema = z
 				message: 'PORT must be a number',
 				description: 'API port',
 			})
+			.int()
 			.positive({ message: 'PORT must be a positive number' })
 			.min(1000, { message: 'PORT should be >= 1000 and < 65536' })
 			.max(65535, { message: 'PORT should be >= 1000 and < 65536' })
@@ -68,11 +69,17 @@ const envSchema = z
 				message: 'FIRST_SUPERUSER is required',
 				description: 'First superuser email',
 			})
-			.email(),
-		FIRST_SUPERUSER_PASSWORD: z.string({
-			message: 'FIRST_SUPERUSER_PASSWORD is required',
-			description: 'First superuser password',
-		}),
+			.email({
+				message: 'FIRST_SUPERUSER must be a valid email',
+			}),
+		FIRST_SUPERUSER_PASSWORD: z
+			.string({
+				message: 'FIRST_SUPERUSER_PASSWORD is required',
+				description: 'First superuser password',
+			})
+			.min(8, {
+				message: 'FIRST_SUPERUSER_PASSWORD must be at least 8 characters',
+			}),
 	})
 	.readonly();
 

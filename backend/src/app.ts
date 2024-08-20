@@ -67,7 +67,7 @@ export const app = new Elysia()
 	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
 	.use(apiRouter);
 
-if (env.BACKEND_CORS_ORIGINS.length) {
+if (env.BACKEND_CORS_ORIGINS) {
 	app.use(
 		cors({
 			origin: env.BACKEND_CORS_ORIGINS,
