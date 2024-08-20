@@ -101,6 +101,7 @@ const envSchema = z
 			.describe('First superuser password'),
 	})
 	.transform((values) => ({
+		// Thanks https://github.com/colinhacks/zod/issues/1454#issuecomment-1272260555
 		...values,
 		get DATABASE_URI() {
 			const uri = z
