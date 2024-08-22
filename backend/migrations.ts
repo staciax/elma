@@ -176,25 +176,72 @@ async function runUpgrade(migrations: Migrations) {
 	return rev;
 }
 
+async function init() {
+	const migrations = new Migrations();
+	await migrations.setup();
+
+	try {
+		const applied = await runUpgrade(migrations);
+		console.log(`Successfully initialized and applied ${applied} revisions(s)`);
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+async function migrate(reason: string) {
+	const migrations = new Migrations();
+	await migrations.setup();
+	if (migrations.isNextRevisionTaken()) {
+		console.log(
+			'an unapplied migration already exists for the next version, exiting',
+		);
+		console.log('hint: apply pending migrations with the `upgrade` command');
+		return;
+	}
+	const revision = await migrations.createRivision(reason);
+	console.log(`Created revision V${revision.version}`);
+}
+
+async function upgrade(sql: boolean) {
+	const migrations = new Migrations();
+	await migrations.setup();
+
+	if (sql) {
+		migrations.display();
+		return;
+	}
+
+	try {
+		const applied = await runUpgrade(migrations);
+		console.log(`Successfully initialized and applied ${applied} revisions(s)`);
+	} catch (err) {
+		console.error(err);
+		console.log('failed to apply migrations due to error');
+	}
+}
+
+async function current() {
+	const migrations = new Migrations();
+	await migrations.setup();
+	console.info('Version', migrations.version);
+}
+
+async function log() {
+	const migrations = new Migrations();
+	await migrations.setup();
+	const revs = migrations.orderedRevisions;
+	for (const rev of revs) {
+		console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
+	}
+}
+
 yargs(hideBin(process.argv))
 	.scriptName('migrations')
 	.usage('$0 <cmd> [args]')
 	.command(
 		'init',
 		'Initializes the database and runs all the current migrations',
-		async () => {
-			const migrations = new Migrations();
-			await migrations.setup();
-
-			try {
-				const applied = await runUpgrade(migrations);
-				console.log(
-					`Successfully initialized and applied ${applied} revisions(s)`,
-				);
-			} catch (err) {
-				console.error(err);
-			}
-		},
+		async () => await init(),
 	)
 	.command(
 		'migrate [reason]',
@@ -208,21 +255,7 @@ yargs(hideBin(process.argv))
 				})
 				.demandOption('reason');
 		},
-		async (argv: Arguments) => {
-			const migrations = new Migrations();
-			await migrations.setup();
-			if (migrations.isNextRevisionTaken()) {
-				console.log(
-					'an unapplied migration already exists for the next version, exiting',
-				);
-				console.log(
-					'hint: apply pending migrations with the `upgrade` command',
-				);
-				return;
-			}
-			const revision = await migrations.createRivision(argv.reason as string);
-			console.log(`Created revision V${revision.version}`);
-		},
+		async (argv: Arguments) => await migrate(argv.reason as string),
 	)
 	.command(
 		'upgrade [sql]',
@@ -234,39 +267,14 @@ yargs(hideBin(process.argv))
 				default: false,
 			});
 		},
-		async (argv: Arguments) => {
-			const migrations = new Migrations();
-			await migrations.setup();
-
-			if (argv.sql) {
-				migrations.display();
-				return;
-			}
-
-			try {
-				const applied = await runUpgrade(migrations);
-				console.log(
-					`Successfully initialized and applied ${applied} revisions(s)`,
-				);
-			} catch (err) {
-				console.error(err);
-				console.log('failed to apply migrations due to error');
-			}
-		},
+		async (argv: Arguments) => await upgrade(argv.sql as boolean),
 	)
-	.command('current', 'Shows the current active revision version', async () => {
-		const migrations = new Migrations();
-		await migrations.setup();
-		console.info('Version', migrations.version);
-	})
-	.command('log', 'Displays the revision history', async () => {
-		const migrations = new Migrations();
-		await migrations.setup();
-		const revs = migrations.orderedRevisions;
-		for (const rev of revs) {
-			console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
-		}
-	})
+	.command(
+		'current',
+		'Shows the current active revision version',
+		async () => await current(),
+	)
+	.command('log', 'Displays the revision history', async () => await log())
 	.demandCommand()
 	.help()
 	.parse();
