@@ -54,38 +54,6 @@ class Migrations {
 		this.filename = filename;
 	}
 
-	async setup() {
-		this.root = import.meta.dir;
-		this.revisions = await this.getRevisions();
-		await this.load();
-	}
-
-	async getRevisions() {
-		const results: Record<string, Revision> = {};
-		const glob = new Glob('**/*.sql');
-		for await (const file of glob.scan('.')) {
-			const match = file.match(REVISION_FILE);
-			const result = revSchema.safeParse(match?.groups);
-			if (result.success) {
-				const rev = Revision.fromSchema(result.data, file);
-				results[rev.version] = rev;
-			}
-		}
-		return results;
-	}
-
-	async load() {
-		const data = await this.loadMetadata();
-		this.version = data.version;
-		this.database_uri = data.database_uri || null;
-		return data;
-	}
-
-	async save() {
-		const data = JSON.stringify(this.dump, null, 4);
-		await Bun.write(this.filename, data);
-	}
-
 	async loadMetadata(): Promise<Revisions> {
 		try {
 			const file = Bun.file(this.filename);
@@ -102,15 +70,48 @@ class Migrations {
 		}
 	}
 
-	get dump() {
+	async getRevisions() {
+		const results: Record<string, Revision> = {};
+		const glob = new Glob('**/*.sql');
+		// TODO: try syncScan
+		for await (const file of glob.scan('.')) {
+			const match = file.match(REVISION_FILE);
+			const result = revSchema.safeParse(match?.groups);
+			if (result.success) {
+				const rev = Revision.fromSchema(result.data, file);
+				results[rev.version] = rev;
+			}
+		}
+		return results;
+	}
+
+	dump() {
 		return {
 			version: this.version,
 			database_uri: this.database_uri,
 		};
 	}
 
+	async load() {
+		this.root = import.meta.dir;
+		this.revisions = await this.getRevisions();
+		const data = await this.loadMetadata();
+		this.version = data.version;
+		this.database_uri = data.database_uri;
+		return data;
+	}
+
+	async save() {
+		const data = JSON.stringify(this.dump(), null, 4);
+		await Bun.write(this.filename, data);
+	}
+
 	isNextRevisionTaken() {
 		return this.version + 1 in this.revisions;
+	}
+
+	get orderedRevisions(): Revision[] {
+		return Object.values(this.revisions).sort((a, b) => a.version - b.version);
 	}
 
 	async createRivision(reason: string, kind = 'V'): Promise<Revision> {
@@ -127,10 +128,6 @@ class Migrations {
 
 		this.save();
 		return new Revision(kind, this.version + 1, reason, path);
-	}
-
-	get orderedRevisions(): Revision[] {
-		return Object.values(this.revisions).sort((a, b) => a.version - b.version);
 	}
 
 	async upgrade(conn: mysql.Connection) {
@@ -171,14 +168,14 @@ class Migrations {
 async function runUpgrade(migrations: Migrations) {
 	const conn = await mysql.createConnection(env.DATABASE_URI);
 	const rev = await migrations.upgrade(conn);
-	migrations.database_uri = env.DATABASE_URI;
 	await conn.end();
 	return rev;
 }
 
 async function init() {
 	const migrations = new Migrations();
-	await migrations.setup();
+	await migrations.load();
+	migrations.database_uri = env.DATABASE_URI;
 
 	try {
 		const applied = await runUpgrade(migrations);
@@ -190,7 +187,7 @@ async function init() {
 
 async function migrate(reason: string) {
 	const migrations = new Migrations();
-	await migrations.setup();
+	await migrations.load();
 	if (migrations.isNextRevisionTaken()) {
 		console.log(
 			'an unapplied migration already exists for the next version, exiting',
@@ -204,7 +201,7 @@ async function migrate(reason: string) {
 
 async function upgrade(sql: boolean) {
 	const migrations = new Migrations();
-	await migrations.setup();
+	await migrations.load();
 
 	if (sql) {
 		migrations.display();
@@ -222,13 +219,13 @@ async function upgrade(sql: boolean) {
 
 async function current() {
 	const migrations = new Migrations();
-	await migrations.setup();
+	await migrations.load();
 	console.info('Version', migrations.version);
 }
 
 async function log() {
 	const migrations = new Migrations();
-	await migrations.setup();
+	await migrations.load();
 	const revs = migrations.orderedRevisions;
 	for (const rev of revs) {
 		console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
