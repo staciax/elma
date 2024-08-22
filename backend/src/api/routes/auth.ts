@@ -21,23 +21,36 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 	.post(
 		'/sign',
 		async ({ jwt, body: { email, password } }) => {
-			const user = await prisma.user.findUnique({
-				where: { email },
-			});
+			const conn = await pool.getConnection();
 
-			if (!user) {
-				throw new HTTPError(404, 'User not found');
+			const stmt = 'SELECT * FROM user WHERE email=? AND password=?';
+
+			try {
+				const [results, fields] = await conn.query(stmt, [email, password]);
+				console.log(results);
+			} catch {
+				conn.rollback();
+			} finally {
+				await conn.release();
 			}
 
-			const isMatch = await verifyPassword(password, user.hashed_password);
+			// const user = await prisma.user.findUnique({
+			// 	where: { email },
+			// });
 
-			if (!isMatch) {
-				throw new HTTPError(400, 'Invalid password');
-			}
+			// if (!user) {
+			// 	throw new HTTPError(404, 'User not found');
+			// }
 
-			const accessToken = await jwt.sign({ sub: user.id });
+			// const isMatch = await verifyPassword(password, user.hashed_password);
 
-			return { accessToken };
+			// if (!isMatch) {
+			// 	throw new HTTPError(400, 'Invalid password');
+			// }
+
+			// const accessToken = await jwt.sign({ sub: user.id });
+
+			return { accessToken: 'test' };
 		},
 		{
 			body: 'user.sign-in',
