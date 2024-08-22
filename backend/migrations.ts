@@ -12,7 +12,7 @@ import { hideBin } from 'yargs/helpers';
 import z from 'zod';
 
 const REVISION_FILE = /(?<kind>V|U)(?<version>[0-9]+)__(?<description>.+).sql/;
-const revSchema = z.object({
+const revisionSchema = z.object({
 	kind: z.union([z.literal('V'), z.literal('U')]),
 	version: z.number({ coerce: true }).int().nonnegative(),
 	description: z.string().min(1),
@@ -40,7 +40,10 @@ class Revision {
 		this.file = file;
 	}
 
-	static fromSchema(schema: z.infer<typeof revSchema>, file: string): Revision {
+	static fromSchema(
+		schema: z.infer<typeof revisionSchema>,
+		file: string,
+	): Revision {
 		return new Revision(schema.kind, schema.version, schema.description, file);
 	}
 }
@@ -80,7 +83,7 @@ class Migrations {
 		// TODO: try syncScan
 		for await (const file of glob.scan('.')) {
 			const match = file.match(REVISION_FILE);
-			const result = revSchema.safeParse(match?.groups);
+			const result = revisionSchema.safeParse(match?.groups);
 			if (result.success) {
 				const rev = Revision.fromSchema(result.data, file);
 				results[rev.version] = rev;
