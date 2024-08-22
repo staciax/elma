@@ -25,6 +25,7 @@ class Revision {
 	version: number;
 	description: string;
 	file: string;
+
 	constructor(
 		kind: string,
 		version: number,
@@ -44,13 +45,14 @@ class Revision {
 
 class Migrations {
 	filename: string;
-	root: string | undefined;
+	root: string;
 	revisions: Record<number, Revision> = {};
 
 	version = 0;
 	database_uri: string | null = null;
 
 	constructor(filename = 'migrations/revisions.json') {
+		this.root = resolve(import.meta.file, '..');
 		this.filename = filename;
 	}
 
@@ -117,7 +119,7 @@ class Migrations {
 	async createRivision(reason: string, kind = 'V'): Promise<Revision> {
 		const cleaned = reason.replace(/\s/g, '_');
 		const filename = `${kind}${this.version + 1}__${cleaned}.sql`;
-		const path = resolve(import.meta.file, '..', 'migrations', filename);
+		const path = resolve(this.root, 'migrations', filename);
 
 		let stub = '';
 		stub += `-- Revises: V${this.version}\n`;
