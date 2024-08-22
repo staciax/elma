@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { copyFile, unlink } from 'node:fs/promises';
+import { unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { env } from '@/config';
 import { Glob } from 'bun';
