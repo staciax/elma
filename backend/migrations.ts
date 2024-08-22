@@ -60,7 +60,7 @@ class Migrations {
 			const contents = await file.json();
 			return {
 				version: contents.version,
-				database_uri: contents.database,
+				database_uri: contents.database_uri,
 			};
 		} catch {
 			return {
