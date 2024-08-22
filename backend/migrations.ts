@@ -1,6 +1,10 @@
+#!/usr/bin/env bun
 import { resolve } from 'node:path';
 import { env } from '@/config';
 import { Glob } from 'bun';
+import yargs from 'yargs';
+import type { Arguments } from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import z from 'zod';
 
 import mysql from 'mysql2/promise';
@@ -105,7 +109,7 @@ class Migrations {
 		};
 	}
 
-	get isNextRevisionTaken() {
+	isNextRevisionTaken() {
 		return this.version + 1 in this.revisions;
 	}
 
@@ -167,123 +171,102 @@ class Migrations {
 async function runUpgrade(migrations: Migrations) {
 	const conn = await mysql.createConnection(env.DATABASE_URI);
 	const rev = await migrations.upgrade(conn);
+	migrations.database_uri = env.DATABASE_URI;
 	await conn.end();
 	return rev;
 }
 
-export async function init() {
-	const migrations = new Migrations();
-	await migrations.setup();
+yargs(hideBin(process.argv))
+	.scriptName('migrations')
+	.usage('$0 <cmd> [args]')
+	.command(
+		'init',
+		'Initializes the database and runs all the current migrations',
+		async () => {
+			const migrations = new Migrations();
+			await migrations.setup();
 
-	try {
-		const applied = await runUpgrade(migrations);
-		console.log(`Successfully initialized and applied ${applied} revisions(s)`);
-	} catch (err) {
-		console.error(err);
-	}
-}
+			try {
+				const applied = await runUpgrade(migrations);
+				console.log(
+					`Successfully initialized and applied ${applied} revisions(s)`,
+				);
+			} catch (err) {
+				console.error(err);
+			}
+		},
+	)
+	.command(
+		'migrate [reason]',
+		'Creates a new revision for you to edit.',
+		(yargs) => {
+			yargs
+				.positional('reason', {
+					describe: 'The reason for this revision.',
+					type: 'string',
+					alias: 'r',
+				})
+				.demandOption('reason');
+		},
+		async (argv: Arguments) => {
+			const migrations = new Migrations();
+			await migrations.setup();
+			if (migrations.isNextRevisionTaken()) {
+				console.log(
+					'an unapplied migration already exists for the next version, exiting',
+				);
+				console.log(
+					'hint: apply pending migrations with the `upgrade` command',
+				);
+				return;
+			}
+			const revision = await migrations.createRivision(argv.reason as string);
+			console.log(`Created revision V${revision.version}`);
+		},
+	)
+	.command(
+		'upgrade [sql]',
+		'Upgrades the database at the given revision (if any).',
+		(yargs) => {
+			yargs.positional('sql', {
+				describe: 'Print the SQL instead of executing it',
+				type: 'boolean',
+				default: false,
+			});
+		},
+		async (argv: Arguments) => {
+			const migrations = new Migrations();
+			await migrations.setup();
 
-export async function upgrade(sql = false) {
-	const migrations = new Migrations();
-	await migrations.setup();
+			if (argv.sql) {
+				migrations.display();
+				return;
+			}
 
-	if (sql) {
-		migrations.display();
-		return;
-	}
-
-	try {
-		const applied = await runUpgrade(migrations);
-		console.log(`Successfully initialized and applied ${applied} revisions(s)`);
-	} catch (err) {
-		console.error(err);
-		console.log('failed to apply migrations due to error');
-	}
-
-	return;
-}
-
-export async function current() {
-	const migrations = new Migrations();
-	await migrations.setup();
-	console.info('Version', migrations.version);
-}
-
-export async function log() {
-	const migrations = new Migrations();
-	await migrations.setup();
-	const revs = migrations.orderedRevisions;
-	for (const rev of revs) {
-		console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
-	}
-}
-
-// await init();
-// await upgrade();
-// await current();
-// await log();
-
-//
-// const migrations = new Migrations();
-// await migrations.setup();
-// // await migrations.createRivision('fix 2');
-// // await migrations.upgrade();
-
-// migrations.show();
-
-// const path = await Bun.resolve(import.meta.dir, '..');
-// console.log(path);
-// console.log(path.resolve(import.meta.file, '..'));
-// console.log(migrations);
-
-// console.log('import.meta.dir', import.meta.dir);
-// const root = await Bun.resolve(import.meta.file, '.');
-// console.log('root', root);
-
-// const root = await Bun.resolve(import.meta.path, '../migrations');
-// for await (const file of glob.scan('.')) {
-// 	console.log('file', file);
-// 	const match = file.match(REVISION_FILE);
-// 	if (match) {
-// 		const rev = Revision.fromMatch(match, file);
-// 		console.log(rev);
-// 	}
-// 	// const { kind, version, description } = revSchema.parse(match?.groups);
-// 	// console.log('kind', kind);
-// 	// console.log('version', version);
-// 	// console.log('description', description);
-// 	// const rev = new Revision(kind, version, description, file);
-
-// 	// const groups: Partial<RegexRevisionFile> | undefined = match?.groups;
-// 	// if (match && groups) {
-// 	// 	const { kind, version, description } = groups;
-// 	// 	console.log('kind', kind);
-// 	// 	console.log('version', version);
-// 	// 	console.log('description', description);
-// 	// 	const rev = Revision.fromMatch(match, file);
-// 	// }
-// }
-
-// const getRevisions = async (): Promise<Record<number, Revision>> => {
-// 	const results: Record<string, Revision> = {};
-
-// 	const glob = new Glob('**/*.sql');
-
-// 	for await (const file of glob.scan('.')) {
-// 		const match = file.match(REVISION_FILE);
-// 		const result = revSchema.safeParse(match?.groups);
-// 		if (result.success) {
-// 			const rev = Revision.fromSchema(result.data, file);
-// 			results[rev.version] = rev;
-// 		}
-// 	}
-// 	return results;
-// };
-
-// const revisions = await getRevisions();
-// for (const [key, value] of Object.entries(revisions)) {
-// 	console.log(key, value);
-// }
-
-// const root = resolve(import.meta.path, '..');
-// console.log(root);
+			try {
+				const applied = await runUpgrade(migrations);
+				console.log(
+					`Successfully initialized and applied ${applied} revisions(s)`,
+				);
+			} catch (err) {
+				console.error(err);
+				console.log('failed to apply migrations due to error');
+			}
+		},
+	)
+	.command('current', 'Shows the current active revision version', async () => {
+		const migrations = new Migrations();
+		await migrations.setup();
+		console.info('Version', migrations.version);
+	})
+	.command('log', 'Displays the revision history', async () => {
+		const migrations = new Migrations();
+		await migrations.setup();
+		const revs = migrations.orderedRevisions;
+		for (const rev of revs) {
+			console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
+		}
+	})
+	.demandCommand()
+	.help()
+	.parse();
