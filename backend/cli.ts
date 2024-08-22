@@ -2,32 +2,23 @@
 import yargs from 'yargs';
 import type { Arguments } from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { current, init, log, upgrade } from './migrations';
 
 yargs(hideBin(process.argv))
 	.scriptName('db')
-	.usage('$0 <cmd> [args]')
-	.command('init', 'initialize the database', async () => {
-		await init();
-	})
-	.command('current', 'show current migration version', async () => {
-		await current();
-	})
-	.command('log', 'show migration log', async () => {
-		await log();
-	})
 	.command(
-		'upgrade [sql]',
-		'upgrade database to latest version',
+		'migrate [reason]',
+		'show current migration version',
 		(yargs) => {
-			yargs.positional('sql', {
-				describe: 'Print the SQL instead of executing it',
-				type: 'boolean',
-				default: false,
-			});
+			yargs
+				.positional('reason', {
+					describe: 'The reason for this revision.',
+					type: 'string',
+					alias: 'r',
+				})
+				.demandOption('reason');
 		},
 		async (argv: Arguments) => {
-			await upgrade(argv.sql as boolean);
+			console.log('migrate', argv.reason);
 		},
 	)
 	.demandCommand()
