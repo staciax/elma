@@ -121,10 +121,7 @@ class Migrations {
 		const filename = `${kind}${this.version + 1}__${cleaned}.sql`;
 		const path = resolve(this.root, 'migrations', filename);
 
-		let stub = '';
-		stub += `-- Revises: V${this.version}\n`;
-		stub += `-- Creation Date: ${new Date().toISOString()} UTC\n`;
-		stub += `-- Reason: ${reason}\n\n`;
+		const stub = `-- Revises: V${this.version}\n-- Creation Date: ${new Date().toISOString()} UTC\n-- Reason: ${reason}\n`;
 
 		await Bun.write(path, stub);
 
