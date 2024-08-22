@@ -23,7 +23,28 @@
 		"rules": {
 			"recommended": true,
 			"correctness": {
-				"noUnusedVariables": "warn"
+				"noUnusedVariables": "warn",
+				"noUnusedImports": {
+					"level": "warn",
+					"fix": "none"
+				},
+				"noInvalidUseBeforeDeclaration": "error"
+			},
+			"style": {
+				"useConst": {
+					"level": "warn",
+					"fix": "none"
+				},
+				"useExportType": "warn",
+				"useImportType": "warn"
+				// "useNamingConvention": {
+				// 	"level": "warn",
+				// 	"fix": "none",
+				// 	"options": {}
+				// }
+			},
+			"complexity": {
+				"useOptionalChain": "warn"
 			}
 		}
 	},
