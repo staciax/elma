@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// https://github.com/Rapptz/RoboDanny/blob/rewrite/launcher.py
 import { unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { env } from '@/config';
@@ -60,7 +61,7 @@ class Migrations {
 	async loadMetadata(): Promise<Revisions> {
 		try {
 			const file = Bun.file(this.filename);
-			const contents = await file.json();
+			const contents: Revisions = await file.json();
 			return {
 				version: contents.version,
 				database_uri: contents.database_uri,
@@ -230,10 +231,12 @@ async function current() {
 	console.info('Version', migrations.version);
 }
 
-async function log() {
+async function log(reverse = false) {
 	const migrations = new Migrations();
 	await migrations.load();
-	const revs = migrations.orderedRevisions;
+	const revs = reverse
+		? migrations.orderedRevisions.reverse()
+		: migrations.orderedRevisions;
 	for (const rev of revs) {
 		console.info(`V${rev.version} ${rev.description.replace('_', ' ')}`);
 	}
@@ -278,7 +281,18 @@ yargs(hideBin(process.argv))
 		'Shows the current active revision version',
 		async () => await current(),
 	)
-	.command('log', 'Displays the revision history', async () => await log())
+	.command(
+		'log [reverse]',
+		'Print in reverse order (oldest first).',
+		(yargs) => {
+			yargs.positional('reverse', {
+				describe: 'Show the log in reverse order',
+				type: 'boolean',
+				default: false,
+			});
+		},
+		async (argv: Arguments) => await log(argv.reverse as boolean),
+	)
 	.demandCommand()
 	.help()
 	.parse();
