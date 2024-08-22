@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
+import { copyFile, unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { env } from '@/config';
 import { Glob } from 'bun';
+import mysql from 'mysql2/promise';
+import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 import type { Arguments } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import z from 'zod';
-
-import mysql from 'mysql2/promise';
 
 const REVISION_FILE = /(?<kind>V|U)(?<version>[0-9]+)__(?<description>.+).sql/;
 const revSchema = z.object({
@@ -104,8 +105,15 @@ class Migrations {
 	}
 
 	async save() {
-		const data = JSON.stringify(this.dump(), null, 4);
-		await Bun.write(this.filename, data);
+		const temp = `${this.filename}.${uuidv4()}.tmp`;
+		await Bun.write(temp, JSON.stringify(this.dump(), null, 4));
+
+		const tempFile = Bun.file(temp);
+		const text = await tempFile.text();
+		await Bun.write(this.filename, text);
+
+		// remove the temp file
+		await unlink(temp);
 	}
 
 	isNextRevisionTaken() {
