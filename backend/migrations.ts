@@ -2,7 +2,6 @@
 // https://github.com/Rapptz/RoboDanny/blob/rewrite/launcher.py
 import { unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { env } from '@/config';
 import { Glob } from 'bun';
 import mysql from 'mysql2/promise';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +9,7 @@ import yargs from 'yargs';
 import type { Arguments } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import z from 'zod';
+import { env } from './src/config';
 
 const REVISION_FILE = /(?<kind>V|U)(?<version>[0-9]+)__(?<description>.+).sql/;
 const revisionSchema = z.object({
