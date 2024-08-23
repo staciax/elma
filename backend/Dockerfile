@@ -1,10 +1,10 @@
-ARG BUN_VERSION=1.1
+FROM oven/bun:1 AS base
 
 # deps stage
-FROM oven/bun:${BUN_VERSION} AS deps
+FROM base AS deps
 
-RUN apt-get update && apt-get install -y \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY bun.lockb .
 RUN bun install --production && bun pm cache clean
 
 # builder stage
-FROM oven/bun:${BUN_VERSION} AS builder
+FROM base AS builder
 
 WORKDIR /app
 
@@ -25,11 +25,10 @@ COPY package.json .
 COPY tsconfig.json .
 
 ENV NODE_ENV=production
-
 RUN bun run build
 
 # runner stage
-FROM oven/bun:${BUN_VERSION} AS runner
+FROM base AS runner
 
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
