@@ -1,9 +1,11 @@
-ARG NODE_VERSION=22-alpine
+ARG NODE_VERSION=22
+
+FROM node:${NODE_VERSION}-alpine AS base
 
 # deps stage
-FROM node:${NODE_VERSION} AS deps
+FROM base AS deps
 
-RUN apk add --no-cache && rm -rf /var/cache/apk/*
+# RUN apk add --no-cache && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
@@ -13,7 +15,7 @@ COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
 
 # builder stage
-FROM node:${NODE_VERSION} AS builder
+FROM base AS builder
 
 WORKDIR /app
 
@@ -26,7 +28,7 @@ ENV NODE_ENV=production
 RUN yarn run build
 
 # runner stage
-FROM node:${NODE_VERSION} AS runner
+FROM base AS runner
 
 WORKDIR /app
 
