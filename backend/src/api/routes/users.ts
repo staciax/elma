@@ -1,325 +1,194 @@
-import { HTTPError } from '@/errors';
-import { currentUser, superuser } from '@/plugins/auth';
-import { Message } from '@/schemas/message';
-import {
-	SignUpDTO,
-	UpdatePasswordDTO,
-	UserCreate,
-	UserMeUpdate,
-	UserPublic,
-	UserUpdate,
-	UsersPublic,
-} from '@/schemas/users';
-import { getPasswordHash, verifyPassword } from '@/security';
-
+import { pool } from '@/db';
+import { getPasswordHash } from '@/security';
 import { Elysia, t } from 'elysia';
+import type { RowDataPacket } from 'mysql2';
+import { v7 as uuidv7 } from 'uuid';
 
-export const router = new Elysia({ prefix: '/users', tags: ['users'] });
-// 	.model({
-// 		message: Message,
-// 		user: UserPublic,
-// 		users: UsersPublic,
-// 		'user.create': UserCreate,
-// 		'user.update': UserUpdate,
-// 		'user.me.update': UserMeUpdate,
-// 		'user.sign-up': SignUpDTO,
-// 		'update.password': UpdatePasswordDTO,
-// 	})
-// 	.guard((app) =>
-// 		app
-// 			.use(superuser())
-// 			.get(
-// 				'/',
-// 				async ({ query: { limit, offset } }) => {
-// 					const count = await prisma.user.count();
-// 					const users = await prisma.user.findMany({
-// 						take: limit,
-// 						skip: offset,
-// 					});
+enum Role {
+	SUPERUSER = 'SUPERUSER',
+	ADMIN = 'ADMIN',
+	MANAGER = 'MANAGER',
+	EMPLOYEE = 'EMPLOYEE',
+	CUSTOMER = 'CUSTOMER',
+}
 
-// 					return {
-// 						count,
-// 						data: users,
-// 					};
-// 				},
-// 				{
-// 					query: t.Object({
-// 						limit: t.Optional(t.Number({ default: 100 })),
-// 						offset: t.Optional(t.Number({ default: 0 })),
-// 					}),
-// 					response: {
-// 						200: 'users',
-// 					},
-// 				},
-// 			)
-// 			.get(
-// 				'/:id',
-// 				async ({ params: { id } }) => {
-// 					const user = await prisma.user.findUnique({
-// 						where: {
-// 							id: id,
-// 						},
-// 					});
-// 					if (!user) {
-// 						throw new HTTPError(404, 'User not found');
-// 					}
-// 					return user;
-// 				},
-// 				{
-// 					params: t.Object({
-// 						id: t.String(),
-// 					}),
-// 					response: {
-// 						200: 'user',
-// 					},
-// 				},
-// 			)
-// 			.post(
-// 				'/',
-// 				async ({ set, body: { email, password, ...body } }) => {
-// 					const user = await prisma.user.findUnique({
-// 						where: {
-// 							email: email,
-// 						},
-// 					});
+const session = new Elysia() //
+	.derive({ as: 'scoped' }, async () => {
+		const conn = await pool.getConnection();
+		console.log('get conn');
+		return { conn };
+	});
 
-// 					if (user) {
-// 						throw new HTTPError(400, 'User already exists');
-// 					}
+// TODO: try catch every query // finally always release connection
+// or release connection in onAfterHandle
+// if you don't release connection, it will be leaked (it's okay it will be released after timeout)
+// https://stackoverflow.com/a/57121491/19394867
+// https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
 
-// 					const hashedPassword = await getPasswordHash(password);
+export const router = new Elysia({ prefix: '/users', tags: ['users'] })
+	// .use(session)
+	// .onAfterHandle(async ({ conn }) => {
+	// 	conn.release();
+	// 	// console.log(conn.test);
+	// 	console.log('release conn');
+	// })
+	.get('/', async () => {
+		const conn = await pool.getConnection();
 
-// 					const userCreate = await prisma.user.create({
-// 						data: {
-// 							...body,
-// 							hashed_password: hashedPassword,
-// 							email: email,
-// 						},
-// 					});
-// 					set.status = 201;
-// 					return userCreate;
-// 				},
-// 				{
-// 					body: 'user.create',
-// 					response: {
-// 						201: 'user',
-// 					},
-// 				},
-// 			)
-// 			.patch(
-// 				'/:id',
-// 				async ({ body, params: { id } }) => {
-// 					const user = await prisma.user.findUnique({
-// 						where: {
-// 							id: id,
-// 						},
-// 					});
+		const stmt = `
+		SELECT
+			*
+		FROM
+			users
+		`;
+		// TODO: join ?
+		const [results] = await conn.query(stmt);
+		conn.release();
+		// conn.test = 'hi';
+		return results;
+	})
+	.get('/:id', async ({ set, params: { id } }) => {
+		const conn = await pool.getConnection();
 
-// 					if (!user) {
-// 						throw new HTTPError(404, 'User not found');
-// 					}
+		const stmt = `
+		SELECT
+			*
+		FROM
+			users
+		WHERE id = ?;
+		`;
+		// TODO: join ?
+		const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+		if (!results.length) {
+			conn.release();
+			set.status = 404;
+			return { message: 'User not found' };
+		}
+		conn.release();
+		return results;
+	})
+	.post(
+		'/',
+		async ({
+			set,
+			body: { email, first_name, last_name, password, role, is_active },
+		}) => {
+			const conn = await pool.getConnection();
+			const stmt = `
+		INSERT INTO users
+		(
+			id,
+			email,
+			first_name,
+			last_name,
+			hashed_password,
+			role,
+			is_active
+		)
+		VALUES
+		(
+			?,
+			?,
+			?,
+			?,
+			?,
+			?,
+			?
+		);
+	`;
+			const hashedPassword = await getPasswordHash(password);
+			await conn.query(stmt, [
+				uuidv7(),
+				email,
+				first_name,
+				last_name,
+				hashedPassword,
+				role,
+				is_active,
+			]);
 
-// 					const { email, password } = body;
+			const [userCreated] = await conn.query<RowDataPacket[]>(
+				'SELECT * FROM users WHERE email = ?',
+				[email],
+			);
+			// console.log(userCreated);
+			if (!userCreated.length) {
+				conn.release();
+				return { message: 'Failed to create user' };
+			}
 
-// 					const emailUpdate = email ? email.toLowerCase() : undefined;
-// 					const hashedPassword: string | undefined = password
-// 						? await getPasswordHash(password)
-// 						: undefined;
+			conn.release();
 
-// 					const userUpdate = await prisma.user.update({
-// 						where: {
-// 							id: id,
-// 						},
-// 						data: {
-// 							...body,
-// 							email: emailUpdate,
-// 							hashed_password: hashedPassword,
-// 						},
-// 					});
+			set.status = 201;
+			return userCreated;
+		},
+		{
+			body: t.Object({
+				email: t.String({ format: 'email' }),
+				first_name: t.String(),
+				last_name: t.String(),
+				password: t.String(),
+				role: t.Enum(Role),
+				is_active: t.Boolean({ default: true }),
+			}),
+		},
+	)
+	.patch(
+		'/:id',
+		async ({
+			set,
+			params: { id },
+			body: { email, first_name, last_name, role, is_active },
+		}) => {
+			console.log(email, first_name, last_name, role, is_active);
 
-// 					return userUpdate;
-// 				},
-// 				{
-// 					params: t.Object({
-// 						id: t.String(),
-// 					}),
-// 					body: 'user.update',
-// 					response: {
-// 						200: 'user',
-// 					},
-// 				},
-// 			)
-// 			.delete(
-// 				'/:id',
-// 				async ({ params: { id }, user }) => {
-// 					const deleteUser = await prisma.user.findUnique({
-// 						where: {
-// 							id: id,
-// 						},
-// 					});
+			const conn = await pool.getConnection();
 
-// 					if (!deleteUser) {
-// 						throw new HTTPError(404, 'User not found');
-// 					}
+			// TODO: check email if exists
 
-// 					if (deleteUser === user) {
-// 						throw new HTTPError(
-// 							403,
-// 							'Super users are not allowed to delete themselves',
-// 						);
-// 					}
+			const stmt = 'SELECT * FROM users WHERE id = ?';
+			const [updateUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			// console.log(updateUser);
+			if (!updateUser.length) {
+				conn.release();
+				set.status = 404;
+				return { message: 'User not found' };
+			}
+			conn.release();
+			// TODO: do update with transaction
 
-// 					await prisma.user.delete({
-// 						where: {
-// 							id: id,
-// 						},
-// 					});
+			return { message: 'User updated successfully' };
+		},
+		{
+			body: t.Object({
+				email: t.Optional(t.String({ format: 'email' })),
+				first_name: t.Optional(t.String()),
+				last_name: t.Optional(t.String()),
+				// password: t.String(),
+				role: t.Optional(t.Enum(Role)),
+				is_active: t.Optional(t.Boolean()),
+			}),
+		},
+	)
+	.delete('/:id', async ({ set, params: { id } }) => {
+		const conn = await pool.getConnection();
 
-// 					return {
-// 						message: 'User deleted successfully',
-// 					};
-// 				},
-// 				{
-// 					params: t.Object({
-// 						id: t.String(),
-// 					}),
-// 					response: {
-// 						200: 'message',
-// 					},
-// 				},
-// 			),
-// 	)
-// 	.guard((app) =>
-// 		app
-// 			.use(currentUser())
-// 			.get(
-// 				'/me',
-// 				async ({ user }) => {
-// 					return user;
-// 				},
-// 				{
-// 					response: {
-// 						200: 'user',
-// 					},
-// 				},
-// 			)
-// 			.patch(
-// 				'/me',
-// 				async ({ body, user }) => {
-// 					const userUpdate = await prisma.user.update({
-// 						where: {
-// 							id: user.id,
-// 						},
-// 						data: {
-// 							...body,
-// 						},
-// 					});
+		const stmt = 'SELECT * FROM users WHERE id = ?';
+		const [deleteUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
 
-// 					return userUpdate;
-// 				},
-// 				{
-// 					body: 'user.me.update',
-// 					response: {
-// 						200: 'user',
-// 					},
-// 				},
-// 			)
-// 			.patch(
-// 				'/me/password',
-// 				async ({ user, body: { password, new_password } }) => {
-// 					const oldPassword = await verifyPassword(
-// 						password,
-// 						user.hashed_password,
-// 					);
+		// console.log(deleteUser);
+		if (!deleteUser.length) {
+			conn.release();
+			set.status = 404;
+			return { message: 'User not found' };
+		}
 
-// 					if (!oldPassword) {
-// 						throw new HTTPError(400, 'Invalid password');
-// 					}
+		// delete user
+		const deleteStmt = 'DELETE FROM users WHERE id = ?';
+		await conn.execute(deleteStmt, [id]);
 
-// 					const newHashedPassword = await getPasswordHash(new_password);
-
-// 					await prisma.user.update({
-// 						where: {
-// 							id: user.id,
-// 						},
-// 						data: {
-// 							hashed_password: newHashedPassword,
-// 						},
-// 					});
-
-// 					return {
-// 						message: 'Password updated successfully',
-// 					};
-// 				},
-// 				{
-// 					body: 'update.password',
-// 					response: {
-// 						200: 'message',
-// 					},
-// 				},
-// 			)
-// 			.delete(
-// 				'/me',
-// 				async ({ user }) => {
-// 					if (user.is_superuser) {
-// 						throw new HTTPError(
-// 							403,
-// 							'Super users are not allowed to delete themselves',
-// 						);
-// 					}
-
-// 					await prisma.user.delete({
-// 						where: {
-// 							id: user.id,
-// 						},
-// 					});
-
-// 					return {
-// 						message: 'User deleted successfully',
-// 					};
-// 				},
-// 				{
-// 					params: t.Object({
-// 						id: t.String(),
-// 					}),
-// 					response: {
-// 						200: 'message',
-// 					},
-// 				},
-// 			),
-// 	)
-// 	.post(
-// 		'/sign-up',
-// 		async ({ body: { email, password, ...body } }) => {
-// 			const user = await prisma.user.findUnique({
-// 				where: { email: email },
-// 			});
-
-// 			const hashedPassword = await getPasswordHash(password);
-
-// 			if (user) {
-// 				throw new HTTPError(400, 'User already exists');
-// 			}
-
-// 			const userCreate = await prisma.user.create({
-// 				data: {
-// 					...body,
-// 					email: email.toLowerCase(),
-// 					hashed_password: hashedPassword,
-// 				},
-// 				// NOTE: preview feature
-// 				// read more: https://www.prisma.io/docs/orm/reference/prisma-client-reference#omit-preview
-// 				// omit: {
-// 				// 	hashedPassword: true,
-// 				// },
-// 			});
-
-// 			return userCreate;
-// 		},
-// 		{
-// 			body: 'user.sign-up',
-// 			response: {
-// 				200: 'user',
-// 			},
-// 		},
-// 	);
+		conn.release();
+		return { message: 'User deleted successfully' };
+	});
+// TODO: new password route
+// TODO: me route
