@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS authors (
     PRIMARY KEY (id)
 );
 
+-- TODO: ISBN is unique right?
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
