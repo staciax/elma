@@ -11,14 +11,17 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(255) NULL,
     last_name VARCHAR(255) NULL,
     hashed_password VARCHAR(60) NOT NULL,
-    role ENUM('ADMIN', 'MANAGER', 'EMPLOYEE', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
+    role ENUM('SUPERUSER', 'ADMIN', 'MANAGER', 'EMPLOYEE', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
     is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    updated_at DATETIME(3) NOT NULL,
+    created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE INDEX users_email_key(email),
+    INDEX idx_users_email(email)
 );
 
+-- TODO: publishers name is unique right?
 CREATE TABLE IF NOT EXISTS publishers (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -26,6 +29,7 @@ CREATE TABLE IF NOT EXISTS publishers (
     PRIMARY KEY (id)
 );
 
+-- TODO: categories name is unique right?
 CREATE TABLE IF NOT EXISTS categories (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
