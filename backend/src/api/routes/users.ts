@@ -47,26 +47,34 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		// conn.test = 'hi';
 		return results;
 	})
-	.get('/:id', async ({ set, params: { id } }) => {
-		const conn = await pool.getConnection();
+	.get(
+		'/:id',
+		async ({ set, params: { id } }) => {
+			const conn = await pool.getConnection();
 
-		const stmt = `
+			const stmt = `
 		SELECT
 			*
 		FROM
 			users
 		WHERE id = ?;
 		`;
-		// TODO: join ?
-		const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
-		if (!results.length) {
+			// TODO: join ?
+			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			if (!results.length) {
+				conn.release();
+				set.status = 404;
+				return { message: 'User not found' };
+			}
 			conn.release();
-			set.status = 404;
-			return { message: 'User not found' };
-		}
-		conn.release();
-		return results;
-	})
+			return results;
+		},
+		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
+		},
+	)
 	.post(
 		'/',
 		async ({
@@ -123,6 +131,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			return userCreated;
 		},
 		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
 			body: t.Object({
 				email: t.String({ format: 'email' }),
 				first_name: t.String(),
@@ -160,6 +171,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			return { message: 'User updated successfully' };
 		},
 		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
 			body: t.Object({
 				email: t.Optional(t.String({ format: 'email' })),
 				first_name: t.Optional(t.String()),
@@ -170,25 +184,33 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			}),
 		},
 	)
-	.delete('/:id', async ({ set, params: { id } }) => {
-		const conn = await pool.getConnection();
+	.delete(
+		'/:id',
+		async ({ set, params: { id } }) => {
+			const conn = await pool.getConnection();
 
-		const stmt = 'SELECT * FROM users WHERE id = ?';
-		const [deleteUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			const stmt = 'SELECT * FROM users WHERE id = ?';
+			const [deleteUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
 
-		// console.log(deleteUser);
-		if (!deleteUser.length) {
+			// console.log(deleteUser);
+			if (!deleteUser.length) {
+				conn.release();
+				set.status = 404;
+				return { message: 'User not found' };
+			}
+
+			// delete user
+			const deleteStmt = 'DELETE FROM users WHERE id = ?';
+			await conn.execute(deleteStmt, [id]);
+
 			conn.release();
-			set.status = 404;
-			return { message: 'User not found' };
-		}
-
-		// delete user
-		const deleteStmt = 'DELETE FROM users WHERE id = ?';
-		await conn.execute(deleteStmt, [id]);
-
-		conn.release();
-		return { message: 'User deleted successfully' };
-	});
+			return { message: 'User deleted successfully' };
+		},
+		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
+		},
+	);
 // TODO: new password route
 // TODO: me route
