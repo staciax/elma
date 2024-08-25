@@ -1,9 +1,9 @@
+import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { security } from '@/security';
-
 import { bearer } from '@elysiajs/bearer';
-
 import { Elysia } from 'elysia';
+import type { RowDataPacket } from 'mysql2/promise';
 
 async function findUserById(userId: string) {
 	// return prisma.user.findUnique({
@@ -52,15 +52,26 @@ export const superuser = () =>
 				throw new HTTPError(401, 'Unauthorized');
 			}
 			const data = await jwt.verify(bearer);
+
 			if (!data) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			const user = await findUserById(data.sub);
-			if (!user) {
+			const conn = await pool.getConnection();
+
+			const [user_results] = await conn.query<RowDataPacket[]>(
+				'SELECT * FROM users WHERE id=?',
+				[data.sub],
+			);
+
+			if (!user_results.length) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			// if (!user.is_superuser) {
-			// 	throw new HTTPError(403, 'Forbidden');
-			// }
+			const user = user_results[0];
+
+			// TODO: user?.role or user.role
+			if (user?.role !== 'SUPERUSER') {
+				throw new HTTPError(403, 'Forbidden');
+			}
+
 			return { user };
 		});
