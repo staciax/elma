@@ -12,8 +12,8 @@ app.listen(
 console.log(
 	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 );
-
 // TODO: add this repo to the ElysiaJS Awesome list https://github.com/elysiajs/awesome-elysia
 // TODO: biomejs github action hook https://biomejs.dev/recipes/git-hooks/
 // TODO: add more github actions like biomejs lint, test, build, etc.
 // TODO: add logger plugin
+// TODO: hostname http or https
