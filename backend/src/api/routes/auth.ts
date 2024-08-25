@@ -25,13 +25,16 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 
 			const stmt = 'SELECT * FROM user WHERE email=? AND password=?';
 
+			await conn.beginTransaction();
+
 			try {
-				const [results, fields] = await conn.query(stmt, [email, password]);
+				const [results] = await conn.query(stmt, [email, password]);
 				console.log(results);
+				await conn.commit();
 			} catch {
 				conn.rollback();
 			} finally {
-				await conn.release();
+				conn.release();
 			}
 
 			// const user = await prisma.user.findUnique({
