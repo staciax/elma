@@ -149,9 +149,9 @@ class Migrations {
 
 		for (const rev of ordered) {
 			if (rev.version > this.version) {
-				// const sql = await Bun.read(rev.file);
-				// const sql = '';
-				// await await conn.execute(sql);
+				const revFile = await Bun.file(rev.file);
+				const sql = await revFile.text();
+				await await conn.query(sql);
 				successes++;
 			}
 		}
@@ -177,7 +177,10 @@ class Migrations {
 }
 
 async function runUpgrade(migrations: Migrations) {
-	const conn = await mysql.createConnection(env.DATABASE_URI);
+	const conn = await mysql.createConnection({
+		uri: env.DATABASE_URI,
+		multipleStatements: true,
+	});
 	const rev = await migrations.upgrade(conn);
 	await conn.end();
 	return rev;
