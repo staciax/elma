@@ -25,6 +25,7 @@ const session = new Elysia() //
 // https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
 // TODO: new password route
 // TODO: me route with guard
+// TODO: check conn not release
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
