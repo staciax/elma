@@ -15,7 +15,7 @@ const envSchema = z
 		MYSQL_HOST: z
 			.string()
 			.min(1)
-			.default('localhost') // TODO: wait for support hostname https://github.com/colinhacks/zod/pull/3692
+			.default('localhost') // TODO: wait for support hostname https://github.com/colinhacks/zod/pull/3692 or url or ip?
 			.describe('MySQL host'),
 		MYSQL_PORT: z
 			.number({ coerce: true })
