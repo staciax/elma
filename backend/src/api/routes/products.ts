@@ -1,6 +1,6 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
-// import { superuser } from '@/plugins/auth';
+import { superuser } from '@/plugins/auth';
 import { Elysia, t } from 'elysia';
 import type { RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
@@ -13,7 +13,8 @@ export const router = new Elysia({
 	prefix: '/products',
 	tags: ['products'],
 })
-	// .use(superuser())
+	// TODO: add role-based access control
+	.use(superuser())
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
