@@ -21,9 +21,10 @@ const session = new Elysia() //
 
 // TODO: try catch every query // finally always release connection
 // or release connection in onAfterHandle
-// if you don't release connection, it will be leaked (it's okay it will be released after timeout)
 // https://stackoverflow.com/a/57121491/19394867
 // https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
+// TODO: new password route
+// TODO: me route with guard
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
@@ -32,21 +33,32 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// 	// console.log(conn.test);
 	// 	console.log('release conn');
 	// })
-	.get('/', async () => {
-		const conn = await pool.getConnection();
+	.get(
+		'/',
+		async ({ query: { limit, offset } }) => {
+			const conn = await pool.getConnection();
 
-		const stmt = `
+			const stmt = `
 		SELECT
 			*
 		FROM
 			users
+		LIMIT ?
+		OFFSET ?;
 		`;
-		// TODO: join ?
-		const [results] = await conn.query(stmt);
-		conn.release();
-		// conn.test = 'hi';
-		return results;
-	})
+			// TODO: join ?
+			const [results] = await conn.query(stmt, [limit, offset]);
+			conn.release();
+			// conn.test = 'hi';
+			return results;
+		},
+		{
+			query: t.Object({
+				limit: t.Optional(t.Number({ default: 100 })),
+				offset: t.Optional(t.Number({ default: 0 })),
+			}),
+		},
+	)
 	.get(
 		'/:id',
 		async ({ set, params: { id } }) => {
@@ -212,5 +224,3 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			}),
 		},
 	);
-// TODO: new password route
-// TODO: me route
