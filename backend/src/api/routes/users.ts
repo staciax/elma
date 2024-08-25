@@ -143,9 +143,6 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			return userCreated;
 		},
 		{
-			params: t.Object({
-				id: t.String({ format: 'uuid' }),
-			}),
 			body: t.Object({
 				email: t.String({ format: 'email' }),
 				first_name: t.String(),
