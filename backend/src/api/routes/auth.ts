@@ -6,6 +6,7 @@ import { HTTPError } from '@/errors';
 import { Message } from '@/schemas/message';
 import { SignInDTO } from '@/schemas/users';
 import { verifyPassword } from '@/security';
+import type { RowDataPacket } from 'mysql2/promise';
 
 const Token = t.Object({
 	accessToken: t.String(),
@@ -23,37 +24,36 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 		async ({ jwt, body: { email, password } }) => {
 			const conn = await pool.getConnection();
 
-			const stmt = 'SELECT * FROM user WHERE email=? AND password=?';
+			// console.log('email', email);
+			const user_stmt = 'SELECT * FROM users WHERE email=?';
+			const [user_results] = await conn.query<RowDataPacket[]>(user_stmt, [
+				email,
+			]);
+			conn.release();
+			if (!user_results.length) {
+				throw new HTTPError(404, 'User not found');
+			}
+			const user = user_results[0];
 
-			await conn.beginTransaction();
+			const isMatch = await verifyPassword(password, user?.hashed_password);
 
-			try {
-				const [results] = await conn.query(stmt, [email, password]);
-				console.log(results);
-				await conn.commit();
-			} catch {
-				conn.rollback();
-			} finally {
-				conn.release();
+			if (!isMatch) {
+				throw new HTTPError(400, 'Invalid password');
 			}
 
-			// const user = await prisma.user.findUnique({
-			// 	where: { email },
-			// });
+			const accessToken = await jwt.sign({ sub: user.id });
 
-			// if (!user) {
-			// 	throw new HTTPError(404, 'User not found');
+			// try {
+			// 	const [results] = await conn.query(stmt, [email, password]);
+			// 	console.log(results);
+			// 	await conn.commit();
+			// } catch {
+			// 	conn.rollback();
+			// } finally {
+			// 	conn.release();
 			// }
 
-			// const isMatch = await verifyPassword(password, user.hashed_password);
-
-			// if (!isMatch) {
-			// 	throw new HTTPError(400, 'Invalid password');
-			// }
-
-			// const accessToken = await jwt.sign({ sub: user.id });
-
-			return { accessToken: 'test' };
+			return { accessToken };
 		},
 		{
 			body: 'user.sign-in',
