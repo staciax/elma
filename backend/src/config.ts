@@ -9,7 +9,7 @@ const envSchema = z
 			.refine((value) => !value.endsWith('/'), {
 				message:
 					"A path prefix must not end with '/', as the routes will start with '/'",
-			})
+			}) // TODO: wait for support .not() https://github.com/colinhacks/zod/pull/3709
 			.default('/api/v1')
 			.describe('API version'),
 		MYSQL_HOST: z
