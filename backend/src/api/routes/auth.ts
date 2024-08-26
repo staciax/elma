@@ -8,6 +8,9 @@ import { SignInDTO } from '@/schemas/users';
 import { verifyPassword } from '@/security';
 import type { RowDataPacket } from 'mysql2/promise';
 
+// TODO: reimplement cookie set on backend?
+// what about httpOnly?, secure?, sameSite?, expires?, etc.
+
 const Token = t.Object({
 	accessToken: t.String(),
 });
