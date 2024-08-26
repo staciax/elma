@@ -29,7 +29,7 @@ export const app = new Elysia()
 	.onError(({ code, error, set }) => {
 		switch (code) {
 			case 'HTTPError':
-				set.status = error.status_code;
+				set.status = error.status;
 				if (error.headers) {
 					set.headers = error.headers;
 				}
