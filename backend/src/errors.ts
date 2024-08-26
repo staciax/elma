@@ -1,13 +1,28 @@
-export class HTTPError extends Error {
-	status_code: number;
-	headers: Record<string, string> | undefined;
+import { InvertedStatusMap, type StatusMap } from 'elysia';
+
+export class HTTPError<
+	Status extends keyof StatusMap | keyof InvertedStatusMap, // or number
+> extends Error {
+	status: Status;
+	headers?: Record<string, string> | undefined;
+
 	constructor(
-		status_code: number,
-		message: string,
-		headers?: Record<string, string>,
+		status: Status,
+		message?: string,
+		headers?: Record<string, string> | undefined,
 	) {
-		super(message);
-		this.status_code = status_code;
+		console.log(typeof status);
+		if (!message && typeof status === 'number') {
+			// @ts-ignore
+			const pharse = InvertedStatusMap[status];
+			if (!pharse) {
+				throw new Error('Invalid status code');
+			}
+			super(pharse);
+		} else {
+			super(message);
+		}
+		this.status = status;
 		this.headers = headers;
 	}
 }
