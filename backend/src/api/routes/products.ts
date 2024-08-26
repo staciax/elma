@@ -2,12 +2,13 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
 import { Elysia, t } from 'elysia';
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
 // TODO: check sql injection
 // TODO: transaction for insert, update, delete
 // TODO: remove duplicate code
+// TODO: snake_case to camelCase (stmt)
 
 export const router = new Elysia({
 	prefix: '/products',
@@ -63,7 +64,7 @@ export const router = new Elysia({
 		{
 			query: t.Object({
 				limit: t.Optional(t.Number({ default: 100 })),
-				offset: t.Optional(t.Number({ default: 0 })),
+				offset: t.Optional(t.Number({ default: 0, minimum: 0 })),
 			}),
 		},
 	)
@@ -181,7 +182,7 @@ export const router = new Elysia({
 				);
 			`;
 
-			await conn.query<RowDataPacket[]>(product_stmt, [
+			await conn.query<ResultSetHeader>(product_stmt, [
 				uuidv7(),
 				title,
 				description,
@@ -259,7 +260,7 @@ export const router = new Elysia({
 				products
 			WHERE
 				id = ?`;
-			const [deleted] = await conn.execute(delete_stmt, [id]);
+			const [deleted] = await conn.execute<ResultSetHeader>(delete_stmt, [id]);
 			conn.release();
 
 			if (!deleted) {

@@ -1,7 +1,7 @@
 import { pool } from '@/db';
 import { getPasswordHash } from '@/security';
 import { Elysia, t } from 'elysia';
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
 enum Role {
@@ -26,6 +26,7 @@ const session = new Elysia() //
 // TODO: new password route
 // TODO: me route with guard
 // TODO: check conn not release
+// TODO: use HTTPError instead of set.status
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
@@ -56,7 +57,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		{
 			query: t.Object({
 				limit: t.Optional(t.Number({ default: 100 })),
-				offset: t.Optional(t.Number({ default: 0 })),
+				offset: t.Optional(t.Number({ default: 0, minimum: 0 })),
 			}),
 		},
 	)
@@ -66,12 +67,12 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			const conn = await pool.getConnection();
 
 			const stmt = `
-		SELECT
-			*
-		FROM
-			users
-		WHERE id = ?;
-		`;
+			SELECT
+				*
+			FROM
+				users
+			WHERE id = ?;
+			`;
 			// TODO: join ?
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 			if (!results.length) {
@@ -118,7 +119,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		);
 	`;
 			const hashedPassword = await getPasswordHash(password);
-			await conn.query(stmt, [
+			await conn.query<ResultSetHeader>(stmt, [
 				uuidv7(),
 				email,
 				first_name,
@@ -210,8 +211,8 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			}
 
 			// delete user
-			const deleteStmt = 'DELETE FROM users WHERE id = ?';
-			await conn.execute(deleteStmt, [id]);
+			const deleteUserStmt = 'DELETE FROM users WHERE id = ?';
+			await conn.execute<ResultSetHeader>(deleteUserStmt, [id]);
 
 			conn.release();
 			return { message: 'User deleted successfully' };
