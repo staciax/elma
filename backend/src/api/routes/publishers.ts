@@ -1,9 +1,11 @@
+import { superuser } from '@/plugins/auth';
 import { Elysia } from 'elysia';
 
 export const router = new Elysia({
 	prefix: '/publishers',
 	tags: ['publishers'],
 })
+	.use(superuser())
 	.get('/', async () => '/')
 	.get('/:id', async ({ params: { id } }) => id)
 	.post('/', async ({ body }) => body)

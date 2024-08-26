@@ -1,4 +1,5 @@
 import { pool } from '@/db';
+import { superuser } from '@/plugins/auth';
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
@@ -7,6 +8,7 @@ export const router = new Elysia({
 	prefix: '/categories',
 	tags: ['categories'],
 })
+	.use(superuser())
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
