@@ -5,8 +5,8 @@ export class HTTPError<
 	Message extends string,
 	Headers extends Record<string, string> | undefined | null,
 > extends Error {
-	status: Status;
-	headers?: Headers;
+	public readonly status: Status;
+	public readonly headers?: Headers;
 
 	constructor(status: Status, message?: Message, headers?: Headers) {
 		if (!message && typeof status === 'number') {
