@@ -10,7 +10,6 @@ export class HTTPError<
 
 	constructor(status: Status, message?: Message, headers?: Headers) {
 		if (!message && typeof status === 'number') {
-			// @ts-ignore
 			const pharse = InvertedStatusMap[status];
 			if (!pharse) {
 				throw new Error('Invalid status code');
