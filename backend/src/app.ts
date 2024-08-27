@@ -27,6 +27,7 @@ export const app = new Elysia()
 	// Error handlers
 	.error({ HTTPError })
 	.onError(({ code, error, set }) => {
+		//{ as: 'global' },
 		switch (code) {
 			case 'HTTPError':
 				set.status = error.status;
