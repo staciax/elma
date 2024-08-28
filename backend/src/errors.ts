@@ -1,14 +1,13 @@
 import { InvertedStatusMap } from 'elysia';
 
-export class HTTPError<
-	Status extends keyof InvertedStatusMap, // | keyof StatusMap,
-	Message extends string,
-	Headers extends Record<string, string> | undefined | null,
-> extends Error {
+type Status = keyof InvertedStatusMap;
+type Headers = Record<string, string> | undefined | null;
+
+export class HTTPError extends Error {
 	public readonly status: Status;
 	public readonly headers?: Headers;
 
-	constructor(status: Status, message?: Message, headers?: Headers) {
+	constructor(status: Status, message?: string, headers?: Headers) {
 		if (!message && typeof status === 'number') {
 			const pharse = InvertedStatusMap[status];
 			if (!pharse) {
