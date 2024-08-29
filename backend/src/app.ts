@@ -46,27 +46,42 @@ export const app = new Elysia()
 	.onBeforeHandle(() => {})
 	.onAfterHandle(() => {})
 
-	// CORS
-	// .use(
-	// 	cors(
-	// 		env.BACKEND_CORS_ORIGINS.length
-	// 			? {
-	// 					origin: env.BACKEND_CORS_ORIGINS,
-	// 					credentials: true,
-	// 					methods: ['*'],
-	// 					allowedHeaders: ['*'],
-	// 				}
-	// 			: undefined,
-	// 	),
-	// )
-
-	// Docs
-	.use(swagger({ path: '/docs' }))
-	.get('/', ({ redirect }) => redirect('/docs'))
-
 	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
 	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
 	.use(apiRouter);
+
+if (env.NODE_ENV !== 'production') {
+	app.use(
+		swagger({
+			path: '/docs',
+			provider: 'swagger-ui',
+			documentation: {
+				security: [{ JwtAuth: [], OAuth2PasswordBearer: [] }],
+				components: {
+					securitySchemes: {
+						JwtAuth: {
+							type: 'http',
+							scheme: 'bearer',
+							bearerFormat: 'JWT',
+							description: 'Enter JWT Bearer token **_only_**',
+						},
+						OAuth2PasswordBearer: {
+							type: 'oauth2',
+							description: 'OAuth2 Password Bearer',
+							flows: {
+								password: {
+									tokenUrl: `${env.API_V1_STR}/auth/sign`,
+									scopes: {},
+								},
+							},
+						},
+					},
+				},
+			},
+		}),
+	);
+	app.get('/', ({ redirect }) => redirect('/docs'));
+}
 
 if (env.BACKEND_CORS_ORIGINS) {
 	app.use(
