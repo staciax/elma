@@ -10,10 +10,21 @@ import type { RowDataPacket } from 'mysql2/promise';
 
 // TODO: reimplement cookie set on backend?
 // what about httpOnly?, secure?, sameSite?, expires?, etc.
+// TODO: read about OAuth2.0 https://datatracker.ietf.org/doc/html/rfc6750
 
 const Token = t.Object({
-	accessToken: t.String(),
+	access_token: t.String(),
+	token_type: t.Optional(t.String({ default: 'bearer' })),
+	// TODO: implement refresh token
 });
+
+// query {
+// 	grant_type: "password",
+// 	username: "test@gmail.com",
+// 	password: "test@gmail.com",
+// 	client_id: "",
+// 	scope: "",
+//   }
 
 export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 	.use(security)
@@ -24,13 +35,13 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 	})
 	.post(
 		'/sign',
-		async ({ jwt, body: { email, password } }) => {
+		async ({ jwt, body: { username, password } }) => {
 			const conn = await pool.getConnection();
 
 			// console.log('email', email);
 			const user_stmt = 'SELECT * FROM users WHERE email=?';
 			const [user_results] = await conn.query<RowDataPacket[]>(user_stmt, [
-				email,
+				username,
 			]);
 			conn.release();
 			if (!user_results.length) {
@@ -44,7 +55,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 				throw new HTTPError(400, 'Invalid password');
 			}
 
-			const accessToken = await jwt.sign({ sub: user.id });
+			const access_token = await jwt.sign({ sub: user.id });
 
 			// try {
 			// 	const [results] = await conn.query(stmt, [email, password]);
@@ -56,7 +67,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			// 	conn.release();
 			// }
 
-			return { accessToken };
+			return { access_token };
 		},
 		{
 			body: 'user.sign-in',
