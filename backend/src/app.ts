@@ -98,3 +98,5 @@ export type App = typeof app;
 
 // TODO: @bogeychan/elysia-logger https://github.com/bogeychan/elysia-logger
 // TODO: logger: https://github.com/pinojs/pino
+// TODO: openapi hide file
+
