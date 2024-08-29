@@ -146,10 +146,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		},
 		{
 			body: t.Object({
-				email: t.String({ format: 'email' }),
-				first_name: t.String(),
-				last_name: t.String(),
-				password: t.String(),
+				email: t.String({ format: 'email', error: 'Invalid email' }),
+				first_name: t.String({ maxLength: 128 }),
+				last_name: t.String({ maxLength: 128 }),
+				password: t.String({ minLength: 8 }),
 				role: t.Enum(Role),
 				is_active: t.Boolean({ default: true }),
 			}),
