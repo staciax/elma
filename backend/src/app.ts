@@ -12,7 +12,7 @@ import { Elysia } from 'elysia';
 export const app = new Elysia()
 	.use(
 		logger({
-			level: 'info',
+			level: env.NODE_ENV === 'production' ? 'info' : 'debug',
 		}),
 	)
 	.guard({
