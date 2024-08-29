@@ -8,7 +8,7 @@ export const SignUpDTO = t.Object({
 });
 
 export const SignInDTO = t.Object({
-	email: t.String({ format: 'email', error: 'Invalid email' }),
+	username: t.String({ format: 'email', error: 'Invalid email' }),
 	password: t.String({ minLength: 8, error: 'Invalid password' }),
 });
 
