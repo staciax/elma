@@ -27,6 +27,7 @@ const session = new Elysia() //
 // TODO: me route with guard
 // TODO: check conn not release
 // TODO: use HTTPError instead of set.status
+// TODO: response schema
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
