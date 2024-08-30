@@ -54,7 +54,7 @@ if (env.NODE_ENV !== 'production') {
 	app.use(
 		swagger({
 			path: '/docs',
-			provider: 'swagger-ui',
+			// provider: 'swagger-ui',
 			documentation: {
 				security: [{ JwtAuth: [], OAuth2PasswordBearer: [] }],
 				components: {
@@ -99,4 +99,3 @@ export type App = typeof app;
 // TODO: @bogeychan/elysia-logger https://github.com/bogeychan/elysia-logger
 // TODO: logger: https://github.com/pinojs/pino
 // TODO: openapi hide file
-
