@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- TODO: publishers name is unique right?
+-- TODO: add such as address, phone, email, etc.
 CREATE TABLE IF NOT EXISTS publishers (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
