@@ -87,7 +87,7 @@ export const router = new Elysia({
 		},
 		{
 			body: t.Object({
-				name: t.String(),
+				name: t.String({ minLength: 1, maxLength: 255 }),
 			}),
 		},
 	)
@@ -123,7 +123,7 @@ export const router = new Elysia({
 				id: t.String({ format: 'uuid' }),
 			}),
 			body: t.Object({
-				name: t.Optional(t.String()),
+				name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
 			}),
 		},
 	)

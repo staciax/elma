@@ -147,10 +147,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		{
 			body: t.Object({
 				email: t.String({ format: 'email', error: 'Invalid email' }),
-				first_name: t.String({ maxLength: 128 }),
-				last_name: t.String({ maxLength: 128 }),
-				password: t.String({ minLength: 8 }),
-				role: t.Enum(Role),
+				first_name: t.String({ minLength: 1, maxLength: 128 }),
+				last_name: t.String({ minLength: 1, maxLength: 128 }),
+				password: t.String({ minLength: 8, maxLength: 255 }),
+				role: t.Enum(Role), // TODO: add default ?
 				is_active: t.Boolean({ default: true }),
 			}),
 		},
@@ -187,8 +187,8 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			}),
 			body: t.Object({
 				email: t.Optional(t.String({ format: 'email' })),
-				first_name: t.Optional(t.String()),
-				last_name: t.Optional(t.String()),
+				first_name: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
+				last_name: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
 				// password: t.String(),
 				role: t.Optional(t.Enum(Role)),
 				is_active: t.Optional(t.Boolean()),
