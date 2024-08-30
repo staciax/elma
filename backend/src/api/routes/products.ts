@@ -9,6 +9,7 @@ import { v7 as uuidv7 } from 'uuid';
 // TODO: transaction for insert, update, delete
 // TODO: remove duplicate code
 // TODO: snake_case to camelCase (stmt)
+// TOOD: what t.Partial do?
 
 export const router = new Elysia({
 	prefix: '/products',
@@ -104,7 +105,7 @@ export const router = new Elysia({
 		},
 		{
 			params: t.Object({
-				id: t.String(),
+				id: t.String({ format: 'uuid' }),
 			}),
 		},
 	)
@@ -200,20 +201,22 @@ export const router = new Elysia({
 		{
 			body: t.Object({
 				title: t.String({ minLength: 1, maxLength: 255 }),
-				description: t.String({ minLength: 1 }),
-				isbn: t.String({ maxLength: 13 }),
+				description: t.String({ minLength: 1, maxLength: 255 }),
+				isbn: t.String({ minLength: 13, maxLength: 13 }), // TODO: isbn how many minl
 				price: t.Number({ minimum: 0 }), // TODO: maximum ???
-				published_date: t.Date(),
-				publisher_id: t.Optional(t.String()),
-				category_id: t.Optional(t.String()),
-				series_id: t.Optional(t.String()),
-				author_ids: t.Optional(t.Array(t.String())),
+				published_date: t.Date({ format: 'date-time' }),
+				publisher_id: t.Optional(t.String({ format: 'uuid' })),
+				category_id: t.Optional(t.String({ format: 'uuid' })),
+				// series_id: t.Optional(t.String()),
+				// author_ids: t.Optional(t.Array(t.String())),
 			}),
 		},
 	)
-	.patch('/:id', async ({ params: { id } }) => {
-		const conn = await pool.getConnection();
-		const product_stmt = `
+	.patch(
+		'/:id',
+		async ({ params: { id } }) => {
+			const conn = await pool.getConnection();
+			const product_stmt = `
 		SELECT
 			*
 		FROM
@@ -221,18 +224,33 @@ export const router = new Elysia({
 		WHERE
 			id = ?`;
 
-		const [product] = await conn.query<RowDataPacket[]>(product_stmt, [id]);
-		if (!product.length) {
+			const [product] = await conn.query<RowDataPacket[]>(product_stmt, [id]);
+			if (!product.length) {
+				conn.release();
+				throw new HTTPError(404, 'Product not found');
+			}
+
+			// TODO: update product
+
 			conn.release();
-			throw new HTTPError(404, 'Product not found');
-		}
 
-		// TODO: update product
-
-		conn.release();
-
-		return { message: 'Product updated successfully' };
-	})
+			return { message: 'Product updated successfully' };
+		},
+		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
+			body: t.Object({
+				title: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+				description: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+				isbn: t.Optional(t.String({ minLength: 13, maxLength: 13 })),
+				price: t.Optional(t.Number({ minimum: 0 })),
+				published_date: t.Optional(t.Date({ format: 'date-time' })),
+				publisher_id: t.Optional(t.String({ format: 'uuid' })),
+				category_id: t.Optional(t.String({ format: 'uuid' })),
+			}),
+		},
+	)
 	.delete(
 		'/:id',
 		async ({ params: { id } }) => {
@@ -272,7 +290,7 @@ export const router = new Elysia({
 		},
 		{
 			params: t.Object({
-				id: t.String(),
+				id: t.String({ format: 'uuid' }),
 			}),
 		},
 	);

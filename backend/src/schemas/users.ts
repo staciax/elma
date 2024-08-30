@@ -10,6 +10,9 @@ export const SignUpDTO = t.Object({
 export const SignInDTO = t.Object({
 	username: t.String({ format: 'email', error: 'Invalid email' }),
 	password: t.String({ minLength: 8, error: 'Invalid password' }),
+	// client_id: t.Optional(t.String()),
+	// grant_type: t.Optional(t.String({ default: 'password' })),
+	// scope: t.Optional(t.String()),
 });
 
 export const UserPublic = t.Object({
