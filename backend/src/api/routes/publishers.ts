@@ -4,6 +4,8 @@ import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
+// TODO: response schema
+
 export const router = new Elysia({
 	prefix: '/publishers',
 	tags: ['publishers'],
