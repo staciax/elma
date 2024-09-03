@@ -9,3 +9,5 @@ export const router = new Elysia({
 	.post('/', async ({ body }) => body)
 	.patch('/:id', async ({ body, params: { id } }) => [id, body])
 	.delete('/:id', async ({ params: { id } }) => id);
+
+// TODO: order me routes
