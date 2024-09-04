@@ -19,3 +19,5 @@ export const router = new Elysia({ prefix: env.API_V1_STR }) //
 	.use(productsRouter)
 	.use(shoppingCartsRouter)
 	.use(ordersRouter);
+
+// TODO: add begin transaction for all routes except GET
