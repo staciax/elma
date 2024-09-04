@@ -3,7 +3,7 @@
 -- Reason: init
 
 -- TODO: Add indexes
--- TODO: Add CHECK constraints
+-- TODO: Add CHECK constraints, UNIQUE, INDEXES for all tables?
 
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) NOT NULL,
@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE
 ); 
 
+
+-- TODO: maybe add candidate key for product_images 
 CREATE TABLE IF NOT EXISTS product_images (
     product_id VARCHAR(36) NOT NULL,
     filename VARCHAR(255) NOT NULL,
@@ -80,6 +82,7 @@ CREATE TABLE IF NOT EXISTS product_authors (
     FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- TODO: maybe add candidate key for shopping_carts 
 CREATE TABLE IF NOT EXISTS shopping_carts (
     product_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
@@ -101,6 +104,7 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- TODO: maybe add candidate key for order_items 
 CREATE TABLE IF NOT EXISTS order_items (
     order_id VARCHAR(36) NOT NULL,
     product_id VARCHAR(36) NOT NULL,
