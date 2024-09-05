@@ -98,6 +98,7 @@ export const router = new Elysia({
 			// TODO: join product_authors, authors, product_images
 
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Product not found');
 			}
@@ -113,7 +114,15 @@ export const router = new Elysia({
 		'/',
 		async ({
 			set,
-			body: { title, description, isbn, price, published_date },
+			body: {
+				title,
+				description,
+				isbn,
+				price,
+				published_date,
+				publisher_id,
+				category_id,
+			},
 		}) => {
 			// TODO: remove hard-coded values
 			// TODO: make function for get publisher, category, series, authors
@@ -121,7 +130,7 @@ export const router = new Elysia({
 			const conn = await pool.getConnection();
 
 			// category
-			const publisher_id = '0191896f-047a-7332-8f48-5ba16d59404f'; //body.publisher_id;
+			// const publisher_id = '0191896f-047a-7332-8f48-5ba16d59404f'; //body.publisher_id;
 			// if (!publisher_id) {
 			// 	throw new HTTPError(400, 'publisher');
 			// }
@@ -140,7 +149,7 @@ export const router = new Elysia({
 			}
 
 			// category
-			const category_id = '02a06798-62e6-11ef-877e-0e4d59d62537'; //body.category_id;
+			// const category_id = '02a06798-62e6-11ef-877e-0e4d59d62537'; //body.category_id;
 			// if (!category_id) {
 			// 	throw new HTTPError(400, 'category');
 			// }
