@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS authors (
 );
 
 -- TODO: ISBN is unique right?
+-- TODO: physical price and e-book price
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
