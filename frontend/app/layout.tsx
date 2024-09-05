@@ -1,13 +1,13 @@
 import Header from '@/components/header';
-import { Prompt } from 'next/font/google';
 import type { Metadata } from 'next';
+import { Prompt } from 'next/font/google';
 
 import './globals.css';
 
 const prompt = Prompt({
 	subsets: ['thai'],
 	weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-	display: 'swap',
+	display: 'auto',
 });
 
 export const metadata: Metadata = {
