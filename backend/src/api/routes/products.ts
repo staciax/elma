@@ -35,7 +35,9 @@ export const router = new Elysia({
 					product.title AS product_title,
 					product.description AS product_description,
 					product.isbn AS product_isbn,
-					product.price AS product_price,
+					-- product.price AS product_price,
+					product.price AS product_ebook_price,
+					product.price AS product_paper_price,
 					product.published_date AS product_published_date,
 
 					publisher.id AS publisher_id,
@@ -79,7 +81,9 @@ export const router = new Elysia({
 				product.title AS product_title,
 				product.description AS product_description,
 				product.isbn AS product_isbn,
-				product.price AS product_price,
+				-- product.price AS product_price,
+				product.price AS product_ebook_price,
+				product.price AS product_paper_price,
 				product.published_date AS product_published_date,
 
 				publisher.id AS publisher_id,
