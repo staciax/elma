@@ -70,7 +70,7 @@ export const router = new Elysia({
 			INSERT INTO publishers
 			(	
 				id,
-				name,
+				name
 			)
 			VALUES
 			(	
