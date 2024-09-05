@@ -20,6 +20,14 @@ type UserRole = {
 	isSuperuser?: boolean;
 };
 
+enum Role {
+	SUPERUSER = 'SUPERUSER',
+	ADMIN = 'ADMIN',
+	MANAGER = 'MANAGER',
+	EMPLOYEE = 'EMPLOYEE',
+	CUSTOMER = 'CUSTOMER',
+}
+
 // TODO: remove duplicate code
 
 export const currentUser = (_role?: UserRole) =>
@@ -35,10 +43,23 @@ export const currentUser = (_role?: UserRole) =>
 			if (!data) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			const user = await findUserById(data.sub);
-			if (!user) {
+			const conn = await pool.getConnection();
+
+			const [user_results] = await conn.query<RowDataPacket[]>(
+				'SELECT * FROM users WHERE id=?',
+				[data.sub],
+			);
+
+			if (!user_results.length) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
+			const user = user_results[0];
+
+			// const user = await findUserById(data.sub);
+			// if (!user) {
+			// 	throw new HTTPError(401, 'Unauthorized');
+			// }
+
 			return { user };
 		});
 
@@ -75,3 +96,15 @@ export const superuser = () =>
 
 			return { user };
 		});
+
+// export const hasPermission = (
+// 	userRoles: Role | Role[],
+// 	requiredRoles: Role | Role[],
+// ) => {
+// 	const userRolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+// 	const requiredRolesArray = Array.isArray(requiredRoles)
+// 		? requiredRoles
+// 		: [requiredRoles];
+
+// 	return requiredRolesArray.some((role) => userRolesArray.includes(role));
+// };
