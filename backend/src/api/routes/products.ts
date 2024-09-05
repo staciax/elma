@@ -201,7 +201,7 @@ export const router = new Elysia({
 		{
 			body: t.Object({
 				title: t.String({ minLength: 1, maxLength: 255 }),
-				description: t.String({ minLength: 1, maxLength: 255 }),
+				description: t.String({ minLength: 1, maxLength: 65535 }), // NOTE: mysql maximum length of TEXT is 65,535
 				isbn: t.String({ minLength: 13, maxLength: 13 }), // TODO: isbn how many minl
 				price: t.Number({ minimum: 0 }), // TODO: maximum ???
 				published_date: t.Date({ format: 'date-time' }),
