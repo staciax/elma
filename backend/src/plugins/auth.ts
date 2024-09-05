@@ -83,6 +83,7 @@ export const superuser = () =>
 				'SELECT * FROM users WHERE id=?',
 				[data.sub],
 			);
+			conn.release();
 
 			if (!user_results.length) {
 				throw new HTTPError(401, 'Unauthorized');
