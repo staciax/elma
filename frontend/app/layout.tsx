@@ -1,4 +1,3 @@
-import Header from '@/components/header';
 import type { Metadata } from 'next';
 import { Prompt } from 'next/font/google';
 
@@ -22,12 +21,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={prompt.className}>
-				<Header />
-				{children}
-				{/* <main className="container mx-auto bg-gray-100">{children}</main> */}
-				{/* <Footer /> */}
-			</body>
+			<body className={prompt.className}>{children}</body>
 		</html>
 	);
 }
