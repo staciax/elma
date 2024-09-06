@@ -1,33 +1,99 @@
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import Link from 'next/link';
+'use client';
 
-function Header() {
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Book, Search, ShoppingBag, ShoppingCart, User } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+
+// TODO: add my book to navbar
+
+export default function Header() {
+	const [showMobileSearch, setShowMobileSearch] = useState(false);
+	const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+	const toggleMobileSearch = () => {
+		setShowMobileSearch((prev) => !prev);
+	};
+
+	useEffect(() => {
+		if (showMobileSearch && mobileSearchRef.current) {
+			mobileSearchRef.current.focus();
+		}
+	}, [showMobileSearch]);
+
+	const handleMobileSearchBlur = (e: React.FocusEvent) => {
+		if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+			setShowMobileSearch(false);
+		}
+	};
+
 	return (
-		<header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-			<div>
-				<Link href="/">
-					<span className="font-semibold text-xl">ELMA</span>
-				</Link>
+		<header className="w-full border-b bg-background px-4 py-4 sm:px-6 lg:px-8">
+			<div className="flex items-center justify-between">
+				{/* Logo */}
+				<div className="w-[20%]">
+					<Link href="/" className="flex items-center space-x-2">
+						<Book className="h-6 w-6" />
+						<span className="font-bold text-lg">ELMA</span>
+					</Link>
+				</div>
+
+				{/* Desktop Search Bar */}
+				<div className="mx-4 hidden flex-1 justify-center sm:flex">
+					<form className="relative w-full max-w-md">
+						<Input type="search" placeholder="Search for books..." className="w-full pr-10" />
+						<Button type="submit" variant="ghost" size="icon" className="absolute top-0 right-0 h-full">
+							<Search className="h-5 w-5" />
+							<span className="sr-only">Search</span>
+						</Button>
+					</form>
+				</div>
+
+				{/* Shopping Bag, Search Icon, and Register/Login */}
+				<div className="flex w-[20%] items-center justify-end space-x-4">
+					<Button variant="ghost" size="icon" className="sm:hidden" onClick={toggleMobileSearch}>
+						<Search className="h-5 w-5" />
+						<span className="sr-only">Search</span>
+					</Button>
+
+					<Button variant="ghost" size="icon">
+						<Link href="/">
+							<ShoppingBag className="h-5 w-5 transition-colors hover:text-[#5AB772]" />
+						</Link>
+						<span className="sr-only">Shopping Bag</span>
+					</Button>
+
+					{/* TODO: after auth show button for bookshelf or profile or something */}
+					<Button variant="outline" className="hidden items-center space-x-2 sm:flex">
+						{/* <User className="h-5 w-5" /> */}
+						<Link href="/register">
+							<span className="text-sm transition-colors hover:text-[#5AB772]">สมัครสมาชิก</span>
+						</Link>
+						<span className="text-sm">/</span>
+						<Link href="/login">
+							<span className="text-sm transition-colors hover:text-[#5AB772]">เข้าสู่ระบบ</span>
+						</Link>
+					</Button>
+					<Button variant="outline" size="icon" className="sm:hidden">
+						<User className="h-5 w-5" />
+						<span className="sr-only">สมัครสมาชิก / เข้าสู่ระบบ</span>
+					</Button>
+				</div>
 			</div>
-			<div className="flex w-full items-center gap-4 md:mx-auto md:gap-2 lg:gap-4">
-				<form className="mx-auto flex-1 sm:flex-initial">
-					<div className="relative">
-						<button type="submit" className="absolute top-2.5 right-2.5">
-							<Search className="h-4 w-4 text-muted-foreground" />
-						</button>
-						<Input
-							name="q"
-							type="text"
-							placeholder="ค้นหาสินค้า..."
-							className="pl-4 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-						/>
-					</div>
-				</form>
-			</div>
-			<nav>NAV</nav>
+
+			{/* Mobile Search Bar */}
+			{showMobileSearch && (
+				<div className="mt-4 sm:hidden">
+					<form className="relative" onBlur={handleMobileSearchBlur}>
+						<Input ref={mobileSearchRef} type="search" placeholder="Search for books..." className="w-full pr-10" />
+						<Button type="submit" variant="ghost" size="icon" className="absolute top-0 right-0 h-full">
+							<Search className="h-5 w-5" />
+							<span className="sr-only">Search</span>
+						</Button>
+					</form>
+				</div>
+			)}
 		</header>
 	);
 }
-
-export default Header;
