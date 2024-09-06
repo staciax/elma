@@ -14,9 +14,9 @@ const axios = Axios.create({
 axios.interceptors.request.use(
 	(config) => {
 		const cookieStore = cookies();
-		const token = cookieStore.get('ac-token');
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
+		const access_token = cookieStore.get('ac-token')?.value;
+		if (access_token) {
+			config.headers.Authorization = `Bearer ${access_token}`;
 		}
 		return config;
 	},
