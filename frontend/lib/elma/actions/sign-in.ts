@@ -8,8 +8,8 @@ export const signIn = async (email: string, password: string): Promise<Token> =>
 	try {
 		const response = await axios.post('/v1/auth/sign', {
 			// TODO: remove hard-coded values
-			email: 'stacia.dev9@gmail.com',
-			password: 'testtest',
+			username: 'stacia.dev@gmail.com',
+			password: '0892983142',
 		});
 		return response.data;
 	} catch (error) {
