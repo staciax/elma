@@ -59,6 +59,7 @@ export const router = new Elysia({
 				product_stmt,
 				[limit, offset],
 			);
+			conn.release();
 			return {
 				count: count,
 				data: product_results,
