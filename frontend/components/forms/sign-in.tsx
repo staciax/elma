@@ -1,9 +1,13 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+// import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { signIn } from '@/lib/elma/actions/sign-in';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { setCookie } from 'cookies-next';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -11,13 +15,15 @@ const schema = z.object({
 	email: z.string().email(),
 	password: z
 		.string()
-		.min(8, {
-			message: 'min length is 8',
-		})
-		.max(512, {
-			message: 'max length is 128',
+		// .min(8, {
+		// 	message: 'min length is 8',
+		// })
+		.max(255, {
+			message: 'max length is 255',
 		}),
 });
+
+// TODO: implement next path after login
 
 function SignInForm() {
 	type Schema = z.infer<typeof schema>;
@@ -35,17 +41,21 @@ function SignInForm() {
 	});
 
 	async function onSubmit(values: Schema) {
-		const { accessToken } = await signIn(values.email, values.password);
-		setCookie('ac-token', accessToken, {
+		const { access_token } = await signIn(values.email, values.password);
+		setCookie('ac-token', access_token, {
 			// httpOnly: true,
 			// secure: process.env.NODE_ENV === 'production',
 			// maxAge: 60 * 60 * 24 * 7, // 1 week
 		});
+		if (access_token) {
+			// reset();
+			// router.push('/');
+		}
 	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
-			<div className="flex flex-col border">
+			{/* <div className="flex flex-col border">
 				<label htmlFor="email">email</label>
 				<input
 					{...register('email', {
@@ -78,6 +88,48 @@ function SignInForm() {
 				{errors.password && <span role="alert">{errors.password.message}</span>}
 
 				<button type="submit">SUBMIT</button>
+			</div> */}
+			<div className="grid gap-4">
+				<div className="grid gap-2">
+					<Label htmlFor="email">อีเมล</Label>
+					<Input
+						{...register('email', { required: true })}
+						id="email"
+						type="email"
+						placeholder="m@example.com"
+						required
+					/>
+					{errors.email && <span role="alert">{errors.email.message}</span>}
+				</div>
+				<div className="grid gap-2">
+					<div className="flex items-center">
+						<Label htmlFor="password">รหัสผ่าน</Label>
+						<Link href="#" className="ml-auto inline-block text-sm underline transition-colors hover:text-[#5AB772]">
+							ลืมรหัสผ่าน?
+						</Link>
+					</div>
+					<Input
+						{...register('password', { required: true })}
+						id="password"
+						type="password"
+						minLength={0}
+						maxLength={255}
+						required
+					/>
+					{errors.password && <span role="alert">{errors.password.message}</span>}
+				</div>
+				<Button type="submit" className="w-full transition hover:bg-[#5AB772]">
+					เข้าสู่ระบบ
+				</Button>
+				{/* <Button variant="outline" className="w-full transition hover:bg-[#5AB772] hover:text-white">
+					เข้าสู่ระบบด้วย Google
+				</Button> */}
+			</div>
+			<div className="mt-4 text-center text-sm">
+				ยังไม่มีบัญชีใช่ไหม?{' '}
+				<Link href="/register" className="text-[#5AB772] underline">
+					สมัครสมาชิก
+				</Link>
 			</div>
 		</form>
 	);
