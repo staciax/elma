@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { getProduct } from '@/lib/elma/actions/products';
 import { ShoppingCart } from 'lucide-react';
-import Link from 'next/link';
 
 // TODO: use decimal.js for price calculation
 // https://github.com/MikeMcl/decimal.js
@@ -27,14 +26,35 @@ function priceDiffPercent(paperPrice: number, ebookPrice: number) {
 	return diffPercent.toFixed(2);
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
-	const { slug } = params;
-	console.log(slug);
+type Props = {
+	params: { slug: string };
+};
+
+// TODO: remove duplicate code
+
+export async function generateMetadata({ params }: Props) {
+	const slug = params.slug;
+
 	const results = await getProduct(slug);
 	if (!results.length) {
 		return <div>Product not found</div>;
 	}
 	const product = results[0];
+
+	return {
+		title: product.product_title,
+	};
+}
+
+export default async function Page({ params }: Props) {
+	const slug = params.slug;
+
+	const results = await getProduct(slug);
+	if (!results.length) {
+		return <div>Product not found</div>;
+	}
+	const product = results[0];
+
 	return (
 		<main className="container flex flex-col items-center">
 			<section className="flex w-full max-w-6xl flex-row gap-14 px-4 pt-10 pb-12">
@@ -42,7 +62,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 					<div className="rounded-md bg-gradient-to-b from-[rgba(120,240,132,0.2)] to-transparent">
 						<div className="relative">
 							<img
-								src={'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif?4'}
+								src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif?4"
 								alt="product-image"
 								className="mx-auto"
 							/>
