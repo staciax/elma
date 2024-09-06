@@ -63,8 +63,8 @@ function SignUpForm() {
 		const { email, password, firstName, lastName } = values;
 
 		const user = await signUp(email, password, firstName, lastName);
-		const { accessToken } = await signIn(user.email, values.password);
-		setCookie('ac-token', accessToken, {
+		const { access_token } = await signIn(user.email, values.password);
+		setCookie('ac-token', access_token, {
 			// httpOnly: true,
 			// secure: process.env.NODE_ENV === 'production',
 			// maxAge: 60 * 60 * 24 * 7, // 1 week
