@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-// import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { signIn } from '@/lib/elma/actions/sign-in';
@@ -53,42 +52,10 @@ function SignInForm() {
 		}
 	}
 
+	// TODO: use Form component from shadcn/ui instead of form
+
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
-			{/* <div className="flex flex-col border">
-				<label htmlFor="email">email</label>
-				<input
-					{...register('email', {
-						required: true,
-						pattern: {
-							value: /\S+@\S+\.\S+/,
-							message: 'Entered value does not match email format',
-						},
-					})}
-					type="email"
-				/>
-				{errors.email && <span role="alert">{errors.email.message}</span>}
-
-				<label htmlFor="password">password</label>
-				<input
-					id="password"
-					{...register('password', {
-						required: true,
-						minLength: {
-							value: 8,
-							message: 'min length is 8',
-						},
-						maxLength: {
-							value: 128,
-							message: 'max length is 128',
-						},
-					})}
-					type="password"
-				/>
-				{errors.password && <span role="alert">{errors.password.message}</span>}
-
-				<button type="submit">SUBMIT</button>
-			</div> */}
 			<div className="grid gap-4">
 				<div className="grid gap-2">
 					<Label htmlFor="email">อีเมล</Label>
