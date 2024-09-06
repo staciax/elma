@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react';
 
 // TODO: use decimal.js for price calculation
 // https://github.com/MikeMcl/decimal.js
+// TODO: add skeleton loading https://ui.shadcn.com/docs/components/skeleton
 
 const productAuthors = [
 	{
