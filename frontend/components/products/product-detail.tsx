@@ -5,6 +5,7 @@ import { addProductToCartMe } from '@/lib/elma/actions/shopping-carts';
 import type { Product } from '@/lib/elma/types';
 import { ShoppingCart } from 'lucide-react';
 import React from 'react';
+import { toast } from 'sonner';
 
 const productAuthors = [
 	{
@@ -32,6 +33,15 @@ type Props = {
 };
 
 export default function ProductDetail({ product }: Props) {
+	const handleAddToCart = async () => {
+		try {
+			await addProductToCartMe(product.product_id);
+			toast.success('เพิ่มสินค้าลงตะกร้าสำเร็จ', { duration: 5000 });
+		} catch (error) {
+			toast.error('เพิ่มสินค้าลงตะกร้าไม่สำเร็จ', { duration: 5000 });
+		}
+	};
+
 	return (
 		<section className="flex w-full max-w-6xl flex-row gap-14 px-4 pt-10 pb-12">
 			<div className="-z-10 sticky w-2/4">
@@ -71,7 +81,7 @@ export default function ProductDetail({ product }: Props) {
 					<Button variant={'secondary'} className="w-full rounded-full ">
 						<span className="font-light text-base">ทดลองอ่าน</span>
 					</Button>
-					<Button className="w-full rounded-full" onClick={async () => await addProductToCartMe(product.product_id)}>
+					<Button className="w-full rounded-full" onClick={handleAddToCart}>
 						<ShoppingCart />
 						<span className="ml-2 font-light text-base">เพิ่มลงตะกร้า</span>
 					</Button>
