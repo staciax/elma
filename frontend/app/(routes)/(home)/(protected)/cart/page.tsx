@@ -1,21 +1,19 @@
 import React from 'react';
 
-import { getShoppingCartMe } from '@/lib/elma/actions/shopping-carts';
-
 import { Button } from '@/components/ui/button';
-import type { Product } from '@/lib/elma/types';
+import { getShoppingCartMe } from '@/lib/elma/actions/shopping-carts';
 import { Trash } from 'lucide-react';
 import Link from 'next/link';
 
-// type Props = {
-// 	product: Product;
-// };
-
-// function ProductLine({ product }) {}
-
 export default async function Page() {
 	const results = await getShoppingCartMe();
-	console.log(results);
+
+	// TODO: use decimal.js for price calculation
+	// TODO: remove hardcode
+	const total = 666.5;
+	const shippingCost = 60;
+	const grandTotal = total + shippingCost;
+
 	return (
 		<section className="container">
 			<div>
@@ -63,18 +61,18 @@ export default async function Page() {
 									<div>
 										<div className="flex justify-between">
 											<span>รวม</span>
-											<span>600 บาท</span>
+											<span>{total} บาท</span>
 										</div>
 										<div className="flex justify-between">
 											<span>ค่าจัดส่ง</span>
-											<span>600 บาท</span>
+											<span>{shippingCost} บาท</span>
 										</div>
 									</div>
 									<div>
 										<div className="flex justify-between">
 											<span>ยอดชำระ</span>
 											<span>
-												<span>726.50</span> บาท
+												<span>{grandTotal}</span> บาท
 											</span>
 										</div>
 									</div>
