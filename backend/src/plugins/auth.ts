@@ -28,6 +28,18 @@ enum Role {
 	CUSTOMER = 'CUSTOMER',
 }
 
+type UserDataPacket = RowDataPacket & {
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
+	hashed_password: string;
+	role: string;
+	is_active: number;
+	created_at: string;
+	updated_at: string;
+};
+
 // TODO: remove duplicate code
 
 export const currentUser = (_role?: UserRole) =>
@@ -45,10 +57,11 @@ export const currentUser = (_role?: UserRole) =>
 			}
 			const conn = await pool.getConnection();
 
-			const [user_results] = await conn.query<RowDataPacket[]>(
+			const [user_results] = await conn.query<UserDataPacket[]>(
 				'SELECT * FROM users WHERE id=?',
 				[data.sub],
 			);
+			conn.release();
 
 			if (!user_results.length) {
 				throw new HTTPError(401, 'Unauthorized');
