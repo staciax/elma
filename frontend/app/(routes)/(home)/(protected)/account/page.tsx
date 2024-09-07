@@ -4,7 +4,10 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import React from 'react';
 
-export default function Page() {
+import { getUserMe } from '@/lib/elma/actions/users';
+
+export default async function Page() {
+	const user = await getUserMe();
 	return (
 		<main className="grid flex-1 p-4">
 			<section className="w-full bg-white">
@@ -29,11 +32,11 @@ export default function Page() {
 						<div className="mt-4 grid grid-cols-2 gap-4">
 							<div className="grid gap-2">
 								<Label htmlFor="first-name">ชื่อ</Label>
-								<Input id="first-name" type="text" placeholder="ชื่อ" maxLength={255} value={'stacia'} />
+								<Input id="first-name" type="text" placeholder="ชื่อ" maxLength={255} value={user.first_name} />
 							</div>
 							<div className="grid gap-2">
 								<Label htmlFor="last-name">นามสกุล</Label>
-								<Input id="last-name" type="text" placeholder="นามสกุล" maxLength={255} value={'dev'} />
+								<Input id="last-name" type="text" placeholder="นามสกุล" maxLength={255} value={user.last_name} />
 							</div>
 							<div>
 								<Label htmlFor="email">อีเมล</Label>
@@ -44,7 +47,7 @@ export default function Page() {
 									maxLength={255}
 									readOnly={true}
 									className="cursor-not-allowed"
-									value={'test@test.com'}
+									value={user.email}
 								/>
 							</div>
 							<div>
