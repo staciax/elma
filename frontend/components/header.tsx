@@ -29,8 +29,8 @@ export default function Header() {
 	};
 
 	return (
-		<header className="w-full border-b bg-background px-4 py-4 sm:px-6 lg:px-8">
-			<div className="flex items-center justify-between">
+		<header className="border-b bg-background px-4 py-4 sm:px-6 lg:px-8">
+			<div className="container flex items-center justify-between">
 				{/* Logo */}
 				<div className="w-[20%]">
 					<Link href="/" className="flex items-center space-x-2">
@@ -57,9 +57,9 @@ export default function Header() {
 						<span className="sr-only">Search</span>
 					</Button>
 
-					<Button variant="ghost" size="icon">
-						<Link href="/">
-							<ShoppingBag className="h-5 w-5 transition-colors hover:text-[#5AB772]" />
+					<Button variant="ghost" size="icon" className="hover:text-[#5AB772]">
+						<Link href="/cart">
+							<ShoppingBag className="h-5 w-5 " />
 						</Link>
 						<span className="sr-only">Shopping Bag</span>
 					</Button>
