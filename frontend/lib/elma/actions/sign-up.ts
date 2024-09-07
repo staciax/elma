@@ -3,15 +3,13 @@
 import axios from '@/lib/axios';
 import type { User } from '@/lib/elma/types';
 
-export const signUp = async (email: string, password: string, firstName: string, lastName: string): Promise<User> => {
-	console.log(`signup ${email}, ${password}, ${firstName}, ${lastName}`);
+export const signUp = async (email: string, password: string, first_name: string, last_name: string): Promise<User> => {
 	try {
-		const response = await axios.post('/v1/users/sign-up', {
-			// TODO: remove hard-coded values
+		const response = await axios.post('/v1/users/signup', {
 			email: email,
 			password: password,
-			firstName: firstName,
-			lastName: lastName,
+			first_name: first_name,
+			last_name: last_name,
 		});
 		return response.data;
 	} catch (error) {
