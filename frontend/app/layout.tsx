@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 	description: 'ELMA is a book store.',
 };
 
+// TODO: cart provider
+
 export default function RootLayout({
 	children,
 }: Readonly<{

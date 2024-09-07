@@ -9,6 +9,8 @@ import staticPlugin from '@elysiajs/static';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 
+// TODO: Ebook ที่ซื้อแล้ว ไม่สามารถซื้อซ้ำได้
+
 export const app = new Elysia()
 	.use(
 		logger({
