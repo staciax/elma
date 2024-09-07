@@ -7,7 +7,9 @@ import { signIn } from '@/lib/elma/actions/sign-in';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { setCookie } from 'cookies-next';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -25,6 +27,8 @@ const schema = z.object({
 // TODO: implement next path after login
 
 function SignInForm() {
+	const router = useRouter();
+
 	type Schema = z.infer<typeof schema>;
 	const {
 		register,
@@ -46,10 +50,15 @@ function SignInForm() {
 			// secure: process.env.NODE_ENV === 'production',
 			// maxAge: 60 * 60 * 24 * 7, // 1 week
 		});
-		if (access_token) {
-			// reset();
-			// router.push('/');
-		}
+		router.push('/');
+		toast.success('เข้าสู่ระบบสำเร็จ', { duration: 5000 });
+		// if (access_token) {
+		// 	// reset();
+		// 	router.push('/');
+		// 	toast.success('เข้าสู่ระบบสำเร็จ', { duration: 5000 });
+		// } else {
+		// 	toast.error('เข้าสู่ระบบไม่สำเร็จ', {});
+		// }
 	}
 
 	// TODO: use Form component from shadcn/ui instead of form
