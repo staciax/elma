@@ -1,9 +1,8 @@
-import { getProducts } from '@/lib/elma/actions/products';
-import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { getProducts } from '@/lib/elma/actions/products';
 import type { Product } from '@/lib/elma/types';
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
