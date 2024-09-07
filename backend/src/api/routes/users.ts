@@ -1,4 +1,6 @@
 import { pool } from '@/db';
+import { HTTPError } from '@/errors';
+import { currentUser } from '@/plugins/auth';
 import { getPasswordHash } from '@/security';
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -36,6 +38,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// 	// console.log(conn.test);
 	// 	console.log('release conn');
 	// })
+	// TODO: guard for superuser
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
@@ -223,4 +226,78 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				id: t.String({ format: 'uuid' }),
 			}),
 		},
+	)
+	.post(
+		'/signup',
+		async ({ body }) => {
+			const conn = await pool.getConnection();
+
+			const stmt = 'SELECT * FROM users WHERE email = ?';
+			const [user] = await conn.query<RowDataPacket[]>(stmt, [body.email]);
+			if (user.length) {
+				conn.release();
+				throw new HTTPError(400, 'Email already exists');
+			}
+
+			try {
+				await conn.beginTransaction();
+				const insertStmt = `
+				INSERT INTO users
+				(
+					id,
+					email,
+					first_name,
+					last_name,
+					hashed_password,
+					role,
+					is_active
+				)
+				VALUES
+				(
+					?,
+					?,
+					?,
+					?,
+					?,
+					?,
+					?
+				);
+				`;
+				const hashedPassword = await getPasswordHash(body.password);
+				await conn.query<ResultSetHeader>(insertStmt, [
+					uuidv7(),
+					body.email,
+					body.first_name,
+					body.last_name,
+					hashedPassword,
+					Role.CUSTOMER,
+					true, // TODO: to false wehn email verification is implemented
+				]);
+				await conn.commit();
+			} catch (error) {
+				await conn.rollback();
+				// TODO: error handling
+				throw error;
+			} finally {
+				conn.release();
+			}
+
+			return { message: 'User created successfully' };
+		},
+		{
+			body: t.Object({
+				first_name: t.String({ minLength: 1, maxLength: 128 }),
+				last_name: t.String({ minLength: 1, maxLength: 128 }),
+				email: t.String({ format: 'email' }),
+				password: t.String({ minLength: 8, maxLength: 255 }),
+			}),
+		},
+	)
+	.guard((app) =>
+		app
+			.use(currentUser()) //
+			.get('/me', async ({ user }) => {
+				// TODO: omit hashed_password, is_active, created_at, updated_at
+				return user;
+			}),
 	);
