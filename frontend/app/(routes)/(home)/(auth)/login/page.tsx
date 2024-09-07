@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 export function LoginForm() {
 	return (
-		<Card className="mx-auto max-w-sm">
+		<Card className="mx-auto w-full max-w-sm">
 			<CardHeader>
 				<CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
-				<CardDescription>Enter your email below to login to your account</CardDescription>
+				<CardDescription>กรอกข้อมูลเพื่อเข้าสู่ระบบ</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<SignInForm />
