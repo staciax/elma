@@ -3,6 +3,8 @@ import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { QueryError } from 'mysql2';
+
 // import { v7 as uuidv7 } from 'uuid';
 
 // TODO: Ebook ที่ซื้อแล้ว ไม่สามารถซื้อซ้ำได้ และ ไม่สามารถเพิ่มเข้าตะกร้าซ้ำได้
@@ -99,13 +101,26 @@ export const router = new Elysia({
 						throw new HTTPError(404, 'Product not found');
 					}
 
-					const stmt = `
-					INSERT INTO shopping_carts(user_id, product_id)
-					VALUES (?, ?);
-					`;
-
-					await conn.query(stmt, [user.id, product_id]);
-					conn.release();
+					try {
+						await conn.beginTransaction();
+						const stmt = `
+						INSERT INTO shopping_carts(user_id, product_id)
+						VALUES (?, ?);
+						`;
+						await conn.query<ResultSetHeader>(stmt, [user.id, product_id]);
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						if (
+							error instanceof Error &&
+							(error as QueryError).code === 'ER_DUP_ENTRY'
+						) {
+							throw new HTTPError(400, 'Product already in cart');
+						}
+						throw error;
+					} finally {
+						conn.release();
+					}
 
 					return {
 						message: 'Product added to cart',
