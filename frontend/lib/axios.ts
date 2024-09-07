@@ -30,6 +30,12 @@ axios.interceptors.response.use(
 		return response;
 	},
 	(error) => {
+		// Handle 401 Unauthorized
+		// if (Axios.isAxiosError(error) && error?.status === 401) {
+		// 	const cookieStore = cookies();
+		// 	cookieStore.delete('ac-token');
+		// }
+		// TODO: client side delete cookie
 		return Promise.reject(error);
 	},
 );
