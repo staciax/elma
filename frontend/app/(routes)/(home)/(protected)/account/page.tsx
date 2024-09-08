@@ -1,11 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+// import AccountForm from './account-form';
+import AccountForm from '@/components/forms/account';
 import { getUserMe } from '@/lib/elma/actions/users';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import type React from 'react';
-import AccountForm from './account-form';
 
 // TODO: account layout for account page navigation
 
