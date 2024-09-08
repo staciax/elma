@@ -44,10 +44,10 @@ export const router = new Elysia({
 			.patch('/:id', async ({ body, params: { id } }) => [id, body])
 			.delete('/:id', async ({ params: { id } }) => id),
 	)
-	.group('/me', (app) =>
+	.guard((app) =>
 		app
 			.use(currentUser())
-			.get('/', async ({ user }) => {
+			.get('/me', async ({ user }) => {
 				const conn = await pool.getConnection();
 				const stmt = `
 				SELECT
@@ -79,9 +79,9 @@ export const router = new Elysia({
 				conn.release();
 				return results;
 			})
-			.get('/:id', async ({ params: { id } }) => id)
+			.get('/me/:id', async ({ params: { id } }) => id)
 			.post(
-				'/',
+				'/me',
 				async ({ body: { product_id }, user }) => {
 					const conn = await pool.getConnection();
 
@@ -132,8 +132,8 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.patch('/:id', async ({ body, params: { id } }) => [id, body])
-			.delete('/:id', async ({ params: { id } }) => id),
+			.patch('/me/:id', async ({ body, params: { id } }) => [id, body])
+			.delete('/me/:id', async ({ params: { id } }) => id),
 	);
 
 // TODO: carts me routes
