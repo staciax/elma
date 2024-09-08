@@ -2,7 +2,7 @@
 
 import axios from '@/lib/axios';
 
-type UserMe = {
+export type UserMe = {
 	id: number;
 	email: string;
 	first_name: string;
