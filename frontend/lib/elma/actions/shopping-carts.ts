@@ -10,7 +10,13 @@ type ShoppingCart = {
 
 export const getShoppingCartMe = async (): Promise<Product[]> => {
 	try {
-		const response = await axios.get('/v1/carts/me');
+		// cache busting
+		// ?timestamp=${new Date().getTime()}
+		const response = await axios.get('/v1/carts/me', {
+			headers: {
+				'Cache-Control': 'no-cache',
+			},
+		});
 		return response.data;
 	} catch (error) {
 		return Promise.reject(error);
@@ -19,7 +25,15 @@ export const getShoppingCartMe = async (): Promise<Product[]> => {
 
 export const addProductToCartMe = async (product_id: string): Promise<ShoppingCart[]> => {
 	try {
-		const response = await axios.post('/v1/carts/me', { product_id });
+		const response = await axios.post(
+			'/v1/carts/me',
+			{ product_id },
+			{
+				headers: {
+					'Cache-Control': 'no-cache',
+				},
+			},
+		);
 		return response.data;
 	} catch (error) {
 		return Promise.reject(error);
