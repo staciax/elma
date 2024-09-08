@@ -1,9 +1,14 @@
-import React from 'react';
-
 import { Button } from '@/components/ui/button';
 import { getShoppingCartMe } from '@/lib/elma/actions/shopping-carts';
+
 import { Trash } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import React from 'react';
+
+export const metadata: Metadata = {
+	title: 'ตะกร้าสินค้า',
+};
 
 export default async function Page() {
 	const results = await getShoppingCartMe();
