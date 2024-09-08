@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 	title: 'ตะกร้าสินค้า',
 };
 
+// export const fetchCache = 'force-no-store';
+
 export default async function Page() {
 	const results = await getShoppingCartMe();
 
