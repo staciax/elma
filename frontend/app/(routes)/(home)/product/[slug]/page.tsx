@@ -1,5 +1,6 @@
 import ProductDetail from '@/components/products/product-detail';
 import { getProduct } from '@/lib/elma/actions/products';
+import { notFound } from 'next/navigation';
 
 // TODO: use decimal.js for price calculation
 // https://github.com/MikeMcl/decimal.js
@@ -30,7 +31,7 @@ export default async function Page({ params }: Props) {
 
 	const results = await getProduct(slug);
 	if (!results.length) {
-		return <div>Product not found</div>;
+		return notFound();
 	}
 	const product = results[0];
 
