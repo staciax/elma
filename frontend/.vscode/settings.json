@@ -1,4 +1,10 @@
 {
+	// Next.js App router
+	"workbench.editor.customLabels.patterns": {
+		"**/app/**/page.tsx": "${dirname} - page.tsx",
+		"**/app/**/layout.tsx": "${dirname} - layout.tsx",
+	},
+
 	// Editor settings
 	"editor.formatOnSave": true,
 
