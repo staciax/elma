@@ -43,8 +43,8 @@ export default function ProductDetail({ product }: Props) {
 	};
 
 	return (
-		<section className="flex w-full max-w-6xl flex-row gap-14 px-4 pt-10 pb-12">
-			<div className="-z-10 sticky w-2/4">
+		<section className="flex w-full max-w-6xl flex-col items-center gap-14 px-4 pt-10 pb-12 md:flex-row md:items-start">
+			<div className="-z-10 top-8 w-2/4 md:sticky">
 				<div className="rounded-md bg-gradient-to-b from-[rgba(120,240,132,0.2)] to-transparent">
 					<div className="relative">
 						<img
@@ -56,7 +56,7 @@ export default function ProductDetail({ product }: Props) {
 					{/* <div>test</div> */}
 				</div>
 			</div>
-			<div className="flex w-2/4 flex-col">
+			<div className="flex w-full flex-col md:w-2/4">
 				<div>
 					<h3 className="font-semibold text-[#414141]">{product.category_name}</h3>
 					<h3 className="mt-4 font-semibold text-2xl">{product.product_title}</h3>
