@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { UserMe } from '@/lib/elma/actions/users';
-
 import type React from 'react';
 
 type Props = {
 	user: UserMe;
 };
+
+// TODO: zod validation
 
 export default function AccountForm({ user }: Props) {
 	const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
