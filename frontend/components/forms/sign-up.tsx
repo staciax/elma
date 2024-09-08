@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label';
 import { signIn } from '@/lib/elma/actions/sign-in';
 import { signUp } from '@/lib/elma/actions/sign-up';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
-import { AxiosError, isAxiosError } from 'axios';
+// import axios from 'axios';
+// import { AxiosError, isAxiosError } from 'axios';
 import { setCookie } from 'cookies-next';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -95,6 +95,8 @@ function SignUpForm() {
 			// maxAge: 60 * 60 * 24 * 7, // 1 week
 		});
 		router.push('/');
+		// redirect('/');
+		// TODO: router.push or redirect to /
 	}
 
 	return (
