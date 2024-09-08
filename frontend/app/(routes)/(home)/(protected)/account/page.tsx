@@ -1,10 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getUserMe } from '@/lib/elma/actions/users';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import React from 'react';
 
-import { getUserMe } from '@/lib/elma/actions/users';
+// TODO: account layout for account page navigation
+
+export const metadata: Metadata = {
+	title: 'รายละเอียดบัญชี',
+};
 
 export default async function Page() {
 	const user = await getUserMe();
@@ -18,7 +24,7 @@ export default async function Page() {
 					<Link href="/account" className="transition-colors hover:text-[#5AB772]">
 						รายละเอียดบัญชี
 					</Link>
-					<Link href="/order" className="transition-colors hover:text-[#5AB772]">
+					<Link href="/account/order" className="transition-colors hover:text-[#5AB772]">
 						ประวัติการสั่งซื้อ
 					</Link>
 				</div>
