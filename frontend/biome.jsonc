@@ -38,7 +38,10 @@
 			},
 			"correctness": {
 				"noUnusedVariables": "warn",
-				// "noUnusedImports": "warn",
+				"noUnusedImports": {
+					"fix": "none",
+					"level": "warn"
+				},
 				"noInvalidUseBeforeDeclaration": "error",
 				// React
 				"useExhaustiveDependencies": "error",
