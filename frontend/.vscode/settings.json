@@ -1,9 +1,10 @@
 {
 	// Next.js App router
+	// https://www.reddit.com/r/nextjs/comments/1ey6h7r/comment/ljho32y/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 	"workbench.editor.customLabels.patterns": {
-		"**/app/**/page.tsx": "${dirname} - page.tsx",
-		"**/app/**/layout.tsx": "${dirname} - layout.tsx",
+		"**/app/**/{page,layout}.{tsx,jsx,ts,js}": "${dirname} - ${filename}.${extname}"
 	},
+	// "workbench.editor.labelFormat": "short",
 
 	// Editor settings
 	"editor.formatOnSave": true,
