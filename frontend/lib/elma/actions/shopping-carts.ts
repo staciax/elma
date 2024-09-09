@@ -2,11 +2,7 @@
 
 import axios from '@/lib/axios';
 import type { Product } from '../types';
-
-type ShoppingCart = {
-	product_id: string;
-	user_id: string;
-};
+import type { ShoppingCart } from '../types/shopping-carts';
 
 export const getShoppingCartMe = async (): Promise<Product[]> => {
 	try {
