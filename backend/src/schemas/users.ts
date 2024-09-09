@@ -1,66 +1,86 @@
 import { t } from 'elysia';
 
-export const SignUpDTO = t.Object({
-	email: t.String({ format: 'email', error: 'Invalid email' }),
-	password: t.String({ minLength: 8 }),
-	first_name: t.Optional(t.String()),
-	last_name: t.Optional(t.String()),
+export const UserRegiser = t.Object({
+	email: t.String({ format: 'email', error: 'Invalid email' }), // TODO: max length?
+	password: t.String({ minLength: 8, maxLength: 255 }),
+	first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	phone_number: t.Optional(t.String({ minLength: 1, maxLength: 20 })),
 });
 
-export const SignInDTO = t.Object({
-	username: t.String({ format: 'email', error: 'Invalid email' }),
-	password: t.String({ minLength: 8, error: 'Invalid password' }),
-	// client_id: t.Optional(t.String()),
-	// grant_type: t.Optional(t.String({ default: 'password' })),
-	// scope: t.Optional(t.String()),
-});
+export type UserRole =
+	| 'SUPERUSER'
+	| 'ADMIN'
+	| 'MANAGER'
+	| 'EMPLOYEE'
+	| 'CUSTOMER';
 
 export const UserPublic = t.Object({
-	id: t.String({ format: 'uuid', error: 'Invalid UUID' }),
-	email: t.String({ format: 'email', error: 'Invalid email' }),
-	hashed_password: t.String(),
+	id: t.String({ format: 'uuid' }),
+	email: t.String({ format: 'email' }),
 	first_name: t.Nullable(t.String()),
 	last_name: t.Nullable(t.String()),
-	is_superuser: t.Boolean(),
-	is_active: t.Boolean(),
-	is_staff: t.Boolean(),
-	created_at: t.Date({ default: new Date() }),
-	updated_at: t.Date({ default: new Date() }),
-	// orders: t.Any(),
-	// shopping_carts: t.Any(),
+	phone_number: t.Nullable(t.String()),
+	hashed_password: t.String(),
+	role: t.String(),
+	is_active: t.Integer(), // TODO: cast to boolean
+	created_at: t.Date(),
+	updated_at: t.Date(),
 });
 
 export const UsersPublic = t.Object({
-	count: t.Number(),
+	count: t.Integer(),
 	data: t.Array(UserPublic),
 });
 
 export const UserCreate = t.Object({
-	email: t.String({ format: 'email', error: 'Invalid email' }),
-	password: t.String(),
-	first_name: t.Optional(t.String()),
-	last_name: t.Optional(t.String()),
+	email: t.String({ format: 'email', maxLength: 320 }),
+	password: t.String({ minLength: 8, maxLength: 255 }),
+	first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	role: t.Union([
+		t.Literal('SUPERUSER'),
+		t.Literal('ADMIN'),
+		t.Literal('MANAGER'),
+		t.Literal('EMPLOYEE'),
+		t.Literal('CUSTOMER'),
+	]),
 	is_active: t.Optional(t.Boolean({ default: true })),
-	is_staff: t.Optional(t.Boolean({ default: false })),
 });
 
 export const UserUpdate = t.Object({
-	email: t.Optional(t.String({ format: 'email' })),
-	password: t.Optional(t.String({ minLength: 8 })),
-	first_name: t.Optional(t.String()),
-	last_name: t.Optional(t.String()),
+	email: t.Optional(t.String({ format: 'email', maxLength: 320 })),
+	password: t.Optional(t.String({ minLength: 8, maxLength: 255 })),
+	first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	phone_number: t.Optional(t.String({ minLength: 1, maxLength: 20 })),
+	role: t.Union([
+		t.Literal('SUPERUSER'),
+		t.Literal('ADMIN'),
+		t.Literal('MANAGER'),
+		t.Literal('EMPLOYEE'),
+		t.Literal('CUSTOMER'),
+	]),
 	is_active: t.Optional(t.Boolean()),
-	is_staff: t.Optional(t.Boolean()),
 });
 
 export const UserMeUpdate = t.Object({
-	email: t.Optional(t.String({ format: 'email' })),
-	password: t.Optional(t.String({ minLength: 8 })),
-	first_name: t.Optional(t.String()),
-	last_name: t.Optional(t.String()),
+	email: t.Optional(t.String({ format: 'email', maxLength: 320 })),
+	password: t.Optional(t.String({ minLength: 8, maxLength: 255 })),
+	first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+	phone_number: t.Optional(t.String({ minLength: 1, maxLength: 20 })),
 });
 
-export const UpdatePasswordDTO = t.Object({
-	password: t.String({ minLength: 8, error: 'Invalid password' }),
-	new_password: t.String({ minLength: 8, error: 'Invalid password' }),
-});
+// export const UpdatePassword = t.Object({
+// 	password: t.String({
+// 		minLength: 1, // TODO: fix this 1 or 8?
+// 		maxLength: 255,
+// 		error: 'Invalid password',
+// 	}),
+// 	new_password: t.String({
+// 		minLength: 8,
+// 		maxLength: 255,
+// 		error: 'Invalid password',
+// 	}),
+// });

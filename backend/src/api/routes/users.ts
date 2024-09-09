@@ -1,8 +1,10 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
+import { UserRegiser } from '@/schemas/users';
+import { type UserPublic, UsersPublic } from '@/schemas/users';
 import { getPasswordHash } from '@/security';
-import { Elysia, t } from 'elysia';
+import { Elysia, type UnwrapSchema, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
@@ -46,25 +48,45 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				async ({ query: { limit, offset } }) => {
 					const conn = await pool.getConnection();
 
+					const countStmt = 'SELECT COUNT(*) as count FROM users;';
+					const [count] = await conn.query<RowDataPacket[]>(countStmt);
+
 					const stmt = `
 					SELECT
-						*
+						users.id as id,
+						users.email as email,
+						users.first_name as first_name,
+						users.last_name as last_name,
+						users.phone_number as phone_number,
+						users.hashed_password as hashed_password,
+						users.role as role,
+						users.is_active as is_active,
+						users.created_at as created_at,
+						users.updated_at as updated_at
 					FROM
 						users
 					LIMIT ?
 					OFFSET ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.query(stmt, [limit, offset]);
+					const [results] = await conn.query<
+						(RowDataPacket & UnwrapSchema<typeof UserPublic>)[]
+					>(stmt, [limit, offset]);
 					conn.release();
-					// conn.test = 'hi';
-					return results;
+
+					return {
+						count: count[0].count,
+						data: results,
+					};
 				},
 				{
 					query: t.Object({
-						limit: t.Optional(t.Number({ default: 100 })),
-						offset: t.Optional(t.Number({ default: 0, minimum: 0 })),
+						limit: t.Optional(t.Integer({ minimum: 1, default: 100 })),
+						offset: t.Optional(t.Integer({ minimum: 0, default: 0 })),
 					}),
+					response: {
+						200: UsersPublic,
+					},
 				},
 			)
 			.get(
@@ -74,7 +96,16 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 
 					const stmt = `
 					SELECT
-						*
+						users.id as id,
+						users.email as email,
+						users.first_name as first_name,
+						users.last_name as last_name,
+						users.phone_number as phone_number,
+						-- users.hashed_password as hashed_password,
+						users.role as role,
+						users.is_active as is_active,
+						users.created_at as created_at,
+						users.updated_at as updated_at
 					FROM
 						users
 					WHERE id = ?;
@@ -99,7 +130,15 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				'/',
 				async ({
 					set,
-					body: { email, first_name, last_name, password, role, is_active },
+					body: {
+						email,
+						first_name,
+						last_name,
+						phone_number,
+						password,
+						role,
+						is_active,
+					},
 				}) => {
 					const conn = await pool.getConnection();
 					const stmt = `
@@ -109,12 +148,14 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						email,
 						first_name,
 						last_name,
+						phone_number,
 						hashed_password,
 						role,
 						is_active
 					)
 					VALUES
 					(
+						?,
 						?,
 						?,
 						?,
@@ -130,6 +171,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						email,
 						first_name,
 						last_name,
+						phone_number,
 						hashedPassword,
 						role,
 						is_active,
@@ -152,9 +194,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				},
 				{
 					body: t.Object({
-						email: t.String({ format: 'email', error: 'Invalid email' }),
-						first_name: t.String({ minLength: 1, maxLength: 128 }),
-						last_name: t.String({ minLength: 1, maxLength: 128 }),
+						email: t.String({ format: 'email', error: 'Invalid email' }), // TODO: email format should add maxLength????
+						first_name: t.String({ minLength: 1, maxLength: 255 }),
+						last_name: t.String({ minLength: 1, maxLength: 255 }),
+						phone_number: t.String({ minLength: 1, maxLength: 255 }),
 						password: t.String({ minLength: 8, maxLength: 255 }),
 						role: t.Enum(Role), // TODO: add default ?
 						is_active: t.Boolean({ default: true }),
@@ -193,8 +236,11 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					}),
 					body: t.Object({
 						email: t.Optional(t.String({ format: 'email' })),
-						first_name: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
-						last_name: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
+						first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+						last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+						phone_number: t.Optional(
+							t.String({ minLength: 1, maxLength: 255 }),
+						),
 						// password: t.String(),
 						role: t.Optional(t.Enum(Role)),
 						is_active: t.Optional(t.Boolean()),
@@ -230,13 +276,15 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				},
 			),
 	)
-	.guard((app) =>
-		app
-			.use(currentUser()) //
-			.get('/me', async ({ user }) => {
-				// TODO: omit hashed_password, is_active, created_at, updated_at
-				return user;
-			}),
+	.guard(
+		(app) =>
+			app
+				.use(currentUser()) //
+				.get('/me', async ({ user }) => {
+					// TODO: omit hashed_password, is_active, created_at, updated_at
+					return user;
+				}),
+		// TODO: me update password
 	)
 	.post(
 		'/signup',
@@ -297,11 +345,12 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			return { message: 'User created successfully' };
 		},
 		{
-			body: t.Object({
-				first_name: t.String({ minLength: 1, maxLength: 255 }),
-				last_name: t.String({ minLength: 1, maxLength: 255 }),
-				email: t.String({ format: 'email' }),
-				password: t.String({ minLength: 8, maxLength: 255 }),
-			}),
+			body: UserRegiser,
+			// body: t.Object({
+			// 	first_name: t.String({ minLength: 1, maxLength: 255 }),
+			// 	last_name: t.String({ minLength: 1, maxLength: 255 }),
+			// 	email: t.String({ format: 'email' }),
+			// 	password: t.String({ minLength: 8, maxLength: 255 }),
+			// }),
 		},
 	);
