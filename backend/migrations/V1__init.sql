@@ -7,10 +7,10 @@
 
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) NOT NULL,
-    email VARCHAR(255) NOT NULL,
+    email VARCHAR(320) NOT NULL,
     first_name VARCHAR(255) NULL,
     last_name VARCHAR(255) NULL,
-    -- TODO: add phone_number
+    phone_number VARCHAR(20) NULL,
     hashed_password VARCHAR(60) NOT NULL,
     role ENUM('SUPERUSER', 'ADMIN', 'MANAGER', 'EMPLOYEE', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
     is_active BOOLEAN NOT NULL DEFAULT true,
