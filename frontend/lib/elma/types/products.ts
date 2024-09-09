@@ -1,4 +1,4 @@
-export type Product = {
+export type ProductPublic = {
 	product_id: string;
 	product_title: string;
 	product_description: string;
@@ -13,7 +13,7 @@ export type Product = {
 	category_name?: string;
 };
 
-export type Products = {
+export type ProductsPublic = {
 	count: number;
-	data: Product[];
+	data: ProductPublic[];
 };

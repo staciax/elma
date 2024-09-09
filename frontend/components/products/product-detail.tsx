@@ -2,9 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import { addProductToCartMe } from '@/lib/elma/actions/shopping-carts';
-import type { Product } from '@/lib/elma/types';
+import type { ProductPublic } from '@/lib/elma/types';
 import { ShoppingCart } from 'lucide-react';
-import React from 'react';
 import { toast } from 'sonner';
 
 const productAuthors = [
@@ -29,7 +28,7 @@ function priceDiffPercent(paperPrice: number, ebookPrice: number) {
 }
 
 type Props = {
-	product: Product;
+	product: ProductPublic;
 };
 
 export default function ProductDetail({ product }: Props) {
