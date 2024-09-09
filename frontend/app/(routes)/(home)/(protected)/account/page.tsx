@@ -33,16 +33,3 @@ export default async function Page() {
 		</main>
 	);
 }
-
-// <section>
-// <span>บัญชีของฉัน</span>
-// <Input type="text" placeholder="ชื่ิอที่อยู่" maxLength={255} />
-// <Input type="text" placeholder="ที่อยู่" maxLength={255} />
-// <div className="grid grid-cols-2">
-// 	<Input type="text" placeholder="จัดหวัด" maxLength={255} />
-// 	<Input type="text" placeholder="เขตอำเภอ/เขต" maxLength={255} />
-// 	<Input type="email" placeholder="คำบล/แขวง" maxLength={255} />
-// 	{/* TODO: format phone when unforcus and when focus show default */}
-// 	<Input type="text" placeholder="รหัสไปรษณีย์" maxLength={15} />
-// </div>
-// </section>

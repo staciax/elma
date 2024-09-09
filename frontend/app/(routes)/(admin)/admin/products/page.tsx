@@ -15,8 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 
-import type { Product } from '@/lib/elma/types';
-
 export default async function Page() {
 	return (
 		<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">

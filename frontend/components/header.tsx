@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
-	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
@@ -11,10 +10,8 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Book, CircleUser, Search, ShoppingBag, ShoppingBasket, ShoppingCart, User } from 'lucide-react';
-import Image from 'next/image';
+import { Book, CircleUser, Search, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 // TODO: add my book to navbar
