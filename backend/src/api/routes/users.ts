@@ -141,46 +141,71 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					},
 				}) => {
 					const conn = await pool.getConnection();
-					const stmt = `
-					INSERT INTO users
-					(
-						id,
+
+					// check email if exists
+					const checkStmt = 'SELECT * FROM users WHERE email = ?';
+					const [checkUser] = await conn.query<RowDataPacket[]>(checkStmt, [
 						email,
-						first_name,
-						last_name,
-						phone_number,
-						hashed_password,
-						role,
-						is_active
-					)
-					VALUES
-					(
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?
-					);
-				`;
-					const hashedPassword = await getPasswordHash(password);
-					await conn.query<ResultSetHeader>(stmt, [
-						uuidv7(),
-						email,
-						first_name,
-						last_name,
-						phone_number,
-						hashedPassword,
-						role,
-						is_active,
 					]);
+
+					if (checkUser.length) {
+						conn.release();
+						set.status = 400;
+						return { message: 'Email already exists' };
+					}
+
+					const hashedPassword = await getPasswordHash(password);
+
+					try {
+						await conn.beginTransaction();
+						const stmt = `
+						INSERT INTO users
+						(
+							id,
+							email,
+							first_name,
+							last_name,
+							phone_number,
+							hashed_password,
+							role,
+							is_active
+						)
+						VALUES
+						(
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?
+						);
+				`;
+						await conn.query<ResultSetHeader>(stmt, [
+							uuidv7(),
+							email,
+							first_name,
+							last_name,
+							phone_number,
+							hashedPassword,
+							role,
+							is_active,
+						]);
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					}
+
+					// refresh user created
 
 					const [userCreated] = await conn.query<RowDataPacket[]>(
 						'SELECT * FROM users WHERE email = ?',
 						[email],
 					);
+
 					// console.log(userCreated);
 					if (!userCreated.length) {
 						conn.release();
@@ -197,7 +222,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						email: t.String({ format: 'email', error: 'Invalid email' }), // TODO: email format should add maxLength????
 						first_name: t.String({ minLength: 1, maxLength: 255 }),
 						last_name: t.String({ minLength: 1, maxLength: 255 }),
-						phone_number: t.String({ minLength: 1, maxLength: 255 }),
+						phone_number: t.String({ minLength: 1, maxLength: 20 }),
 						password: t.String({ minLength: 8, maxLength: 255 }),
 						role: t.Enum(Role), // TODO: add default ?
 						is_active: t.Boolean({ default: true }),
