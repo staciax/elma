@@ -4,7 +4,6 @@ import { getShoppingCartMe } from '@/lib/elma/actions/shopping-carts';
 import { Trash } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import React from 'react';
 
 export const metadata: Metadata = {
 	title: 'ตะกร้าสินค้า',

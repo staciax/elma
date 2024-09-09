@@ -8,7 +8,7 @@ import { signUp } from '@/lib/elma/actions/sign-up';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { setCookie } from 'cookies-next';
 import Link from 'next/link';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // redirect,
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
