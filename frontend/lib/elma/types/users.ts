@@ -1,12 +1,17 @@
-export type User = {
-	id: string;
+export type UserPublic = {
+	id: number;
 	email: string;
-	firstName: string;
-	lastName: string;
-	hashedPassword: string;
-	isSuperuser: boolean;
-	isStaff: boolean;
-	isActive: boolean;
-	createdAt: string;
-	updatedAt: string;
+	first_name: string;
+	last_name: string;
+	// phone_number: string;
+};
+
+export type UserRole = 'SUPERUSER' | 'ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'CUSTOMER';
+
+export type User = UserPublic & {
+	hashed_password: string;
+	role: UserRole;
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
 };

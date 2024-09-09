@@ -3,11 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { UserMe } from '@/lib/elma/actions/users';
+import type { UserPublic } from '@/lib/elma/types';
 import type React from 'react';
 
 type Props = {
-	user: UserMe;
+	user: UserPublic;
 };
 
 // TODO: zod validation

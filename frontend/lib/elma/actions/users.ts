@@ -1,15 +1,9 @@
 'use server';
 
 import axios from '@/lib/axios';
+import type { UserPublic } from '../types';
 
-export type UserMe = {
-	id: number;
-	email: string;
-	first_name: string;
-	last_name: string;
-};
-
-export const getUserMe = async (): Promise<UserMe> => {
+export const getUserMe = async (): Promise<UserPublic> => {
 	try {
 		const response = await axios.get('/v1/users/me');
 		return response.data;
