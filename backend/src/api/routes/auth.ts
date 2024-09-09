@@ -1,22 +1,15 @@
 import { pool } from '@/db';
-import { security } from '@/security';
-import { Elysia, t } from 'elysia';
-
 import { HTTPError } from '@/errors';
-import { Message } from '@/schemas/message';
-import { SignInDTO } from '@/schemas/users';
+import { Login } from '@/schemas/auth';
+import { Token } from '@/schemas/token';
+import { security } from '@/security';
 import { verifyPassword } from '@/security';
+import { Elysia } from 'elysia';
 import type { RowDataPacket } from 'mysql2/promise';
 
 // TODO: reimplement cookie set on backend?
 // what about httpOnly?, secure?, sameSite?, expires?, etc.
 // TODO: read about OAuth2.0 https://datatracker.ietf.org/doc/html/rfc6750
-
-const Token = t.Object({
-	access_token: t.String(),
-	token_type: t.Optional(t.String({ default: 'bearer' })),
-	// TODO: implement refresh token
-});
 
 // query {
 // 	grant_type: "password",
@@ -28,11 +21,6 @@ const Token = t.Object({
 
 export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 	.use(security)
-	.model({
-		'user.sign-in': SignInDTO,
-		token: Token,
-		message: Message,
-	})
 	.post(
 		'/sign',
 		async ({ jwt, body: { username, password } }) => {
@@ -70,7 +58,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			return { access_token };
 		},
 		{
-			body: 'user.sign-in',
-			response: { 200: 'token' },
+			body: Login,
+			response: { 200: Token },
 		},
 	);
