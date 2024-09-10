@@ -1,9 +1,19 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
+import { Message } from '@/schemas/message';
 import { UserRegiser } from '@/schemas/users';
-import { type UserPublic, UsersPublic } from '@/schemas/users';
-import { getPasswordHash } from '@/security';
+import {
+	UpdatePassword,
+	UserCreate,
+	UserMePublic,
+	UserMeUpdate,
+	UserPublic,
+	UserUpdate,
+	UsersPublic,
+} from '@/schemas/users';
+import { getPasswordHash, verifyPassword } from '@/security';
+
 import { Elysia, type UnwrapSchema, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
@@ -33,6 +43,8 @@ const _session = new Elysia() //
 // TODO: use HTTPError instead of set.status
 // TODO: response schema
 // TODO: signup/register schema
+
+type UserRowPacketData = RowDataPacket & UnwrapSchema<typeof UserPublic>;
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
@@ -69,9 +81,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					OFFSET ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.query<
-						(RowDataPacket & UnwrapSchema<typeof UserPublic>)[]
-					>(stmt, [limit, offset]);
+					const [results] = await conn.query<UserRowPacketData[]>(stmt, [
+						limit,
+						offset,
+					]);
 					conn.release();
 
 					return {
@@ -91,7 +104,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			)
 			.get(
 				'/:id',
-				async ({ set, params: { id } }) => {
+				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
 					const stmt = `
@@ -114,8 +127,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 					if (!results.length) {
 						conn.release();
-						set.status = 404;
-						return { message: 'User not found' };
+						throw new HTTPError(404, 'User not found');
 					}
 					conn.release();
 					return results;
@@ -145,13 +157,12 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					// check email if exists
 					const checkStmt = 'SELECT * FROM users WHERE email = ?';
 					const [checkUser] = await conn.query<RowDataPacket[]>(checkStmt, [
-						email,
+						email.toLowerCase(),
 					]);
 
 					if (checkUser.length) {
 						conn.release();
-						set.status = 400;
-						return { message: 'Email already exists' };
+						throw new HTTPError(400, 'Email already exists');
 					}
 
 					const hashedPassword = await getPasswordHash(password);
@@ -184,7 +195,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				`;
 						await conn.query<ResultSetHeader>(stmt, [
 							uuidv7(),
-							email,
+							email.toLowerCase(),
 							first_name,
 							last_name,
 							phone_number,
@@ -205,53 +216,120 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						'SELECT * FROM users WHERE email = ?',
 						[email],
 					);
+					conn.release();
 
 					// console.log(userCreated);
 					if (!userCreated.length) {
-						conn.release();
 						return { message: 'Failed to create user' };
 					}
-
-					conn.release();
 
 					set.status = 201;
 					return userCreated;
 				},
 				{
-					body: t.Object({
-						email: t.String({ format: 'email', error: 'Invalid email' }), // TODO: email format should add maxLength????
-						first_name: t.String({ minLength: 1, maxLength: 255 }),
-						last_name: t.String({ minLength: 1, maxLength: 255 }),
-						phone_number: t.String({ minLength: 1, maxLength: 20 }),
-						password: t.String({ minLength: 8, maxLength: 255 }),
-						role: t.Enum(Role), // TODO: add default ?
-						is_active: t.Boolean({ default: true }),
-					}),
+					body: UserCreate,
+					response: { 201: t.Array(UserPublic) },
 				},
 			)
 			.patch(
 				'/:id',
 				async ({
-					set,
 					params: { id },
-					body: { email, first_name, last_name, role, is_active },
+					body: {
+						email,
+						password,
+						first_name,
+						last_name,
+						phone_number,
+						role,
+						is_active,
+					},
 				}) => {
-					console.log(email, first_name, last_name, role, is_active);
+					// console.log({
+					// 	id,
+					// 	email,
+					// 	password,
+					// 	first_name,
+					// 	last_name,
+					// 	phone_number,
+					// 	role,
+					// 	is_active,
+					// });
 
 					const conn = await pool.getConnection();
 
-					// TODO: check email if exists
-
 					const stmt = 'SELECT * FROM users WHERE id = ?';
 					const [updateUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
-					// console.log(updateUser);
 					if (!updateUser.length) {
 						conn.release();
-						set.status = 404;
-						return { message: 'User not found' };
+						throw new HTTPError(404, 'User not found');
 					}
-					conn.release();
-					// TODO: do update with transaction
+
+					const columns = [];
+					const values = [];
+
+					if (email) {
+						columns.push('email = ?');
+						values.push(email.toLowerCase());
+					}
+
+					if (password) {
+						const hashedPassword = await getPasswordHash(password);
+						columns.push('hashed_password = ?');
+						values.push(hashedPassword);
+					}
+
+					if (first_name) {
+						columns.push('first_name = ?');
+						values.push(first_name);
+					}
+
+					if (last_name) {
+						columns.push('last_name = ?');
+						values.push(last_name);
+					}
+
+					if (phone_number) {
+						columns.push('phone_number = ?');
+						values.push(phone_number);
+					}
+
+					if (role) {
+						columns.push('role = ?');
+						values.push(role);
+					}
+
+					if (is_active) {
+						columns.push('is_active = ?');
+						values.push(is_active);
+					}
+
+					if (!columns.length || !values.length) {
+						conn.release();
+						throw new HTTPError(400, 'No data to update');
+					}
+
+					try {
+						await conn.beginTransaction();
+
+						const updateStmt = `
+						UPDATE
+							users
+						SET
+							${columns.join(', ')}
+						WHERE
+							id = ?;
+						`;
+
+						await conn.execute<ResultSetHeader>(updateStmt, [...values, id]);
+						await conn.commit();
+					} catch (error) {
+						// TODO: error handling
+						await conn.rollback();
+						throw error;
+					} finally {
+						conn.release();
+					}
 
 					return { message: 'User updated successfully' };
 				},
@@ -259,22 +337,13 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					params: t.Object({
 						id: t.String({ format: 'uuid' }),
 					}),
-					body: t.Object({
-						email: t.Optional(t.String({ format: 'email' })),
-						first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-						last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-						phone_number: t.Optional(
-							t.String({ minLength: 1, maxLength: 255 }),
-						),
-						// password: t.String(),
-						role: t.Optional(t.Enum(Role)),
-						is_active: t.Optional(t.Boolean()),
-					}),
+					body: UserUpdate,
+					response: { 200: Message },
 				},
 			)
 			.delete(
 				'/:id',
-				async ({ set, params: { id } }) => {
+				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
 					const stmt = 'SELECT * FROM users WHERE id = ?';
@@ -283,21 +352,21 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					// console.log(deleteUser);
 					if (!deleteUser.length) {
 						conn.release();
-						set.status = 404;
-						return { message: 'User not found' };
+						throw new HTTPError(404, 'User not found');
 					}
 
 					// delete user
 					const deleteUserStmt = 'DELETE FROM users WHERE id = ?';
 					await conn.execute<ResultSetHeader>(deleteUserStmt, [id]);
-
 					conn.release();
+
 					return { message: 'User deleted successfully' };
 				},
 				{
 					params: t.Object({
 						id: t.String({ format: 'uuid' }),
 					}),
+					response: { 200: Message },
 				},
 			),
 	)
@@ -305,15 +374,172 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		(app) =>
 			app
 				.use(currentUser()) //
-				.get('/me', async ({ user }) => {
-					// TODO: omit hashed_password, is_active, created_at, updated_at
-					return user;
-				}),
+				.get('/me', async ({ user }) => user, {
+					response: {
+						200: UserMePublic,
+					},
+				})
+				.patch(
+					'/me',
+					async ({
+						user,
+						body: { email, first_name, last_name, phone_number },
+					}) => {
+						console.log({
+							email,
+							first_name,
+							last_name,
+							phone_number,
+						});
+						// TODO: omit hashed_password, is_active, created_at, updated_at
+						const conn = await pool.getConnection();
+
+						const columns = [];
+						const values = [];
+
+						if (email) {
+							columns.push('email = ?');
+							values.push(email.toLowerCase());
+						}
+
+						if (first_name) {
+							columns.push('first_name = ?');
+							values.push(first_name);
+						}
+
+						if (last_name) {
+							columns.push('last_name = ?');
+							values.push(last_name);
+						}
+
+						if (phone_number) {
+							columns.push('phone_number = ?');
+							values.push(phone_number);
+						}
+
+						if (!columns.length || !values.length) {
+							conn.release();
+							throw new HTTPError(400, 'No data to update');
+						}
+
+						try {
+							await conn.beginTransaction();
+
+							const updateStmt = `
+							UPDATE
+								users
+							SET
+								${columns.join(', ')}
+							WHERE
+								id = ?;
+							`;
+
+							await conn.execute<ResultSetHeader>(updateStmt, [
+								...values,
+								user.id,
+							]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: 'User updated successfully' };
+					},
+					{
+						body: UserMeUpdate,
+						response: { 200: Message },
+					},
+				)
+				.patch(
+					'/me/password',
+					async ({ user, body: { current_password, new_password } }) => {
+						const passwordIsValid = await verifyPassword(
+							current_password,
+							user.hashed_password,
+						);
+
+						if (!passwordIsValid) {
+							throw new HTTPError(400, 'Invalid password');
+						}
+
+						if (current_password === new_password) {
+							throw new HTTPError(400, 'New password must be different');
+						}
+
+						const conn = await pool.getConnection();
+
+						const hashedPassword = await getPasswordHash(new_password);
+
+						try {
+							await conn.beginTransaction();
+							const stmt = `
+							UPDATE
+								users
+							SET
+								hashed_password = ?
+							WHERE
+								id = ?;
+							`;
+							await conn.execute<ResultSetHeader>(stmt, [
+								hashedPassword,
+								user.id,
+							]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: 'User updated successfully' };
+					},
+					{
+						body: UpdatePassword,
+						response: { 200: Message },
+					},
+				)
+				.delete(
+					'/me',
+					async ({ user }) => {
+						if (user.role === Role.SUPERUSER) {
+							throw new HTTPError(
+								403,
+								'Super user are not allowed to delete themselves',
+							);
+						}
+
+						const conn = await pool.getConnection();
+
+						try {
+							await conn.beginTransaction();
+							const stml = 'DELETE FROM users WHERE id = ?';
+							await conn.execute<ResultSetHeader>(stml, [user.id]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: 'User deleted successfully' };
+					},
+					{
+						response: { 200: Message },
+					},
+				),
 		// TODO: me update password
 	)
 	.post(
 		'/signup',
-		async ({ body }) => {
+		async ({ set, body }) => {
 			const conn = await pool.getConnection();
 
 			const stmt = 'SELECT * FROM users WHERE email = ?';
@@ -367,15 +593,11 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				conn.release();
 			}
 
+			set.status = 201;
 			return { message: 'User created successfully' };
 		},
 		{
 			body: UserRegiser,
-			// body: t.Object({
-			// 	first_name: t.String({ minLength: 1, maxLength: 255 }),
-			// 	last_name: t.String({ minLength: 1, maxLength: 255 }),
-			// 	email: t.String({ format: 'email' }),
-			// 	password: t.String({ minLength: 8, maxLength: 255 }),
-			// }),
+			response: { 201: Message },
 		},
 	);
