@@ -1,8 +1,9 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
+import type { UserPublic } from '@/schemas/users';
 import { security } from '@/security';
 import { bearer } from '@elysiajs/bearer';
-import { Elysia } from 'elysia';
+import { Elysia, type UnwrapSchema } from 'elysia';
 import type { RowDataPacket } from 'mysql2/promise';
 
 async function findUserById(userId: string) {
@@ -28,18 +29,6 @@ enum Role {
 	CUSTOMER = 'CUSTOMER',
 }
 
-type UserDataPacket = RowDataPacket & {
-	id: string;
-	email: string;
-	first_name: string;
-	last_name: string;
-	hashed_password: string;
-	role: string;
-	is_active: number;
-	created_at: string;
-	updated_at: string;
-};
-
 // TODO: remove duplicate code
 
 export const currentUser = (_role?: UserRole) =>
@@ -51,16 +40,16 @@ export const currentUser = (_role?: UserRole) =>
 				set.headers['WWW-Authenticate'] = 'Bearer';
 				throw new HTTPError(401, 'Unauthorized');
 			}
+
 			const data = await jwt.verify(bearer);
 			if (!data) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
 			const conn = await pool.getConnection();
 
-			const [user_results] = await conn.query<UserDataPacket[]>(
-				'SELECT * FROM users WHERE id=?',
-				[data.sub],
-			);
+			const [user_results] = await conn.query<
+				(RowDataPacket & UnwrapSchema<typeof UserPublic>)[]
+			>('SELECT * FROM users WHERE id=?', [data.sub]);
 			conn.release();
 
 			if (!user_results.length) {
