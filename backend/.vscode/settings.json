@@ -1,4 +1,8 @@
 {
+	"workbench.editor.customLabels.patterns": {
+		"**/src/**/{schemas,models,routes}/**/*.ts": "${dirname} - ${filename}.ts"
+	},
+
 	// Editor settings
 	"editor.formatOnSave": true,
 
