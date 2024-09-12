@@ -1,13 +1,13 @@
 'use client';
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '../ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 const formSchema = z.object({
 	current_password: z.string().min(1).max(255),
@@ -37,20 +37,6 @@ export default function NewPasswordForm() {
 				<CardTitle className="text-2xl">เปลี่ยนรหัสผ่าน</CardTitle>
 			</CardHeader>
 			<CardContent className="grid gap-4">
-				{/* TODO: Form hare */}
-				{/* <div className="grid w-full max-w-xs items-center gap-1.5">
-					<Label htmlFor="email">รหัสผ่าน</Label>
-					<Input type="email" id="email" />
-				</div>
-				<div className="grid w-full max-w-xs items-center gap-1.5">
-					<Label htmlFor="email">รหัสผ่านใหม่</Label>
-					<Input type="email" id="email" />
-				</div>
-				<div className="grid w-full max-w-xs items-center gap-1.5">
-					<Label htmlFor="email">ยืนยันรหัสผ่านใหม่</Label>
-					<Input type="email" id="email" />
-				</div> */}
-
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 						<FormField
@@ -98,11 +84,6 @@ export default function NewPasswordForm() {
 					</form>
 				</Form>
 			</CardContent>
-			<CardFooter>
-				{/* <Button type="submit" className="w-20">
-					บันทึก
-				</Button> */}
-			</CardFooter>
 		</Card>
 	);
 }
