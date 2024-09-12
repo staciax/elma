@@ -22,7 +22,7 @@ export function LoginForm() {
 
 async function Page() {
 	return (
-		<main className="container flex ">
+		<main className="container flex h-[80vh] items-center justify-center">
 			<LoginForm />
 		</main>
 	);

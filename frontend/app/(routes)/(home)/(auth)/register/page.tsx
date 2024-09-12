@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export function RegisterForm() {
 	return (
-		<Card className="mx-auto max-w-sm">
+		<Card className="mx-auto w-full max-w-sm">
 			<CardHeader>
 				<CardTitle className="text-xl">สมัครสมาชิก</CardTitle>
 				<CardDescription>กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ของคุณ</CardDescription>
@@ -22,7 +22,7 @@ export function RegisterForm() {
 
 function Page() {
 	return (
-		<main className="container flex ">
+		<main className="container flex h-[80vh] items-center justify-center">
 			{/* <SignUpForm /> */}
 			<RegisterForm />
 		</main>
