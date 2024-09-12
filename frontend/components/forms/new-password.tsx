@@ -67,7 +67,7 @@ export default function NewPasswordForm() {
 						/>
 						<FormField
 							control={form.control}
-							name="new_password"
+							name="confirm_new_password"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>ยืนยันรหัสผ่านใหม่</FormLabel>
