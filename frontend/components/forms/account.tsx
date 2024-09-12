@@ -1,14 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import type { UserPublic } from '@/lib/elma/types';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 const formSchema = z.object({
 	first_name: z.string(),
@@ -108,11 +108,6 @@ export default function AccountForm({ user }: Props) {
 					</form>
 				</Form>
 			</CardContent>
-			{/* <CardFooter>
-					<Button type="submit" className="w-20">
-						บันทึก
-					</Button>
-				</CardFooter> */}
 		</Card>
 	);
 }
