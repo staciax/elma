@@ -1,5 +1,6 @@
 // import AccountForm from './account-form';
-import AccountContent from '@/components/forms/account';
+import AccountForm from '@/components/forms/account';
+import NewPasswordForm from '@/components/forms/new-password';
 import { Card } from '@/components/ui/card';
 import { getUserMe } from '@/lib/elma/actions/users';
 import type { Metadata } from 'next';
@@ -32,8 +33,10 @@ export default async function Page() {
 					</Link>
 				</div>
 			</nav>
-			{/* TODO: form update */}
-			<AccountContent user={user} />
+			<section className="grid w-full gap-4 bg-[rgba(144,200,75,0.1)]">
+				<AccountForm user={user} />
+				<NewPasswordForm />
+			</section>
 		</main>
 	);
 }
