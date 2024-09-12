@@ -1,15 +1,54 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
+import { type ProductRowPacketData, ProductsPublic } from '@/schemas/products';
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
-
 // TODO: check sql injection
 // TODO: transaction for insert, update, delete
 // TODO: remove duplicate code
 // TODO: snake_case to camelCase (stmt)
 // TOOD: what t.Partial do?
+
+const transformProductRows = (rows: ProductRowPacketData[]) => {
+	return rows.map((row) => {
+		// publisher
+		const publisher =
+			row.publisher_id && row.publisher_name
+				? {
+						id: row.publisher_id,
+						name: row.publisher_name,
+					}
+				: null;
+		row.publisher_id = row.publisher_name = undefined;
+
+		// category
+		const category =
+			row.category_id && row.category_name
+				? {
+						id: row.category_id,
+						name: row.category_name,
+					}
+				: null;
+		row.category_id = row.category_name = undefined;
+
+		// authors
+		const authors = row.authors
+			? row.authors.split(',').map((author) => {
+					const [id, first_name, last_name] = author.split(';');
+					return { id: id, first_name, last_name };
+				})
+			: null;
+
+		return {
+			...row,
+			publisher,
+			category,
+			authors,
+		};
+	});
+};
 
 export const router = new Elysia({
 	prefix: '/products',
@@ -31,38 +70,45 @@ export const router = new Elysia({
 
 			const product_stmt = `
 			SELECT
-				product.id AS product_id,
-				product.title AS product_title,
-				product.description AS product_description,
-				product.isbn AS product_isbn,
-				-- product.price AS product_price,
-				product.price AS product_ebook_price,
-				product.price AS product_paper_price,
-				product.published_date AS product_published_date,
+				products.id AS id,
+				products.title AS title,
+				products.description AS description,
+				products.isbn AS isbn,
+				products.price AS ebook_price,
+				products.price AS paper_price,
+				products.published_date AS published_date,
 
 				publisher.id AS publisher_id,
 				publisher.name AS publisher_name,
 
 				category.id AS category_id,
-				category.name AS category_name
+				category.name AS category_name,
+
+				GROUP_CONCAT(CONCAT(author.id, ';', author.first_name, ';' ,author.last_name)) AS authors
 			FROM
-				products AS product
+				products
 			LEFT JOIN
-				publishers AS publisher ON product.publisher_id = publisher.id
+				publishers AS publisher ON products.publisher_id = publisher.id
 			LEFT JOIN
-				categories AS category ON product.category_id = category.id
-			LIMIT ? OFFSET ?
+				categories AS category ON products.category_id = category.id
+			LEFT JOIN
+				product_authors AS product_author ON products.id = product_author.product_id
+			LEFT JOIN
+				authors AS author ON product_author.author_id = author.id
+			GROUP BY products.id
+			LIMIT ? OFFSET ?;
 			`;
-			// TODO: join product_authors, authors, product_images
-			// and then group by?
-			const [product_results] = await conn.query<RowDataPacket[]>(
-				product_stmt,
-				[limit, offset],
-			);
+			const [rows] = await conn.query<ProductRowPacketData[]>(product_stmt, [
+				limit,
+				offset,
+			]);
 			conn.release();
+
+			const results = transformProductRows(rows);
+
 			return {
 				count: count,
-				data: product_results,
+				data: results,
 			};
 		},
 		{
@@ -70,6 +116,10 @@ export const router = new Elysia({
 				limit: t.Optional(t.Integer({ minimum: 1, default: 100 })),
 				offset: t.Optional(t.Integer({ minimum: 0, default: 0 })),
 			}),
+			response: {
+				200: ProductsPublic,
+			},
+			// TODO: response
 		},
 	)
 	.get(
