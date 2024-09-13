@@ -10,6 +10,8 @@ export const ProductPublic = t.Object({
 	title: t.String(),
 	description: t.String(),
 	isbn: t.String(),
+	price: t.String(),
+	physical_price: t.Nullable(t.String()),
 	published_date: t.Date({ format: 'date-time' }),
 	publisher: t.Nullable(PublisherPublic),
 	category: t.Nullable(CategoryPublic),
@@ -22,10 +24,4 @@ export const ProductsPublic = t.Object({
 });
 
 export type ProductRowPacketData = RowDataPacket &
-	UnwrapSchema<typeof ProductPublic> & {
-		authors: string;
-		publisher_id?: string;
-		publisher_name?: string;
-		category_id?: string;
-		category_name?: string;
-	};
+	UnwrapSchema<typeof ProductPublic>;

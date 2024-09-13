@@ -4,8 +4,7 @@ import type { RowDataPacket } from 'mysql2';
 
 export const AuthorPublic = t.Object({
 	id: t.String({ format: 'uuid' }),
-	first_name: t.String(),
-	last_name: t.String(),
+	name: t.String(),
 });
 
 export const AuthorsPublic = t.Object({
