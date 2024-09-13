@@ -69,11 +69,12 @@ export default async function Page() {
 										<TableHead className="hidden w-[100px] sm:table-cell">
 											<span className="sr-only">Image</span>
 										</TableHead>
-										<TableHead>Name</TableHead>
-										<TableHead>Status</TableHead>
-										<TableHead className="hidden md:table-cell">Price</TableHead>
-										<TableHead className="hidden md:table-cell">Total Sales</TableHead>
-										<TableHead className="hidden md:table-cell">Created at</TableHead>
+										<TableHead>ชื่อ</TableHead>
+										<TableHead>ผู้แต่ง</TableHead>
+										<TableHead className="hidden md:table-cell">ราคา</TableHead>
+										<TableHead className="hidden md:table-cell">สำนักพิมพ์</TableHead>
+										{/* <TableHead className="hidden md:table-cell">อัพเดท</TableHead> */}
+										<TableHead className="hidden md:table-cell">สถานะ</TableHead>
 										<TableHead>
 											<span className="sr-only">Actions</span>
 										</TableHead>
@@ -93,11 +94,34 @@ export default async function Page() {
 											</TableCell>
 											<TableCell className="font-medium">{product.title}</TableCell>
 											<TableCell>
-												<Badge variant="outline">Draft</Badge>
+												{/* <Badge variant="outline">Draft</Badge> */}
+												<div className="grid gap-1">
+													{product.authors ? (
+														product.authors.map((author) => (
+															<span
+																key={author.id}
+																className="inline-block rounded-full bg-muted px-2 py-1 text-muted-foreground text-xs"
+															>
+																{author.name}
+															</span>
+														))
+													) : (
+														<>-</>
+													)}
+												</div>
 											</TableCell>
-											<TableCell className="hidden md:table-cell">{product.price}</TableCell>
-											<TableCell className="hidden md:table-cell">25</TableCell>
-											<TableCell className="hidden md:table-cell">2023-07-12 10:42 AM</TableCell>
+
+											<TableCell className="hidden md:table-cell">&#3647;{product.price}</TableCell>
+											<TableCell className="hidden md:table-cell">
+												{product.publisher ? <>{product.publisher.name}</> : <>-</>}
+											</TableCell>
+											<TableCell className="hidden md:table-cell">
+												{product.is_active ? (
+													<Badge className="bg-green-500">Active</Badge>
+												) : (
+													<Badge variant={'secondary'}>Inactive</Badge>
+												)}
+											</TableCell>
 											<TableCell>
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
