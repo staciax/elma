@@ -51,7 +51,7 @@ export const UserCreate = t.Object({
 	is_active: t.Optional(t.Boolean({ default: true })),
 });
 
-export const UserUpdate = t.Partial(UserCreate);
+export const UserUpdate = t.Partial(UserCreate); // TODO remove default values
 
 export const UserMePublic = t.Omit(UserPublic, [
 	'hashed_password',
