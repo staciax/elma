@@ -15,7 +15,8 @@ export const router = new Elysia({
 			const conn = await pool.getConnection();
 			const stmt = `
 			SELECT
-				*
+				authors.id AS id,
+				authors.name AS name
 			FROM
 				authors
 			LIMIT ?
@@ -39,7 +40,8 @@ export const router = new Elysia({
 
 			const stmt = `
 			SELECT
-				*
+				authors.id AS id,
+				authors.name AS name
 			FROM
 				authors
 			WHERE
@@ -63,14 +65,13 @@ export const router = new Elysia({
 	)
 	.post(
 		'/',
-		async ({ set, body: { first_name, last_name } }) => {
+		async ({ set, body: { name } }) => {
 			const conn = await pool.getConnection();
 			const stmt = `
 			INSERT INTO authors
 			(	
 				id,
-				first_name,
-				last_name
+				name
 			)
 			VALUES
 			(	
@@ -79,11 +80,7 @@ export const router = new Elysia({
 				?
 			);
 			`;
-			await conn.query<ResultSetHeader>(stmt, [
-				uuidv7(),
-				first_name,
-				last_name,
-			]);
+			await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
 			conn.release();
 
 			set.status = 201;
@@ -91,15 +88,14 @@ export const router = new Elysia({
 		},
 		{
 			body: t.Object({
-				first_name: t.String({ minLength: 1, maxLength: 255 }),
-				last_name: t.String({ minLength: 1, maxLength: 255 }),
+				name: t.String({ minLength: 1, maxLength: 255 }),
 			}),
 		},
 	)
 	.patch(
 		'/:id',
-		async ({ set, params: { id }, body: { first_name, last_name } }) => {
-			console.log(first_name, last_name);
+		async ({ set, params: { id }, body: { name } }) => {
+			console.log(name);
 			const conn = await pool.getConnection();
 			const authorStmt = `
 			SELECT
@@ -128,8 +124,7 @@ export const router = new Elysia({
 				id: t.String({ format: 'uuid' }),
 			}),
 			body: t.Object({
-				first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-				last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+				name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
 			}),
 		},
 	)

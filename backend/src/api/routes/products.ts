@@ -5,50 +5,12 @@ import { type ProductRowPacketData, ProductsPublic } from '@/schemas/products';
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
+
 // TODO: check sql injection
 // TODO: transaction for insert, update, delete
 // TODO: remove duplicate code
 // TODO: snake_case to camelCase (stmt)
-// TOOD: what t.Partial do?
-
-const transformProductRows = (rows: ProductRowPacketData[]) => {
-	return rows.map((row) => {
-		// publisher
-		const publisher =
-			row.publisher_id && row.publisher_name
-				? {
-						id: row.publisher_id,
-						name: row.publisher_name,
-					}
-				: null;
-		row.publisher_id = row.publisher_name = undefined;
-
-		// category
-		const category =
-			row.category_id && row.category_name
-				? {
-						id: row.category_id,
-						name: row.category_name,
-					}
-				: null;
-		row.category_id = row.category_name = undefined;
-
-		// authors
-		const authors = row.authors
-			? row.authors.split(',').map((author) => {
-					const [id, first_name, last_name] = author.split(';');
-					return { id: id, first_name, last_name };
-				})
-			: null;
-
-		return {
-			...row,
-			publisher,
-			category,
-			authors,
-		};
-	});
-};
+// TODO: what t.Partial do?
 
 export const router = new Elysia({
 	prefix: '/products',
@@ -60,6 +22,10 @@ export const router = new Elysia({
 		'/',
 		async ({ query: { limit, offset } }) => {
 			const conn = await pool.getConnection();
+
+			await conn.beginTransaction();
+
+			// TODO: set isolation level
 
 			const count_stmt = 'SELECT COUNT(*) AS count FROM products';
 			const [count_results] = await conn.query<RowDataPacket[]>(count_stmt);
@@ -74,17 +40,32 @@ export const router = new Elysia({
 				products.title AS title,
 				products.description AS description,
 				products.isbn AS isbn,
-				products.price AS ebook_price,
-				products.price AS paper_price,
+				products.price AS price,
+				products.physical_price AS physical_price,
 				products.published_date AS published_date,
 
-				publisher.id AS publisher_id,
-				publisher.name AS publisher_name,
+				IF(publisher.id IS NULL, NULL,
+					JSON_OBJECT(
+						'id', publisher.id,
+						'name', publisher.name
+					)
+				) AS publisher,
 
-				category.id AS category_id,
-				category.name AS category_name,
+				IF(category.id IS NULL, NULL, 
+					JSON_OBJECT(
+						'id', category.id,
+						'name', category.name
+					)
+				) AS category, 
 
-				GROUP_CONCAT(CONCAT(author.id, ';', author.first_name, ';' ,author.last_name)) AS authors
+				IF(COUNT(author.id) = 0, NULL,
+					JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'id', author.id,
+							'name', author.name
+						)
+					)
+				) AS authors
 			FROM
 				products
 			LEFT JOIN
@@ -98,13 +79,13 @@ export const router = new Elysia({
 			GROUP BY products.id
 			LIMIT ? OFFSET ?;
 			`;
-			const [rows] = await conn.query<ProductRowPacketData[]>(product_stmt, [
+			const [results] = await conn.query<ProductRowPacketData[]>(product_stmt, [
 				limit,
 				offset,
 			]);
-			conn.release();
 
-			const results = transformProductRows(rows);
+			await conn.commit();
+			conn.release();
 
 			return {
 				count: count,
@@ -113,13 +94,12 @@ export const router = new Elysia({
 		},
 		{
 			query: t.Object({
-				limit: t.Optional(t.Integer({ minimum: 1, default: 100 })),
-				offset: t.Optional(t.Integer({ minimum: 0, default: 0 })),
+				limit: t.Optional(t.Number({ minimum: 1, default: 100 })),
+				offset: t.Optional(t.Number({ minimum: 0, default: 0 })),
 			}),
 			response: {
 				200: ProductsPublic,
 			},
-			// TODO: response
 		},
 	)
 	.get(
@@ -127,30 +107,50 @@ export const router = new Elysia({
 		async ({ params: { id } }) => {
 			const conn = await pool.getConnection();
 			const stmt = `
-			SELECT
-				product.id AS product_id,
-				product.title AS product_title,
-				product.description AS product_description,
-				product.isbn AS product_isbn,
-				-- product.price AS product_price,
-				product.price AS product_ebook_price,
-				product.price AS product_paper_price,
-				product.published_date AS product_published_date,
+						SELECT
+				products.id AS id,
+				products.title AS title,
+				products.description AS description,
+				products.isbn AS isbn,
+				products.price AS price,
+				products.physical_price AS physical_price,
+				products.published_date AS published_date,
 
-				publisher.id AS publisher_id,
-				publisher.name AS publisher_name,
+				IF(publisher.id IS NULL, NULL,
+					JSON_OBJECT(
+						'id', publisher.id,
+						'name', publisher.name
+					)
+				) AS publisher,
 
-				category.id AS category_id,
-				category.name AS category_name
+				IF(category.id IS NULL, NULL, 
+					JSON_OBJECT(
+						'id', category.id,
+						'name', category.name
+					)
+				) AS category, 
+
+				IF(COUNT(author.id) = 0, NULL,
+					JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'id', author.id,
+							'name', author.name
+						)
+					)
+				) AS authors
 			FROM
-				products AS product
+				products
 			LEFT JOIN
-				publishers AS publisher ON product.publisher_id = publisher.id
+				publishers AS publisher ON products.publisher_id = publisher.id
 			LEFT JOIN
-				categories AS category ON product.category_id = category.id
-			WHERE product.id = ?
+				categories AS category ON products.category_id = category.id
+			LEFT JOIN
+				product_authors AS product_author ON products.id = product_author.product_id
+			LEFT JOIN
+				authors AS author ON product_author.author_id = author.id
+			WHERE products.id = ?;
 			`;
-			// TODO: join product_authors, authors, product_images
+			// TODO: join product_images
 
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 			conn.release();
@@ -182,16 +182,10 @@ export const router = new Elysia({
 						category_id,
 					},
 				}) => {
-					// TODO: remove hard-coded values
 					// TODO: make function for get publisher, category, series, authors
-
+					// TODO: begin transaction
 					const conn = await pool.getConnection();
 
-					// category
-					// const publisher_id = '0191896f-047a-7332-8f48-5ba16d59404f'; //body.publisher_id;
-					// if (!publisher_id) {
-					// 	throw new HTTPError(400, 'publisher');
-					// }
 					const publisher_stmt = `
 					SELECT
 						*
@@ -207,11 +201,6 @@ export const router = new Elysia({
 						throw new HTTPError(404, 'publisher');
 					}
 
-					// category
-					// const category_id = '02a06798-62e6-11ef-877e-0e4d59d62537'; //body.category_id;
-					// if (!category_id) {
-					// 	throw new HTTPError(400, 'category');
-					// }
 					const category_stmt = `
 					SELECT
 						*
@@ -272,11 +261,10 @@ export const router = new Elysia({
 						description: t.String({ minLength: 1, maxLength: 65535 }), // NOTE: mysql maximum length of TEXT is 65,535
 						isbn: t.String({ minLength: 13, maxLength: 13 }), // TODO: isbn how many minl
 						price: t.Number({ minimum: 0 }), // TODO: maximum ???
+						psysical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
 						published_date: t.Date({ format: 'date-time' }),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),
-						// series_id: t.Optional(t.String()),
-						// author_ids: t.Optional(t.Array(t.String())),
 					}),
 				},
 			)
@@ -284,6 +272,7 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
+
 					const product_stmt = `
 					SELECT
 						*
@@ -315,6 +304,7 @@ export const router = new Elysia({
 						description: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
 						isbn: t.Optional(t.String({ minLength: 13, maxLength: 13 })),
 						price: t.Optional(t.Number({ minimum: 0 })),
+						psysical_price: t.Optional(t.Number({ minimum: 0 })),
 						published_date: t.Optional(t.Date({ format: 'date-time' })),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),
