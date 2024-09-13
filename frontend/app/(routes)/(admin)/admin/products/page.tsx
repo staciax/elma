@@ -81,7 +81,7 @@ export default async function Page() {
 								</TableHeader>
 								<TableBody>
 									{result.data.map((product) => (
-										<TableRow key={product.product_id}>
+										<TableRow key={product.id}>
 											<TableCell className="hidden sm:table-cell">
 												<Image
 													alt="Product image"
@@ -91,11 +91,11 @@ export default async function Page() {
 													width="64"
 												/>
 											</TableCell>
-											<TableCell className="font-medium">{product.product_title}</TableCell>
+											<TableCell className="font-medium">{product.title}</TableCell>
 											<TableCell>
 												<Badge variant="outline">Draft</Badge>
 											</TableCell>
-											<TableCell className="hidden md:table-cell">{product.product_ebook_price}</TableCell>
+											<TableCell className="hidden md:table-cell">{product.price}</TableCell>
 											<TableCell className="hidden md:table-cell">25</TableCell>
 											<TableCell className="hidden md:table-cell">2023-07-12 10:42 AM</TableCell>
 											<TableCell>
