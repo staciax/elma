@@ -1,16 +1,18 @@
+import type { AuthorPublic } from './authors';
+import type { CategoryPublic } from './categories';
+import type { PublisherPublic } from './publishers';
+
 export type ProductPublic = {
-	product_id: string;
-	product_title: string;
-	product_description: string;
-	product_isbn: string;
-	product_ebook_price: number;
-	product_paper_price: number;
-	// product_ebook_file: string;
+	id: string;
+	title: string;
+	description: string;
+	isbn: string;
+	price: number;
+	physical_price: number;
 	published_date: string;
-	publisher_id?: string;
-	publisher_name?: string;
-	category_id?: string;
-	category_name?: string;
+	category: CategoryPublic | null;
+	publisher: PublisherPublic | null;
+	authors: AuthorPublic[] | null;
 };
 
 export type ProductsPublic = {
