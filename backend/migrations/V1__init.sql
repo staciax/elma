@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS products (
     price DECIMAL(10, 2) NOT NULL,
     physical_price DECIMAL(10, 2) NULL,
     published_date DATETIME(3) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     publisher_id VARCHAR(36) NULL,
     category_id VARCHAR(36) NULL,
 
