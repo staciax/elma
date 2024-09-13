@@ -6,7 +6,7 @@ import { bearer } from '@elysiajs/bearer';
 import { Elysia, type UnwrapSchema } from 'elysia';
 import type { RowDataPacket } from 'mysql2/promise';
 
-async function findUserById(userId: string) {
+async function _findUserById(_userId: string) {
 	// return prisma.user.findUnique({
 	// 	where: {
 	// 		id: userId,
@@ -21,7 +21,7 @@ type UserRole = {
 	isSuperuser?: boolean;
 };
 
-enum Role {
+enum _Role {
 	SUPERUSER = 'SUPERUSER',
 	ADMIN = 'ADMIN',
 	MANAGER = 'MANAGER',

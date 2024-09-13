@@ -11,14 +11,6 @@ import type { RowDataPacket } from 'mysql2/promise';
 // what about httpOnly?, secure?, sameSite?, expires?, etc.
 // TODO: read about OAuth2.0 https://datatracker.ietf.org/doc/html/rfc6750
 
-// query {
-// 	grant_type: "password",
-// 	username: "test@gmail.com",
-// 	password: "test@gmail.com",
-// 	client_id: "",
-// 	scope: "",
-//   }
-
 export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 	.use(security)
 	.post(
