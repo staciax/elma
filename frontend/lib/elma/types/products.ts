@@ -10,6 +10,7 @@ export type ProductPublic = {
 	price: number;
 	physical_price: number;
 	published_date: string;
+	is_active: boolean;
 	category: CategoryPublic | null;
 	publisher: PublisherPublic | null;
 	authors: AuthorPublic[] | null;
