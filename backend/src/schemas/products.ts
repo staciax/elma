@@ -13,6 +13,7 @@ export const ProductPublic = t.Object({
 	price: t.String(),
 	physical_price: t.Nullable(t.String()),
 	published_date: t.Date({ format: 'date-time' }),
+	is_active: t.Integer(),
 	publisher: t.Nullable(PublisherPublic),
 	category: t.Nullable(CategoryPublic),
 	authors: t.Nullable(t.Array(AuthorPublic)),

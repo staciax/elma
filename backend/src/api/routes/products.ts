@@ -43,6 +43,7 @@ export const router = new Elysia({
 				products.price AS price,
 				products.physical_price AS physical_price,
 				products.published_date AS published_date,
+				products.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
 					JSON_OBJECT(
@@ -115,6 +116,7 @@ export const router = new Elysia({
 				products.price AS price,
 				products.physical_price AS physical_price,
 				products.published_date AS published_date,
+				products.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
 					JSON_OBJECT(
@@ -178,6 +180,7 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						is_active,
 						publisher_id,
 						category_id,
 					},
@@ -225,10 +228,12 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						is_active
 						publisher_id,
 						category_id
 					)
 					VALUES (
+						?,
 						?,
 						?,
 						?,
@@ -247,6 +252,7 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						is_active,
 						publisher_id,
 						category_id,
 					]);
@@ -263,6 +269,7 @@ export const router = new Elysia({
 						price: t.Number({ minimum: 0 }), // TODO: maximum ???
 						psysical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
 						published_date: t.Date({ format: 'date-time' }),
+						is_active: t.Optional(t.Boolean({ default: true })),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),
 					}),
@@ -306,6 +313,7 @@ export const router = new Elysia({
 						price: t.Optional(t.Number({ minimum: 0 })),
 						psysical_price: t.Optional(t.Number({ minimum: 0 })),
 						published_date: t.Optional(t.Date({ format: 'date-time' })),
+						is_active: t.Optional(t.Boolean({ default: true })),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),
 					}),
