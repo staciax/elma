@@ -14,18 +14,18 @@ const productAuthors = [
 ];
 // const productImages = [];
 
-function isbnHyphen(isbn: string) {
-	return isbn.replace(/(\d{3})(\d{1})(\d{4})(\d{4})(\d{1})/, '$1-$2-$3-$4-$5');
-}
+// function isbnHyphen(isbn: string) {
+// 	return isbn.replace(/(\d{3})(\d{1})(\d{4})(\d{4})(\d{1})/, '$1-$2-$3-$4-$5');
+// }
 
-function priceDiffPercent(paperPrice: number, ebookPrice: number) {
-	const diff = paperPrice - ebookPrice;
-	const diffPercent = (diff / paperPrice) * 100;
-	if (Number.isInteger(diffPercent)) {
-		return diffPercent;
-	}
-	return diffPercent.toFixed(2);
-}
+// function priceDiffPercent(paperPrice: number, ebookPrice: number) {
+// 	const diff = paperPrice - ebookPrice;
+// 	const diffPercent = (diff / paperPrice) * 100;
+// 	if (Number.isInteger(diffPercent)) {
+// 		return diffPercent;
+// 	}
+// 	return diffPercent.toFixed(2);
+// }
 
 type Props = {
 	product: ProductPublic;
@@ -34,7 +34,7 @@ type Props = {
 export default function ProductDetail({ product }: Props) {
 	const handleAddToCart = async () => {
 		try {
-			await addProductToCartMe(product.product_id);
+			await addProductToCartMe(product.id);
 			toast.success('เพิ่มสินค้าลงตะกร้าสำเร็จ', { duration: 5000 });
 		} catch (error) {
 			toast.error('เพิ่มสินค้าลงตะกร้าไม่สำเร็จ', { duration: 5000 });
@@ -57,8 +57,8 @@ export default function ProductDetail({ product }: Props) {
 			</div>
 			<div className="flex w-full flex-col md:w-2/4">
 				<div>
-					<h3 className="font-semibold text-[#414141]">{product.category_name}</h3>
-					<h3 className="mt-4 font-semibold text-2xl">{product.product_title}</h3>
+					<h3 className="font-semibold text-[#414141]">product.category_name</h3>
+					<h3 className="mt-4 font-semibold text-2xl">product.product_title</h3>
 					<h3 className="mt-4">
 						โดย{' '}
 						<span className="font-semibold text-green-500">
@@ -72,7 +72,7 @@ export default function ProductDetail({ product }: Props) {
 						</span>
 					</h3>
 					<h3 className="mt-4">
-						<span className="mr-4 font-semibold text-2xl text-red-500">{product.product_ebook_price} บาท</span>
+						<span className="mr-4 font-semibold text-2xl text-red-500">{product.price} บาท</span>
 					</h3>
 				</div>
 				<hr className="my-8" />
@@ -88,13 +88,13 @@ export default function ProductDetail({ product }: Props) {
 				<hr className="my-8" />
 				<div>
 					<h3 className="font-ligh text-[#707070]">เรื่องย่อ</h3>
-					<h3 className="mt-2 font-light text-[#707070]">{product.product_description}</h3>
+					<h3 className="mt-2 font-light text-[#707070]">{product.description}</h3>
 				</div>
 				<hr className="my-8" />
 				<div className="mt-4 flex">
 					<div className="w-2/4">
 						<h3 className="font-ligh text-[#707070]">สำนักพิมพ์</h3>
-						<h3 className="font-light">{product.publisher_name}</h3>
+						<h3 className="font-light">product.publisher_name</h3>
 						{/* TODO: link to publisher */}
 					</div>
 
@@ -111,7 +111,7 @@ export default function ProductDetail({ product }: Props) {
 					</div>
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">ISBN</h3>
-						<h3 className="font-light">{isbnHyphen(product.product_isbn)}</h3>
+						<h3 className="font-light">{product.isbn}</h3>
 						{/* TODO: context copy and copy without hyphen */}
 					</div>
 				</div>
@@ -123,8 +123,9 @@ export default function ProductDetail({ product }: Props) {
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">ราคาหน้าปก</h3>
 						<h3 className="font-light">
-							{product.product_paper_price} บาท (ประหยัด{' '}
-							{priceDiffPercent(product.product_paper_price, product.product_ebook_price)}%)
+							{product.physical_price ? <>{product.physical_price} บาท</> : '-'}
+							{/* {product.price} บาท (ประหยัด{' '}
+							{priceDiffPercent(product.price, product.product_ebook_price)}%) */}
 						</h3>
 					</div>
 				</div>
