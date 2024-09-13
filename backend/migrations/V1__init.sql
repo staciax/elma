@@ -8,8 +8,9 @@
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) NOT NULL,
     email VARCHAR(320) NOT NULL,
-    first_name VARCHAR(255) NULL,
+    fisrt_name VARCHAR(255) NULL,
     last_name VARCHAR(255) NULL,
+    -- display_name VARCHAR(255) NULL,
     phone_number VARCHAR(20) NULL,
     hashed_password VARCHAR(60) NOT NULL,
     role ENUM('SUPERUSER', 'ADMIN', 'MANAGER', 'EMPLOYEE', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
@@ -41,20 +42,19 @@ CREATE TABLE IF NOT EXISTS categories (
 
 CREATE TABLE IF NOT EXISTS authors (
     id VARCHAR(36) NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
 
     PRIMARY KEY (id)
 );
 
 -- TODO: ISBN is unique right?
--- TODO: physical price and e-book price
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     isbn VARCHAR(13) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
+    physical_price DECIMAL(10, 2) NULL,
     published_date DATETIME(3) NOT NULL,
     publisher_id VARCHAR(36) NULL,
     category_id VARCHAR(36) NULL,
