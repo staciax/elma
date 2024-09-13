@@ -210,7 +210,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						throw error;
 					}
 
-					// refresh user created
+					// TODO: refresh user created
 
 					const [userCreated] = await conn.query<RowDataPacket[]>(
 						'SELECT * FROM users WHERE email = ?',
@@ -245,17 +245,6 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						is_active,
 					},
 				}) => {
-					// console.log({
-					// 	id,
-					// 	email,
-					// 	password,
-					// 	first_name,
-					// 	last_name,
-					// 	phone_number,
-					// 	role,
-					// 	is_active,
-					// });
-
 					const conn = await pool.getConnection();
 
 					const stmt = 'SELECT * FROM users WHERE id = ?';
