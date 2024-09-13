@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
 	"files": {
 		"include": ["./**/*.js", "./**/*.ts", "./**/*.jsx", "./**/*.tsx", "./**/*.css", "./**/*.json"],
 		"ignore": ["dist/**", ".vscode", ".next", "public", "node_modules"]
@@ -30,8 +30,7 @@
 						"attributes": ["classList"],
 						"functions": ["clsx", "cva", "tw"]
 					}
-				},
-				"useThrowOnlyError": "error"
+				}
 			},
 			"performance": {
 				"noAccumulatingSpread": "error"
@@ -50,7 +49,8 @@
 			"style": {
 				"useConst": "warn",
 				"useExportType": "warn",
-				"useImportType": "warn"
+				"useImportType": "warn",
+				"useThrowOnlyError": "error"
 				// "useConsistentArrayType": "warn",
 				// "useNamingConvention": "warn",
 				// "useLiteralEnumMembers": "warn",
