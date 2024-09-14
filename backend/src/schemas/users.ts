@@ -1,4 +1,4 @@
-import { t, type UnwrapSchema } from 'elysia';
+import { type UnwrapSchema, t } from 'elysia';
 import type { RowDataPacket } from 'mysql2';
 
 // TODO: regex pattern for password
