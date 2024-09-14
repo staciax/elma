@@ -1,4 +1,5 @@
 import { pool } from '@/db';
+import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
 
 import { Elysia, t } from 'elysia';
@@ -11,7 +12,7 @@ export const router = new Elysia({
 	prefix: '/publishers',
 	tags: ['publishers'],
 })
-	.use(superuser())
+
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
@@ -50,8 +51,7 @@ export const router = new Elysia({
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 			if (!results.length) {
 				conn.release();
-				set.status = 404;
-				return { message: 'Publisher not found' };
+				throw new HTTPError(404, 'Publisher not found');
 			}
 			conn.release();
 			return results;
@@ -63,106 +63,110 @@ export const router = new Elysia({
 			}),
 		},
 	)
-	.post(
-		'/',
-		async ({ set, body: { name } }) => {
-			const conn = await pool.getConnection();
-			const stmt = `
-			INSERT INTO publishers
-			(	
-				id,
-				name
+	.guard((app) =>
+		app
+			.use(superuser())
+			.post(
+				'/',
+				async ({ set, body: { name } }) => {
+					const conn = await pool.getConnection();
+					const stmt = `
+					INSERT INTO publishers
+					(	
+						id,
+						name
+					)
+					VALUES
+					(	
+						?,
+						?
+					);
+					`;
+					await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
+					conn.release();
+
+					set.status = 201;
+					return { message: 'Publisher created' };
+				},
+				{
+					body: t.Object({
+						name: t.String({ minLength: 1, maxLength: 255 }),
+					}),
+				},
 			)
-			VALUES
-			(	
-				?,
-				?
-			);
-			`;
-			await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
-			conn.release();
+			.patch(
+				'/:id',
+				async ({ set, params: { id }, body: { name } }) => {
+					const conn = await pool.getConnection();
+					const publisherStmt = `
+					SELECT
+						*
+					FROM
+						publishers
+					WHERE
+						id = ?`;
+					const [updatePublisher] = await conn.query<RowDataPacket[]>(
+						publisherStmt,
+						[id],
+					);
+					if (!updatePublisher.length) {
+						conn.release();
+						throw new HTTPError(404, 'Publisher not found');
+					}
 
-			set.status = 201;
-			return { message: 'Publisher created' };
-		},
-		{
-			body: t.Object({
-				name: t.String({ minLength: 1, maxLength: 255 }),
-			}),
-		},
-	)
-	.patch(
-		'/:id',
-		async ({ set, params: { id }, body: { name } }) => {
-			const conn = await pool.getConnection();
-			const publisherStmt = `
-			SELECT
-				*
-			FROM
-				publishers
-			WHERE
-				id = ?`;
-			const [updatePublisher] = await conn.query<RowDataPacket[]>(
-				publisherStmt,
-				[id],
-			);
-			if (!updatePublisher.length) {
-				conn.release();
-				set.status = 404;
-				return { message: 'Publisher not found' };
-			}
+					// TODO: update publisher
 
-			// TODO: update publisher
+					conn.release();
 
-			conn.release();
+					return { message: 'Publisher updated successfully' };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+					body: t.Object({
+						name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+					}),
+				},
+			)
+			.delete(
+				'/:id',
+				async ({ set, params: { id } }) => {
+					const conn = await pool.getConnection();
 
-			return { message: 'Publisher updated successfully' };
-		},
-		{
-			params: t.Object({
-				id: t.String({ format: 'uuid' }),
-			}),
-			body: t.Object({
-				name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-			}),
-		},
-	)
-	.delete(
-		'/:id',
-		async ({ set, params: { id } }) => {
-			const conn = await pool.getConnection();
+					const publisherStmt = `
+					SELECT
+						*
+					FROM
+						publishers
+					WHERE
+						id = ?`;
+					const [deletePublisher] = await conn.query<RowDataPacket[]>(
+						publisherStmt,
+						[id],
+					);
+					if (!deletePublisher.length) {
+						conn.release();
+						throw new HTTPError(404, 'Publisher not found');
+					}
 
-			const publisherStmt = `
-			SELECT
-				*
-			FROM
-				publishers
-			WHERE
-				id = ?`;
-			const [deletePublisher] = await conn.query<RowDataPacket[]>(
-				publisherStmt,
-				[id],
-			);
-			if (!deletePublisher.length) {
-				conn.release();
-				set.status = 404;
-				return { message: 'Publisher not found' };
-			}
+					const deletePublisherStmt = `
+					DELETE FROM
+						publishers 
+					WHERE 
+						id = ?
+					`;
+					await conn.execute<ResultSetHeader>(deletePublisherStmt, [id]);
+					conn.release();
 
-			const deletePublisherStmt = `
-			DELETE FROM
-				publishers 
-			WHERE 
-				id = ?
-			`;
-			await conn.execute<ResultSetHeader>(deletePublisherStmt, [id]);
-			conn.release();
-
-			return { message: 'Publisher deleted successfully' };
-		},
-		{
-			params: t.Object({
-				id: t.String({ format: 'uuid' }),
-			}),
-		},
+					return { message: 'Publisher deleted successfully' };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+				},
+			),
 	);
+
+// TODO: get products by publisher
