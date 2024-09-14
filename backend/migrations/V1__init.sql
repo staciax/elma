@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS publishers (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE INDEX publishers_name_key(name)
 );
 
 -- TODO: categories name is unique right?
@@ -37,14 +38,16 @@ CREATE TABLE IF NOT EXISTS categories (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE INDEX categories_name_key(name)
 );
 
 CREATE TABLE IF NOT EXISTS authors (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE INDEX authors_name_key(name)
 );
 
 -- TODO: ISBN is unique right?
@@ -65,7 +68,6 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (publisher_id) REFERENCES publishers(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE
 ); 
-
 
 -- TODO: maybe add candidate key for product_images 
 CREATE TABLE IF NOT EXISTS product_images (
