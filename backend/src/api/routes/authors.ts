@@ -1,5 +1,6 @@
 import { pool } from '@/db';
 import { superuser } from '@/plugins/auth';
+
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';

@@ -2,6 +2,7 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
 import { type ProductRowPacketData, ProductsPublic } from '@/schemas/products';
+
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';

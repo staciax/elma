@@ -1,6 +1,7 @@
 import { env } from '@/config';
 import { pool } from '@/db';
 import { getPasswordHash } from '@/security';
+
 import { v7 as uuidv7 } from 'uuid';
 
 async function init() {

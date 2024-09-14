@@ -1,6 +1,7 @@
 import { env } from '@/config';
 
 import { Elysia } from 'elysia';
+
 import { router as authRouter } from './routes/auth';
 import { router as authorsRouter } from './routes/authors';
 import { router as categoriesRouter } from './routes/categories';
