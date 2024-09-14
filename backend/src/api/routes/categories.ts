@@ -1,4 +1,5 @@
 import { pool } from '@/db';
+import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
 
 import { Elysia, t } from 'elysia';
@@ -9,15 +10,15 @@ export const router = new Elysia({
 	prefix: '/categories',
 	tags: ['categories'],
 })
-	.use(superuser())
+
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
 			const conn = await pool.getConnection();
 			const stmt = `
 			SELECT
-				categories.id AS category_id,
-				categories.name AS category_name
+				categories.id AS id,
+				categories.name AS name
 			FROM
 				categories
 			LIMIT ?
@@ -36,13 +37,13 @@ export const router = new Elysia({
 	)
 	.get(
 		'/:id',
-		async ({ set, params: { id } }) => {
+		async ({ params: { id } }) => {
 			const conn = await pool.getConnection();
 
 			const stmt = `
 			SELECT
-				categories.id AS category_id,
-				categories.name AS category_name
+				categories.id AS id,
+				categories.name AS name
 			FROM
 				categories
 			WHERE id = ?;
@@ -50,8 +51,7 @@ export const router = new Elysia({
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 			if (!results.length) {
 				conn.release();
-				set.status = 404;
-				return { message: 'Categoriy not found' };
+				throw new HTTPError(404, 'Category not found');
 			}
 			conn.release();
 			return results;
@@ -62,107 +62,112 @@ export const router = new Elysia({
 			}),
 		},
 	)
-	.post(
-		'/',
-		async ({ set, body: { name } }) => {
-			console.log(name);
+	.guard((app) =>
+		app
+			.use(superuser())
+			.post(
+				'/',
+				async ({ set, body: { name } }) => {
+					const conn = await pool.getConnection();
+					const stmt = `
+					INSERT INTO categories
+					(	
+						id,
+						name
+					)
+					VALUES
+					(	
+						?,
+						?
+					);
+					`;
+					await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
+					conn.release();
 
-			const conn = await pool.getConnection();
-			const stmt = `
-			INSERT INTO categories
-			(	
-				id,
-				name
+					set.status = 201;
+					return { message: 'Category created' };
+				},
+				{
+					body: t.Object({
+						name: t.String({ minLength: 1, maxLength: 255 }),
+					}),
+				},
 			)
-			VALUES
-			(	
-				?,
-				?
-			);
-			`;
-			await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
-			conn.release();
+			.patch(
+				'/:id',
+				async ({ params: { id }, body: { name } }) => {
+					console.log(name);
+					const conn = await pool.getConnection();
+					const categoryStmt = `
+					SELECT
+						*
+					FROM
+						categories
+					WHERE
+						id = ?`;
+					const [updateCategory] = await conn.query<RowDataPacket[]>(
+						categoryStmt,
+						[id],
+					);
+					if (!updateCategory.length) {
+						conn.release();
+						throw new HTTPError(404, 'Category not found');
+					}
 
-			set.status = 201;
-			return { message: 'Category created' };
-		},
-		{
-			body: t.Object({
-				name: t.String({ minLength: 1, maxLength: 255 }),
-			}),
-		},
-	)
-	.patch(
-		'/:id',
-		async ({ set, params: { id }, body: { name } }) => {
-			console.log(name);
-			const conn = await pool.getConnection();
-			const categoryStmt = `
-			SELECT
-				*
-			FROM
-				categories
-			WHERE
-				id = ?`;
-			const [updateCategory] = await conn.query<RowDataPacket[]>(categoryStmt, [
-				id,
-			]);
-			if (!updateCategory.length) {
-				conn.release();
-				set.status = 404;
-				return { message: 'Category not found' };
-			}
+					// TODO: update category
 
-			// TODO: update category
+					conn.release();
 
-			conn.release();
+					return { message: 'Category updated successfully' };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+					body: t.Object({
+						name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+					}),
+				},
+			)
+			.delete(
+				'/:id',
+				async ({ params: { id } }) => {
+					const conn = await pool.getConnection();
 
-			return { message: 'Category updated successfully' };
-		},
-		{
-			params: t.Object({
-				id: t.String({ format: 'uuid' }),
-			}),
-			body: t.Object({
-				name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-			}),
-		},
-	)
-	.delete(
-		'/:id',
-		async ({ set, params: { id } }) => {
-			const conn = await pool.getConnection();
+					const categoryStmt = `
+					SELECT
+						*
+					FROM
+						categories
+					WHERE
+						id = ?
+					`;
+					const [deleteCategory] = await conn.query<RowDataPacket[]>(
+						categoryStmt,
+						[id],
+					);
+					if (!deleteCategory.length) {
+						conn.release();
+						throw new HTTPError(404, 'Category not found');
+					}
 
-			const categoryStmt = `
-			SELECT
-				*
-			FROM
-				categories
-			WHERE
-				id = ?`;
-			const [deleteCategory] = await conn.query<RowDataPacket[]>(categoryStmt, [
-				id,
-			]);
-			if (!deleteCategory.length) {
-				conn.release();
-				set.status = 404;
-				return { message: 'Category not found' };
-			}
+					const deleteCategoryStmt = `
+					DELETE FROM
+						categories 
+					WHERE 
+						id = ?
+					`;
+					await conn.execute<ResultSetHeader>(deleteCategoryStmt, [id]);
+					conn.release();
 
-			const deleteCategoryStmt = `
-			DELETE FROM
-				categories 
-			WHERE 
-				id = ?
-			`;
-			await conn.execute<ResultSetHeader>(deleteCategoryStmt, [id]);
-			conn.release();
-
-			return { message: 'Category deleted successfully' };
-		},
-		{
-			params: t.Object({
-				id: t.String({ format: 'uuid' }),
-			}),
-		},
+					return { message: 'Category deleted successfully' };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+				},
+			),
 	);
+
+// TODO: get products by category
