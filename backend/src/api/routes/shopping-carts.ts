@@ -42,44 +42,102 @@ export const router = new Elysia({
 			)
 			.get('/:id', async ({ params: { id } }) => id)
 			.post('/', async ({ body }) => body)
-			.patch('/:id', async ({ body, params: { id } }) => [id, body])
+			// .patch('/:id', async ({ body, params: { id } }) => [id, body])
 			.delete('/:id', async ({ params: { id } }) => id),
 	)
 	.guard((app) =>
 		app
 			.use(currentUser())
-			.get('/me', async ({ user }) => {
-				const conn = await pool.getConnection();
-				const stmt = `
-				SELECT
-					product.id AS product_id,
-					product.title AS product_title,
-					product.description AS product_description,
-					product.isbn AS product_isbn,
-					-- product.price AS product_price,
-					product.price AS product_ebook_price,
-					product.price AS product_paper_price,
-					product.published_date AS product_published_date,
+			.get(
+				'/me',
+				async ({ user, query: { limit, offset } }) => {
+					const conn = await pool.getConnection();
+					// const stmt = `
+					// SELECT
+					// 	product.id AS product_id,
+					// 	product.title AS product_title,
+					// 	product.description AS product_description,
+					// 	product.isbn AS product_isbn,
+					// 	-- product.price AS product_price,
+					// 	product.price AS product_ebook_price,
+					// 	product.price AS product_paper_price,
+					// 	product.published_date AS product_published_date,
 
-					publisher.id AS publisher_id,
-					publisher.name AS publisher_name,
+					// 	publisher.id AS publisher_id,
+					// 	publisher.name AS publisher_name,
 
-					category.id AS category_id,
-					category.name AS category_name
-				FROM
-					products AS product
-				LEFT JOIN
-					publishers AS publisher ON product.publisher_id = publisher.id
-				LEFT JOIN
-					categories AS category ON product.category_id = category.id
-				JOIN
-					shopping_carts AS cart ON product.id = cart.product_id
-				-- LIMIT ? OFFSET ?
-				`;
-				const [results] = await conn.query(stmt, [user.id]);
-				conn.release();
-				return results;
-			})
+					// 	category.id AS category_id,
+					// 	category.name AS category_name
+					// FROM
+					// 	products AS product
+					// LEFT JOIN
+					// 	publishers AS publisher ON product.publisher_id = publisher.id
+					// LEFT JOIN
+					// 	categories AS category ON product.category_id = category.id
+					// JOIN
+					// 	shopping_carts AS cart ON product.id = cart.product_id
+					// -- LIMIT ? OFFSET ?
+					// `;
+					const sql = `
+					SELECT
+						products.id AS id,
+						products.title AS title,
+						products.description AS description,
+						products.isbn AS isbn,
+						products.price AS price,
+						products.physical_price AS physical_price,
+						products.published_date AS published_date,
+						products.is_active AS is_active,
+
+						IF(publisher.id IS NULL, NULL,
+							JSON_OBJECT(
+								'id', publisher.id,
+								'name', publisher.name
+							)
+						) AS publisher,
+
+						IF(category.id IS NULL, NULL, 
+							JSON_OBJECT(
+								'id', category.id,
+								'name', category.name
+							)
+						) AS category, 
+
+						IF(COUNT(author.id) = 0, NULL,
+							JSON_ARRAYAGG(
+								JSON_OBJECT(
+									'id', author.id,
+									'name', author.name
+								)
+							)
+						) AS authors
+					FROM
+						products
+					LEFT JOIN
+						publishers AS publisher ON products.publisher_id = publisher.id
+					LEFT JOIN
+						categories AS category ON products.category_id = category.id
+					LEFT JOIN
+						product_authors AS product_author ON products.id = product_author.product_id
+					LEFT JOIN
+						authors AS author ON product_author.author_id = author.id
+					JOIN
+						shopping_carts AS cart ON products.id = cart.product_id AND cart.user_id = ?
+					GROUP BY products.id
+					LIMIT ? OFFSET ?;
+			`;
+
+					const [results] = await conn.query(sql, [user.id, 100, 0]);
+					conn.release();
+					return results;
+				},
+				{
+					query: t.Object({
+						limit: t.Optional(t.Number({ minimum: 1, default: 100 })),
+						offset: t.Optional(t.Number({ minimum: 0, default: 0 })),
+					}),
+				},
+			)
 			.get('/me/:id', async ({ params: { id } }) => id)
 			.post(
 				'/me',
@@ -133,7 +191,7 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.patch('/me/:id', async ({ body, params: { id } }) => [id, body])
+			// .patch('/me/:id', async ({ body, params: { id } }) => [id, body])
 			.delete('/me/:id', async ({ params: { id } }) => id),
 	);
 
