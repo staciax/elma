@@ -10,7 +10,6 @@ export const router = new Elysia({
 	prefix: '/categories',
 	tags: ['categories'],
 })
-
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
