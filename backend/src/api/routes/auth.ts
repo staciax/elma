@@ -4,6 +4,7 @@ import { Login } from '@/schemas/auth';
 import { Token } from '@/schemas/token';
 import { security } from '@/security';
 import { verifyPassword } from '@/security';
+
 import { Elysia } from 'elysia';
 import type { RowDataPacket } from 'mysql2/promise';
 
