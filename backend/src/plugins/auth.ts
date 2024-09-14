@@ -1,9 +1,10 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
-import type { UserPublic } from '@/schemas/users';
+import type { UserRowPacketData } from '@/schemas/users';
 import { security } from '@/security';
+
 import { bearer } from '@elysiajs/bearer';
-import { Elysia, type UnwrapSchema } from 'elysia';
+import { Elysia } from 'elysia';
 import type { RowDataPacket } from 'mysql2/promise';
 
 async function _findUserById(_userId: string) {
@@ -41,21 +42,22 @@ export const currentUser = (_role?: UserRole) =>
 				throw new HTTPError(401, 'Unauthorized');
 			}
 
-			const data = await jwt.verify(bearer);
-			if (!data) {
+			const jwtPayload = await jwt.verify(bearer);
+			if (!jwtPayload) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
 			const conn = await pool.getConnection();
 
-			const [user_results] = await conn.query<
-				(RowDataPacket & UnwrapSchema<typeof UserPublic>)[]
-			>('SELECT * FROM users WHERE id=?', [data.sub]);
+			const stmt = 'SELECT * FROM users WHERE id=?';
+			const [results] = await conn.query<UserRowPacketData[]>(stmt, [
+				jwtPayload.sub,
+			]);
 			conn.release();
 
-			if (!user_results.length) {
+			if (!results.length) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			const user = user_results[0];
+			const user = results[0];
 
 			// const user = await findUserById(data.sub);
 			// if (!user) {
@@ -74,23 +76,22 @@ export const superuser = () =>
 				set.headers['WWW-Authenticate'] = 'Bearer';
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			const data = await jwt.verify(bearer);
-
-			if (!data) {
+			const jwtPayload = await jwt.verify(bearer);
+			if (!jwtPayload) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
 			const conn = await pool.getConnection();
 
-			const [user_results] = await conn.query<RowDataPacket[]>(
-				'SELECT * FROM users WHERE id=?',
-				[data.sub],
-			);
+			const stmt = 'SELECT * FROM users WHERE id=?';
+			const [results] = await conn.query<UserRowPacketData[]>(stmt, [
+				jwtPayload.sub,
+			]);
 			conn.release();
 
-			if (!user_results.length) {
+			if (!results.length) {
 				throw new HTTPError(401, 'Unauthorized');
 			}
-			const user = user_results[0];
+			const user = results[0];
 
 			// TODO: user?.role or user.role
 			if (user?.role !== 'SUPERUSER') {

@@ -2,11 +2,11 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { Login } from '@/schemas/auth';
 import { Token } from '@/schemas/token';
+import type { UserRowPacketData } from '@/schemas/users';
 import { security } from '@/security';
 import { verifyPassword } from '@/security';
 
 import { Elysia } from 'elysia';
-import type { RowDataPacket } from 'mysql2/promise';
 
 // TODO: reimplement cookie set on backend?
 // what about httpOnly?, secure?, sameSite?, expires?, etc.
@@ -20,16 +20,16 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			const conn = await pool.getConnection();
 
 			// console.log('email', email);
-			const user_stmt = 'SELECT * FROM users WHERE email=?';
-			const [user_results] = await conn.query<RowDataPacket[]>(user_stmt, [
-				username,
-			]);
+			const stmt = 'SELECT * FROM users WHERE email=?';
+			const [results] = await conn.query<UserRowPacketData[]>(stmt, [username]);
 			conn.release();
-			if (!user_results.length) {
+
+			if (!results.length) {
 				throw new HTTPError(404, 'User not found');
 			}
-			const user = user_results[0];
+			const user = results[0];
 
+			// TODO: user?.hashed_password or user.hashed_password
 			const isMatch = await verifyPassword(password, user?.hashed_password);
 
 			if (!isMatch) {
