@@ -12,6 +12,8 @@ export const Login = t.Object({
 		maxLength: 255,
 		// error: 'Invalid password',
 	}),
+
+	// OAuth2.0 fields
 	// client_id: t.Optional(t.String()),
 	// client_secret: t.Optional(t.String()),
 	// grant_type: t.Optional(t.String({ default: 'password' })),
