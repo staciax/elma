@@ -2,10 +2,15 @@
 	"$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
 	"files": {
 		"include": ["./src/**/*.js", "./src/**/*.ts", "./src/**/*.json"],
-		"ignore": [".vscode", "node_modules"]
+		"ignore": ["node_modules", "public"]
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git"
 	},
 	"organizeImports": {
-		"enabled": true
+		"enabled": true,
+		"ignore": []
 	},
 	"formatter": {
 		"enabled": true,
