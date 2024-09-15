@@ -37,10 +37,7 @@ const _session = new Elysia() //
 // or release connection in onAfterHandle
 // https://stackoverflow.com/a/57121491/19394867
 // https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
-// TODO: new password route
-// TODO: me route with guard
 // TODO: check conn not release
-// TODO: use HTTPError instead of set.status
 // TODO: response schema
 // TODO: signup/register schema
 
