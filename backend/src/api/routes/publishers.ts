@@ -38,7 +38,7 @@ export const router = new Elysia({
 	)
 	.get(
 		'/:id',
-		async ({ set, params: { id } }) => {
+		async ({ params: { id } }) => {
 			const conn = await pool.getConnection();
 
 			const stmt = `
@@ -96,7 +96,7 @@ export const router = new Elysia({
 			)
 			.patch(
 				'/:id',
-				async ({ set, params: { id }, body: { name } }) => {
+				async ({ params: { id }, body: { name } }) => {
 					const conn = await pool.getConnection();
 					const publisherStmt = `
 					SELECT
@@ -131,7 +131,7 @@ export const router = new Elysia({
 			)
 			.delete(
 				'/:id',
-				async ({ set, params: { id } }) => {
+				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
 					const publisherStmt = `

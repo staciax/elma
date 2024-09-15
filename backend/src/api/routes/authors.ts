@@ -131,7 +131,7 @@ export const router = new Elysia({
 			)
 			.delete(
 				'/:id',
-				async ({ set, params: { id } }) => {
+				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
 					const authorStmt = `
