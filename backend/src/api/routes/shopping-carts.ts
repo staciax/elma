@@ -80,14 +80,14 @@ export const router = new Elysia({
 					// `;
 					const sql = `
 					SELECT
-						products.id AS id,
-						products.title AS title,
-						products.description AS description,
-						products.isbn AS isbn,
-						products.price AS price,
-						products.physical_price AS physical_price,
-						products.published_date AS published_date,
-						products.is_active AS is_active,
+						book.id AS id,
+						book.title AS title,
+						book.description AS description,
+						book.isbn AS isbn,
+						book.price AS price,
+						book.physical_price AS physical_price,
+						book.published_date AS published_date,
+						book.is_active AS is_active,
 
 						IF(publisher.id IS NULL, NULL,
 							JSON_OBJECT(
@@ -112,18 +112,18 @@ export const router = new Elysia({
 							)
 						) AS authors
 					FROM
-						products
+						books as book
 					LEFT JOIN
-						publishers AS publisher ON products.publisher_id = publisher.id
+						publishers AS publisher ON book.publisher_id = publisher.id
 					LEFT JOIN
-						categories AS category ON products.category_id = category.id
+						categories AS category ON book.category_id = category.id
 					LEFT JOIN
-						product_authors AS product_author ON products.id = product_author.product_id
+						book_authors AS product_author ON book.id = product_author.book_id
 					LEFT JOIN
 						authors AS author ON product_author.author_id = author.id
 					JOIN
-						shopping_carts AS cart ON products.id = cart.product_id AND cart.user_id = ?
-					GROUP BY products.id
+						shopping_carts AS cart ON book.id = cart.book_id AND cart.user_id = ?
+					GROUP BY book.id
 					LIMIT ? OFFSET ?;
 			`;
 
@@ -141,21 +141,20 @@ export const router = new Elysia({
 			.get('/me/:id', async ({ params: { id } }) => id)
 			.post(
 				'/me',
-				async ({ body: { product_id }, user }) => {
+				async ({ body: { book_id }, user }) => {
 					const conn = await pool.getConnection();
 
-					const productStmt = `
+					const bookStmt = `
 					SELECT
 						*
 					FROM
-						products
+						books
 					WHERE id = ?;
 					`;
-					const [productResults] = await conn.query<RowDataPacket[]>(
-						productStmt,
-						[product_id],
-					);
-					if (!productResults.length) {
+					const [bookResults] = await conn.query<RowDataPacket[]>(bookStmt, [
+						book_id,
+					]);
+					if (!bookResults.length) {
 						conn.release();
 						throw new HTTPError(404, 'Product not found');
 					}
@@ -163,10 +162,10 @@ export const router = new Elysia({
 					try {
 						await conn.beginTransaction();
 						const stmt = `
-						INSERT INTO shopping_carts(user_id, product_id)
+						INSERT INTO shopping_carts(user_id, book_id)
 						VALUES (?, ?);
 						`;
-						await conn.query<ResultSetHeader>(stmt, [user.id, product_id]);
+						await conn.query<ResultSetHeader>(stmt, [user.id, book_id]);
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
@@ -187,7 +186,7 @@ export const router = new Elysia({
 				},
 				{
 					body: t.Object({
-						product_id: t.String({ format: 'uuid' }),
+						book_id: t.String({ format: 'uuid' }),
 					}),
 				},
 			)

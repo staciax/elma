@@ -1,7 +1,7 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
-import { type ProductRowPacketData, ProductsPublic } from '@/schemas/products';
+import { type BookRowPacketData, BooksPublic } from '@/schemas/books';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -14,11 +14,10 @@ import { v7 as uuidv7 } from 'uuid';
 // TODO: what t.Partial do?
 
 export const router = new Elysia({
-	prefix: '/products',
-	tags: ['products'],
+	prefix: '/books',
+	tags: ['books'],
 })
-	// TODO: add role-based access control
-
+	// TODO: add role-based access controls
 	.get(
 		'/',
 		async ({ query: { limit, offset } }) => {
@@ -28,23 +27,23 @@ export const router = new Elysia({
 
 			// TODO: set isolation level
 
-			const count_stmt = 'SELECT COUNT(*) AS count FROM products';
+			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
 			const [count_results] = await conn.query<RowDataPacket[]>(count_stmt);
 			if (!count_results.length) {
-				throw new HTTPError(404, 'Product not found');
+				throw new HTTPError(404, 'Book not found');
 			}
 			const count = count_results[0].count;
 
-			const product_stmt = `
+			const book_stmt = `
 			SELECT
-				products.id AS id,
-				products.title AS title,
-				products.description AS description,
-				products.isbn AS isbn,
-				products.price AS price,
-				products.physical_price AS physical_price,
-				products.published_date AS published_date,
-				products.is_active AS is_active,
+				book.id AS id,
+				book.title AS title,
+				book.description AS description,
+				book.isbn AS isbn,
+				book.price AS price,
+				book.physical_price AS physical_price,
+				book.published_date AS published_date,
+				book.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
 					JSON_OBJECT(
@@ -69,19 +68,19 @@ export const router = new Elysia({
 					)
 				) AS authors
 			FROM
-				products
+				books as book
 			LEFT JOIN
-				publishers AS publisher ON products.publisher_id = publisher.id
+				publishers AS publisher ON book.publisher_id = publisher.id
 			LEFT JOIN
-				categories AS category ON products.category_id = category.id
+				categories AS category ON book.category_id = category.id
 			LEFT JOIN
-				product_authors AS product_author ON products.id = product_author.product_id
+				book_authors AS book_author ON book.id = book_author.book_id
 			LEFT JOIN
-				authors AS author ON product_author.author_id = author.id
-			GROUP BY products.id
+				authors AS author ON book_author.author_id = author.id
+			GROUP BY book.id
 			LIMIT ? OFFSET ?;
 			`;
-			const [results] = await conn.query<ProductRowPacketData[]>(product_stmt, [
+			const [results] = await conn.query<BookRowPacketData[]>(book_stmt, [
 				limit,
 				offset,
 			]);
@@ -100,7 +99,7 @@ export const router = new Elysia({
 				offset: t.Optional(t.Number({ minimum: 0, default: 0 })),
 			}),
 			response: {
-				200: ProductsPublic,
+				200: BooksPublic,
 			},
 		},
 	)
@@ -109,15 +108,15 @@ export const router = new Elysia({
 		async ({ params: { id } }) => {
 			const conn = await pool.getConnection();
 			const stmt = `
-						SELECT
-				products.id AS id,
-				products.title AS title,
-				products.description AS description,
-				products.isbn AS isbn,
-				products.price AS price,
-				products.physical_price AS physical_price,
-				products.published_date AS published_date,
-				products.is_active AS is_active,
+			SELECT
+				book.id AS id,
+				book.title AS title,
+				book.description AS description,
+				book.isbn AS isbn,
+				book.price AS price,
+				book.physical_price AS physical_price,
+				book.published_date AS published_date,
+				book.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
 					JSON_OBJECT(
@@ -142,23 +141,24 @@ export const router = new Elysia({
 					)
 				) AS authors
 			FROM
-				products
+				books AS book
 			LEFT JOIN
-				publishers AS publisher ON products.publisher_id = publisher.id
+				publishers AS publisher ON book.publisher_id = publisher.id
 			LEFT JOIN
-				categories AS category ON products.category_id = category.id
+				categories AS category ON book.category_id = category.id
 			LEFT JOIN
-				product_authors AS product_author ON products.id = product_author.product_id
+				book_authors AS book_author ON book.id = book_author.book_id
 			LEFT JOIN
-				authors AS author ON product_author.author_id = author.id
-			WHERE products.id = ?;
+				authors AS author ON book_author.author_id = author.id
+			GROUP BY book.id
+			HAVING book.id = ?;
 			`;
-			// TODO: join product_images
+			// TODO: join book_images
 
 			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
 			conn.release();
 			if (!results.length) {
-				throw new HTTPError(404, 'Product not found');
+				throw new HTTPError(404, 'Book not found');
 			}
 			return results;
 		},
@@ -219,10 +219,10 @@ export const router = new Elysia({
 						throw new HTTPError(404, 'category');
 					}
 
-					// TODO: product_authors?
+					// TODO: book_authors?
 
-					const product_stmt = `
-					INSERT INTO products (
+					const book_stmt = `
+					INSERT INTO books (
 						id,
 						title,
 						description,
@@ -246,7 +246,7 @@ export const router = new Elysia({
 					);
 					`;
 
-					await conn.query<ResultSetHeader>(product_stmt, [
+					await conn.query<ResultSetHeader>(book_stmt, [
 						uuidv7(),
 						title,
 						description,
@@ -258,9 +258,9 @@ export const router = new Elysia({
 						category_id,
 					]);
 
-					// TODO: refresh product and return product data
+					// TODO: refresh book and return book data
 					set.status = 201;
-					return { message: 'Product created successfully' };
+					return { message: 'Book created successfully' };
 				},
 				{
 					body: t.Object({
@@ -281,27 +281,25 @@ export const router = new Elysia({
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
-					const product_stmt = `
+					const book_stmt = `
 					SELECT
 						*
 					FROM
-						products
+						books
 					WHERE
 						id = ?`;
 
-					const [product] = await conn.query<RowDataPacket[]>(product_stmt, [
-						id,
-					]);
-					if (!product.length) {
+					const [results] = await conn.query<RowDataPacket[]>(book_stmt, [id]);
+					if (!results.length) {
 						conn.release();
-						throw new HTTPError(404, 'Product not found');
+						throw new HTTPError(404, 'Book not found');
 					}
 
-					// TODO: update product
+					// TODO: update book
 
 					conn.release();
 
-					return { message: 'Product updated successfully' };
+					return { message: 'Book updated successfully' };
 				},
 				{
 					params: t.Object({
@@ -324,29 +322,27 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
-					const product_stmt = `
+					const book_stmt = `
 					SELECT
 						*
 					FROM
-						products
+						books
 					WHERE
 						id = ?
 					`;
-					const [product] = await conn.query<RowDataPacket[]>(product_stmt, [
-						id,
-					]);
+					const [results] = await conn.query<RowDataPacket[]>(book_stmt, [id]);
 
-					if (!product.length) {
+					if (!results.length) {
 						conn.release();
-						throw new HTTPError(404, 'Product not found');
+						throw new HTTPError(404, 'Book not found');
 					}
 
-					console.log(product);
+					// console.log(results);
 
 					const delete_stmt = `
 					DELETE
 					FROM
-						products
+						books
 					WHERE
 						id = ?`;
 					const [deleted] = await conn.execute<ResultSetHeader>(delete_stmt, [
@@ -355,10 +351,10 @@ export const router = new Elysia({
 					conn.release();
 
 					if (!deleted) {
-						throw new HTTPError(500, 'Product not deleted');
+						throw new HTTPError(500, 'Book not deleted');
 					}
 					return {
-						message: 'Product deleted successfully',
+						message: 'Book deleted successfully',
 					};
 				},
 				{

@@ -6,7 +6,7 @@ import { AuthorPublic } from './authors';
 import { CategoryPublic } from './categories';
 import { PublisherPublic } from './publishers';
 
-export const ProductPublic = t.Object({
+export const BookPublic = t.Object({
 	id: t.String({ format: 'uuid' }),
 	title: t.String(),
 	description: t.String(),
@@ -20,10 +20,9 @@ export const ProductPublic = t.Object({
 	authors: t.Nullable(t.Array(AuthorPublic)),
 });
 
-export const ProductsPublic = t.Object({
+export const BooksPublic = t.Object({
 	count: t.Integer(),
-	data: t.Array(ProductPublic),
+	data: t.Array(BookPublic),
 });
 
-export type ProductRowPacketData = RowDataPacket &
-	UnwrapSchema<typeof ProductPublic>;
+export type BookRowPacketData = RowDataPacket & UnwrapSchema<typeof BookPublic>;
