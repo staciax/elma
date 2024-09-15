@@ -1,5 +1,3 @@
-import { env } from '@/config';
-
 import { Elysia } from 'elysia';
 
 import { router as authRouter } from './routes/auth';
@@ -11,14 +9,20 @@ import { router as publishersRouter } from './routes/publishers';
 import { router as shoppingCartsRouter } from './routes/shopping-carts';
 import { router as usersRouter } from './routes/users';
 
-export const router = new Elysia({ prefix: env.API_V1_STR }) //
-	.use(authRouter)
-	.use(usersRouter)
-	.use(authorsRouter)
-	.use(publishersRouter)
-	.use(categoriesRouter)
-	.use(productsRouter)
-	.use(shoppingCartsRouter)
-	.use(ordersRouter);
+// https://elysiajs.com/essential/plugin.html#plugin-deduplication
+export const apiRouter = <T extends string>(config: { prefix: T }) =>
+	new Elysia({
+		prefix: config.prefix,
+		name: 'api',
+		seed: config,
+	})
+		.use(authRouter)
+		.use(usersRouter)
+		.use(authorsRouter)
+		.use(publishersRouter)
+		.use(categoriesRouter)
+		.use(productsRouter)
+		.use(shoppingCartsRouter)
+		.use(ordersRouter);
 
 // TODO: add begin transaction for all routes except GET
