@@ -1,4 +1,4 @@
-import { router as apiRouter } from '@/api';
+import { apiRouter } from '@/api';
 import { env } from '@/config';
 import { HTTPError } from '@/errors';
 import { Message } from '@/schemas/message';
@@ -50,7 +50,7 @@ export const app = new Elysia()
 
 	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
 	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
-	.use(apiRouter);
+	.use(apiRouter({ prefix: env.API_V1_STR }));
 
 if (env.NODE_ENV !== 'production') {
 	app.use(
