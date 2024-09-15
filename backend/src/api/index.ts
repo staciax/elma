@@ -4,7 +4,7 @@ import { router as authRouter } from './routes/auth';
 import { router as authorsRouter } from './routes/authors';
 import { router as categoriesRouter } from './routes/categories';
 import { router as ordersRouter } from './routes/orders';
-import { router as productsRouter } from './routes/products';
+import { router as booksRouter } from './routes/books';
 import { router as publishersRouter } from './routes/publishers';
 import { router as shoppingCartsRouter } from './routes/shopping-carts';
 import { router as usersRouter } from './routes/users';
@@ -21,7 +21,7 @@ export const apiRouter = <T extends string>(config: { prefix: T }) =>
 		.use(authorsRouter)
 		.use(publishersRouter)
 		.use(categoriesRouter)
-		.use(productsRouter)
+		.use(booksRouter)
 		.use(shoppingCartsRouter)
 		.use(ordersRouter);
 
