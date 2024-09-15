@@ -20,6 +20,8 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			const conn = await pool.getConnection();
 
 			// console.log('email', email);
+			// TODO: should begin transaction here right?
+
 			const stmt = 'SELECT * FROM users WHERE email=?';
 			const [results] = await conn.query<UserRowPacketData[]>(stmt, [username]);
 			conn.release();
@@ -39,8 +41,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			const access_token = await jwt.sign({ sub: user.id });
 
 			// try {
-			// 	const [results] = await conn.query(stmt, [email, password]);
-			// 	console.log(results);
+			// 	await conn.beginTransaction();
 			// 	await conn.commit();
 			// } catch {
 			// 	conn.rollback();
