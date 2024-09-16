@@ -1,0 +1,30 @@
+{
+	"workbench.editor.customLabels.patterns": {
+		"**/frontend/app/**/{page,layout}.ts?(x)": "${dirname} - ${filename}.ts",
+		"**/backend/src/**/{schemas,models,routes}/**/*.ts": "${dirname} - ${filename}.ts"
+	},
+
+	// Editor settings
+	"editor.formatOnSave": true,
+
+	// BiomeJS
+	"biome.lspBin": "./node_modules/@biomejs/biome/bin/biome",
+	"editor.codeActionsOnSave": {
+		"quickfix.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome",
+		"editor.codeActionsOnSave": {
+			"quickfix.biome": "explicit",
+			"source.organizeImports.biome": "explicit"
+		}
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
+}
