@@ -1,6 +1,6 @@
 {
 	"workbench.editor.customLabels.patterns": {
-		"**/frontend/app/**/{page,layout}.ts?(x)": "${dirname} - ${filename}.ts",
+		"**/frontend/app/**/{page,layout}.{ts,tsx}": "${dirname} - ${filename}.ts",
 		"**/backend/src/**/{schemas,models,routes}/**/*.ts": "${dirname} - ${filename}.ts"
 	},
 
