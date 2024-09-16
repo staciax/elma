@@ -2,12 +2,14 @@
 
 ## Technology Stack and Features
 
+- [**Turborepo**](https://turbo.build/repo/docs) for managing monorepos.
 - [**ElysiaJS**](https://elysiajs.com) for the Typescript backend API.
-    - [Prisma](https://www.prisma.io) for the database client.
     - [MySQL](https://www.mysql.com) as the SQL database.
+    - [mysql2](https://sidorares.github.io/node-mysql2/docs) for the MySQL client.
+    <!-- - ~~[Prisma](https://www.prisma.io) for the database client.~~ -->
 - [**NextJS**](https://nextjs.org) for the frontend.
     - Using TypeScript.
-    - [TailwindCSS](https://tailwindcss.com) for styling.
+    <!-- - [TailwindCSS](https://tailwindcss.com) for styling. -->
     - [shadcn/ui](https://ui.shadcn.com) for the frontend UI components.
     - [Axios](https://axios-http.com) for making HTTP requests.
     - [React hook form](https://react-hook-form.com) for form handling.
