@@ -8,7 +8,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"include": ["./**/*.ts", "./**/*.tsx", "./**/*.css", "./**/*.json"],
+		"include": ["*.ts", "*.tsx", "*.css", "*.json"],
 		"ignore": ["node_modules", "dist/**", ".next", "public", ".turbo"]
 	},
 	"formatter": {
@@ -27,22 +27,13 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"a11y": {
-				// Frontend only rules
-				"noRedundantRoles": "off",
-				"useSemanticElements": "off",
-				"useFocusableInteractive": "off"
-			},
 			"correctness": {
 				"noUnusedVariables": "warn",
 				"noUnusedImports": {
 					"fix": "none",
 					"level": "warn"
 				},
-				"noInvalidUseBeforeDeclaration": "error",
-				// Frontend only rules
-				"useExhaustiveDependencies": "error",
-				"useHookAtTopLevel": "error"
+				"noInvalidUseBeforeDeclaration": "error"
 			},
 			"style": {
 				"useConst": {
@@ -84,6 +75,24 @@
 		"formatter": {
 			"trailingCommas": "none"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"include": ["*.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noRedundantRoles": "off",
+						"useSemanticElements": "off",
+						"useFocusableInteractive": "off"
+					},
+					"correctness": {
+						"useExhaustiveDependencies": "error",
+						"useHookAtTopLevel": "error"
+					}
+				}
+			}
+		}
+	]
 }
 // wait for biome support monorepo
