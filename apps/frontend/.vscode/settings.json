@@ -18,7 +18,7 @@
 
 	// TailwindCSS
 	"[tailwindcss]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"files.associations": {
 		"*.css": "tailwindcss"
@@ -26,7 +26,7 @@
 	"editor.quickSuggestions": {
 		"strings": "on"
 	},
-	
+
 	// Language specific settings
 	"[typescript]": {
 		"editor.defaultFormatter": "biomejs.biome",
