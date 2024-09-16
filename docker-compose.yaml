@@ -4,12 +4,12 @@ services:
     networks:
       - default
     build:
-      context: ./backend
+      context: ./apps/backend
       args:
         - NODE_ENV=production
     platform: linux/amd64 # Patch for M1 Mac
     env_file:
-      - ./backend/.env
+      - ./apps/backend/.env
     ports:
       - 8000:8000
 
@@ -18,7 +18,7 @@ services:
     networks:
       - default
     build:
-      context: ./frontend
+      context: ./apps/frontend
       args:
         - NODE_ENV=production
     # platform: linux/amd64 # Patch for M1 Mac
