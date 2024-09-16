@@ -19,7 +19,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Home, LineChart, Package, Package2, PanelLeft, Search, ShoppingCart, Users2 } from 'lucide-react';
+import {
+	Home,
+	LineChart,
+	Package,
+	Package2,
+	PanelLeft,
+	Search,
+	ShoppingCart,
+	Users2,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -42,23 +51,38 @@ function Header() {
 							<Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
 							<span className="sr-only">Acme Inc</span>
 						</Link>
-						<Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+						<Link
+							href="#"
+							className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+						>
 							<Home className="h-5 w-5" />
 							Dashboard
 						</Link>
-						<Link href="#" className="flex items-center gap-4 px-2.5 text-foreground">
+						<Link
+							href="#"
+							className="flex items-center gap-4 px-2.5 text-foreground"
+						>
 							<ShoppingCart className="h-5 w-5" />
 							Orders
 						</Link>
-						<Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+						<Link
+							href="#"
+							className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+						>
 							<Package className="h-5 w-5" />
 							Products
 						</Link>
-						<Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+						<Link
+							href="#"
+							className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+						>
 							<Users2 className="h-5 w-5" />
 							Customers
 						</Link>
-						<Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+						<Link
+							href="#"
+							className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+						>
 							<LineChart className="h-5 w-5" />
 							Settings
 						</Link>
@@ -94,7 +118,11 @@ function Header() {
 			</div>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="outline" size="icon" className="overflow-hidden rounded-full">
+					<Button
+						variant="outline"
+						size="icon"
+						className="overflow-hidden rounded-full"
+					>
 						<Image
 							src="/placeholder-user.jpg"
 							width={36}

@@ -52,8 +52,17 @@ export default function Header() {
 				{/* Desktop Search Bar */}
 				<div className="mx-4 hidden flex-1 justify-center sm:flex">
 					<form className="relative w-full max-w-md">
-						<Input type="search" placeholder="ค้้นหาหนังสือ" className="w-full pr-10" />
-						<Button type="submit" variant="ghost" size="icon" className="absolute top-0 right-0 h-full">
+						<Input
+							type="search"
+							placeholder="ค้้นหาหนังสือ"
+							className="w-full pr-10"
+						/>
+						<Button
+							type="submit"
+							variant="ghost"
+							size="icon"
+							className="absolute top-0 right-0 h-full"
+						>
 							<Search className="h-5 w-5" />
 							<span className="sr-only">Search</span>
 						</Button>
@@ -64,7 +73,12 @@ export default function Header() {
 				{/* TODO: after auth show button for bookshelf or profile or something */}
 
 				<div className="flex w-[20%] items-center justify-end space-x-4">
-					<Button variant="ghost" size="icon" className="sm:hidden" onClick={toggleMobileSearch}>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="sm:hidden"
+						onClick={toggleMobileSearch}
+					>
 						<Search className="h-5 w-5" />
 						<span className="sr-only">Search</span>
 					</Button>
@@ -79,7 +93,11 @@ export default function Header() {
 					{isAuthenticated ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="outline" size="icon" className="overflow-hidden rounded-full">
+								<Button
+									variant="outline"
+									size="icon"
+									className="overflow-hidden rounded-full"
+								>
 									{/* <Image
 										src="/placeholder-user.jpg"
 										width={36}
@@ -112,13 +130,20 @@ export default function Header() {
 						</DropdownMenu>
 					) : (
 						<>
-							<Button variant="outline" className="hidden items-center space-x-2 sm:flex">
+							<Button
+								variant="outline"
+								className="hidden items-center space-x-2 sm:flex"
+							>
 								<Link href="/register">
-									<span className="text-sm transition-colors hover:text-[#5AB772]">สมัครสมาชิก</span>
+									<span className="text-sm transition-colors hover:text-[#5AB772]">
+										สมัครสมาชิก
+									</span>
 								</Link>
 								<span className="text-sm">/</span>
 								<Link href="/login">
-									<span className="text-sm transition-colors hover:text-[#5AB772]">เข้าสู่ระบบ</span>
+									<span className="text-sm transition-colors hover:text-[#5AB772]">
+										เข้าสู่ระบบ
+									</span>
 								</Link>
 							</Button>
 							<Button variant="outline" size="icon" className="sm:hidden">
@@ -134,8 +159,18 @@ export default function Header() {
 			{showMobileSearch && (
 				<div className="mt-4 sm:hidden">
 					<form className="relative" onBlur={handleMobileSearchBlur}>
-						<Input ref={mobileSearchRef} type="search" placeholder="ค้้นหาหนังสือ" className="w-full pr-10" />
-						<Button type="submit" variant="ghost" size="icon" className="absolute top-0 right-0 h-full">
+						<Input
+							ref={mobileSearchRef}
+							type="search"
+							placeholder="ค้้นหาหนังสือ"
+							className="w-full pr-10"
+						/>
+						<Button
+							type="submit"
+							variant="ghost"
+							size="icon"
+							className="absolute top-0 right-0 h-full"
+						>
 							<Search className="h-5 w-5" />
 							<span className="sr-only">Search</span>
 						</Button>

@@ -25,10 +25,16 @@ export default async function Page() {
 			</section>
 			<nav className="w-full bg-white">
 				<div className="flex h-10 items-center justify-center gap-4">
-					<Link href="/account" className="transition-colors hover:text-[#5AB772]">
+					<Link
+						href="/account"
+						className="transition-colors hover:text-[#5AB772]"
+					>
 						รายละเอียดบัญชี
 					</Link>
-					<Link href="/account/order" className="transition-colors hover:text-[#5AB772]">
+					<Link
+						href="/account/order"
+						className="transition-colors hover:text-[#5AB772]"
+					>
 						ประวัติการสั่งซื้อ
 					</Link>
 				</div>
