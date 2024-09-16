@@ -33,7 +33,7 @@ export default async function Page() {
 									className="flex max-w-xl border-b pb-6"
 								>
 									<div className="min-w-48 max-w-48 p-4">
-										<Link href={`/product/${product.product_id}`}>
+										<Link href={`/ebook/${product.product_id}`}>
 											<img
 												src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif"
 												alt="Book Cover"
@@ -47,7 +47,7 @@ export default async function Page() {
 										<div className="flex flex-col">
 											<h2 className="text-sm">{product.category_name}</h2>
 											<Link
-												href={`/product/${product.product_id}`}
+												href={`/ebook/${product.product_id}`}
 												className="mt-2"
 											>
 												{product.product_title}

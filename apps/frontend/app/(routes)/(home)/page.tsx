@@ -1,6 +1,6 @@
 import { getBooks } from '@/lib/elma/actions/books';
 
-import { ProductCard } from '@/components/products/product-card';
+import { ProductCard } from '@/components/books/product-card';
 
 export default async function Home() {
 	const results = await getBooks();

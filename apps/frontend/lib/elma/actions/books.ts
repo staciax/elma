@@ -1,7 +1,7 @@
 'use server';
 import axios from '@/lib/axios';
 
-import type { BookPublic, BooksPublic } from '../types/products';
+import type { BookPublic, BooksPublic } from '../types/books';
 
 export const getBook = async (id: string): Promise<BookPublic[]> => {
 	console.log('product id:', id);
