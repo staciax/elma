@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 
-import { getBooks } from '@/lib/elma/actions/products';
+import { getBooks } from '@/lib/elma/actions/books';
 
 export default async function Page() {
 	const result = await getBooks();

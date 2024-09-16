@@ -19,7 +19,7 @@ export function ProductCard({ product, className }: Props) {
 		// 			height={600}
 		// 			className="aspect-[2/3] w-full object-cover transition-opacity group-hover:opacity-80"
 		// 		/>
-		// 		<Link href={`/product/${product.product_id}`}>
+		// 		<Link href={`/ebook/${product.product_id}`}>
 		// 			<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-background/80 to-transparent p-6">
 		// 				<h3 className="line-clamp-2 font-semibold text-black text-lg">{product.product_title}</h3>
 		// 			</div>
@@ -34,7 +34,7 @@ export function ProductCard({ product, className }: Props) {
 		<Card className="w-full max-w-52 rounded-md border">
 			<div className="group flex h-full flex-col justify-between">
 				<div className="aspect-[2/3] w-full overflow-hidden rounded-md">
-					<Link href={`/product/${product.id}`}>
+					<Link href={`/ebook/${product.id}`}>
 						<img
 							src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif"
 							alt="Book Cover"
@@ -46,7 +46,7 @@ export function ProductCard({ product, className }: Props) {
 				</div>
 				<div className="mb-auto px-2 pt-2">
 					<Link
-						href={`/product/${product.id}`}
+						href={`/ebook/${product.id}`}
 						className="line-clamp-2 font-normal text-sm md:text-base"
 					>
 						{product.title}
