@@ -6,6 +6,7 @@ type Headers = Record<string, string> | undefined | null;
 export class HTTPError extends Error {
 	public readonly status: Status;
 	public readonly headers?: Headers;
+	// public readonly detail: string | Record<string, string>;
 
 	constructor(status: Status, message?: string, headers?: Headers) {
 		if (!message && typeof status === 'number') {
