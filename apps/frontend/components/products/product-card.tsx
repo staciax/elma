@@ -45,12 +45,17 @@ export function ProductCard({ product, className }: Props) {
 					</Link>
 				</div>
 				<div className="mb-auto px-2 pt-2">
-					<Link href={`/product/${product.id}`} className="line-clamp-2 font-normal text-sm md:text-base">
+					<Link
+						href={`/product/${product.id}`}
+						className="line-clamp-2 font-normal text-sm md:text-base"
+					>
 						{product.title}
 					</Link>
 				</div>
 				<div className="grid gap-2 px-2 pb-2">
-					<p className="font-semibold text-sm md:text-base">{product.price} บาท</p>
+					<p className="font-semibold text-sm md:text-base">
+						{product.price} บาท
+					</p>
 					<Button size="sm" className="mt-auto">
 						เพิ่มลงตะกร้า
 					</Button>
