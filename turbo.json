@@ -13,10 +13,14 @@
       "persistent": true,
       "cache": false
     },
-    "test": {},
-    "lint": {
-      "persistent": true
+    "test": {
+      "dependsOn": ["^test"]
     },
-    "format": {}
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "format": {
+      "dependsOn": ["^format"]
+    }
   }
 }
