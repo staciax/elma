@@ -21,7 +21,8 @@
 			"cache": false
 		},
 		"format": {
-			"dependsOn": ["^format"]
+			"dependsOn": ["^format"],
+			"cache": false
 		}
 	}
 }
