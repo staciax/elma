@@ -2,7 +2,7 @@ import type { AuthorPublic } from './authors';
 import type { CategoryPublic } from './categories';
 import type { PublisherPublic } from './publishers';
 
-export type ProductPublic = {
+export type BookPublic = {
 	id: string;
 	title: string;
 	description: string;
@@ -16,7 +16,7 @@ export type ProductPublic = {
 	authors: AuthorPublic[] | null;
 };
 
-export type ProductsPublic = {
+export type BooksPublic = {
 	count: number;
-	data: ProductPublic[];
+	data: BookPublic[];
 };

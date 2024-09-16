@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { addProductToCartMe } from '@/lib/elma/actions/shopping-carts';
-import type { ProductPublic } from '@/lib/elma/types';
+import type { BookPublic } from '@/lib/elma/types';
 import { ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,7 +28,7 @@ const productAuthors = [
 // }
 
 type Props = {
-	product: ProductPublic;
+	product: BookPublic;
 };
 
 export default function ProductDetail({ product }: Props) {

@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import type { ProductPublic } from '@/lib/elma/types';
+import type { BookPublic } from '@/lib/elma/types';
 import Link from 'next/link';
 
 type Props = {
 	className?: string;
-	product: ProductPublic;
+	product: BookPublic;
 };
 
 export function ProductCard({ product, className }: Props) {
