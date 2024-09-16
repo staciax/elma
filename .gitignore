@@ -1,2 +1,6 @@
 # Mics
 .DS_Store
+.turbo
+
+# dependencies
+/node_modules
