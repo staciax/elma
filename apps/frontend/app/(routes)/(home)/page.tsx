@@ -1,9 +1,9 @@
-import { getProducts } from '@/lib/elma/actions/products';
+import { getBooks } from '@/lib/elma/actions/books';
 
 import { ProductCard } from '@/components/products/product-card';
 
 export default async function Home() {
-	const results = await getProducts();
+	const results = await getBooks();
 	const products = results.data;
 	return (
 		<main>
