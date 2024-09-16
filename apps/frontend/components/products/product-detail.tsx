@@ -57,7 +57,9 @@ export default function ProductDetail({ product }: Props) {
 			</div>
 			<div className="flex w-full flex-col md:w-2/4">
 				<div>
-					<h3 className="font-semibold text-[#414141]">product.category_name</h3>
+					<h3 className="font-semibold text-[#414141]">
+						product.category_name
+					</h3>
 					<h3 className="mt-4 font-semibold text-2xl">product.product_title</h3>
 					<h3 className="mt-4">
 						โดย{' '}
@@ -72,7 +74,9 @@ export default function ProductDetail({ product }: Props) {
 						</span>
 					</h3>
 					<h3 className="mt-4">
-						<span className="mr-4 font-semibold text-2xl text-red-500">{product.price} บาท</span>
+						<span className="mr-4 font-semibold text-2xl text-red-500">
+							{product.price} บาท
+						</span>
 					</h3>
 				</div>
 				<hr className="my-8" />
@@ -88,7 +92,9 @@ export default function ProductDetail({ product }: Props) {
 				<hr className="my-8" />
 				<div>
 					<h3 className="font-ligh text-[#707070]">เรื่องย่อ</h3>
-					<h3 className="mt-2 font-light text-[#707070]">{product.description}</h3>
+					<h3 className="mt-2 font-light text-[#707070]">
+						{product.description}
+					</h3>
 				</div>
 				<hr className="my-8" />
 				<div className="mt-4 flex">
