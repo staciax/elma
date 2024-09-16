@@ -1,6 +1,6 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
 	"extends": ["../../biome.jsonc"]
+	// "$schema": "https://biomejs.dev/schemas/1.9.1/schema.json",
 	// "files": {
 	// 	"include": ["./**/*.js", "./**/*.ts", "./**/*.jsx", "./**/*.tsx", "./**/*.css", "./**/*.json"],
 	// 	"ignore": ["dist/**", ".vscode", ".next", "public", "node_modules"]
