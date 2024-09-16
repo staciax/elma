@@ -25,7 +25,10 @@ export const router = new Elysia({
 			`;
 			const [results] = await conn.query(stmt, [limit, offset]);
 			conn.release();
-			return results;
+			return {
+				count: 1,
+				data: results,
+			};
 		},
 		{
 			query: t.Object({
