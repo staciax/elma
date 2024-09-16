@@ -80,7 +80,10 @@ function SignInForm() {
 				<div className="grid gap-2">
 					<div className="flex items-center">
 						<Label htmlFor="password">รหัสผ่าน</Label>
-						<Link href="#" className="ml-auto inline-block text-sm underline transition-colors hover:text-[#5AB772]">
+						<Link
+							href="#"
+							className="ml-auto inline-block text-sm underline transition-colors hover:text-[#5AB772]"
+						>
 							ลืมรหัสผ่าน?
 						</Link>
 					</div>
@@ -92,7 +95,9 @@ function SignInForm() {
 						maxLength={255}
 						required
 					/>
-					{errors.password && <span role="alert">{errors.password.message}</span>}
+					{errors.password && (
+						<span role="alert">{errors.password.message}</span>
+					)}
 				</div>
 				<Button type="submit" className="w-full transition hover:bg-[#5AB772]">
 					เข้าสู่ระบบ

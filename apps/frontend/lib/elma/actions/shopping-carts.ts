@@ -19,7 +19,9 @@ export const getShoppingCartMe = async (): Promise<Product[]> => {
 	}
 };
 
-export const addProductToCartMe = async (product_id: string): Promise<ShoppingCart[]> => {
+export const addProductToCartMe = async (
+	product_id: string,
+): Promise<ShoppingCart[]> => {
 	try {
 		const response = await axios.post(
 			'/v1/carts/me',

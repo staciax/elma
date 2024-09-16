@@ -6,7 +6,12 @@ export type UserPublic = {
 	phone_number: string;
 };
 
-export type UserRole = 'SUPERUSER' | 'ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'CUSTOMER';
+export type UserRole =
+	| 'SUPERUSER'
+	| 'ADMIN'
+	| 'MANAGER'
+	| 'EMPLOYEE'
+	| 'CUSTOMER';
 
 export type User = UserPublic & {
 	hashed_password: string;

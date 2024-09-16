@@ -105,24 +105,47 @@ function SignUpForm() {
 				<div className="grid grid-cols-2 gap-4">
 					<div className="grid gap-2">
 						<Label htmlFor="first_name">ชื่อ</Label>
-						<Input id="first_name" {...register('first_name')} maxLength={128} required />
-						{errors.first_name && <span role="alert">{errors.first_name.message}</span>}
+						<Input
+							id="first_name"
+							{...register('first_name')}
+							maxLength={128}
+							required
+						/>
+						{errors.first_name && (
+							<span role="alert">{errors.first_name.message}</span>
+						)}
 					</div>
 					<div className="grid gap-2">
 						<Label htmlFor="last_name">นามสกุล</Label>
-						<Input id="last_name" {...register('last_name')} maxLength={128} required />
-						{errors.last_name && <span role="alert">{errors.last_name.message}</span>}
+						<Input
+							id="last_name"
+							{...register('last_name')}
+							maxLength={128}
+							required
+						/>
+						{errors.last_name && (
+							<span role="alert">{errors.last_name.message}</span>
+						)}
 					</div>
 				</div>
 				<div className="grid gap-2">
 					<Label htmlFor="email">อีเมล</Label>
-					<Input id="email" type="email" placeholder="m@example.com" {...register('email')} maxLength={256} required />
+					<Input
+						id="email"
+						type="email"
+						placeholder="m@example.com"
+						{...register('email')}
+						maxLength={256}
+						required
+					/>
 					{errors.email && <span role="alert">{errors.email.message}</span>}
 				</div>
 				<div className="grid gap-2">
 					<Label htmlFor="password">รหััสผ่าน</Label>
 					<Input id="password" type="password" {...register('password')} />
-					{errors.password && <span role="alert">{errors.password.message}</span>}
+					{errors.password && (
+						<span role="alert">{errors.password.message}</span>
+					)}
 				</div>
 				<div className="grid gap-2">
 					<Label htmlFor="password-comfirm">ยืนยันรหัสผ่าน</Label>
@@ -134,7 +157,9 @@ function SignUpForm() {
 						minLength={8}
 						maxLength={255}
 					/>
-					{errors.confirm_password && <span role="alert">{errors.confirm_password.message}</span>}
+					{errors.confirm_password && (
+						<span role="alert">{errors.confirm_password.message}</span>
+					)}
 				</div>
 				<Button type="submit" className="w-full transition hover:bg-[#5AB772]">
 					สมัครสมาชิก

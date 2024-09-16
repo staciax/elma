@@ -1,5 +1,11 @@
 import SignInForm from '@/components/forms/sign-in';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
