@@ -4,10 +4,11 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
+	BookHeart,
 	Home,
-	LineChart,
 	Package,
 	Package2,
+	PencilLine,
 	Settings,
 	ShoppingCart,
 	Users2,
@@ -52,28 +53,52 @@ export default function SideBar() {
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Link
-							href="#"
+							href="/admin/books"
 							className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
 						>
 							<Package className="h-5 w-5" />
-							<span className="sr-only">Products</span>
+							<span className="sr-only">หนังสือ</span>
 						</Link>
 					</TooltipTrigger>
-					<TooltipContent side="right">Products</TooltipContent>
+					<TooltipContent side="right">หนังสือ</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Link
-							href="#"
+							href="/admin/users"
 							className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
 						>
 							<Users2 className="h-5 w-5" />
-							<span className="sr-only">Customers</span>
+							<span className="sr-only">บัญชีผู้ใช้</span>
 						</Link>
 					</TooltipTrigger>
-					<TooltipContent side="right">Customers</TooltipContent>
+					<TooltipContent side="right">บัญชีผู้ใช้</TooltipContent>
 				</Tooltip>
 				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link
+							href="/admin/authors"
+							className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+						>
+							<PencilLine className="h-5 w-5" />
+							<span className="sr-only">ผู้แต่ง</span>
+						</Link>
+					</TooltipTrigger>
+					<TooltipContent side="right">ผู้แต่ง</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link
+							href="/admin/publishers"
+							className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+						>
+							<BookHeart className="h-5 w-5" />
+							<span className="sr-only">สำนักพิมพ์</span>
+						</Link>
+					</TooltipTrigger>
+					<TooltipContent side="right">สำนักพิมพ์</TooltipContent>
+				</Tooltip>
+				{/* <Tooltip>
 					<TooltipTrigger asChild>
 						<Link
 							href="#"
@@ -84,7 +109,7 @@ export default function SideBar() {
 						</Link>
 					</TooltipTrigger>
 					<TooltipContent side="right">Analytics</TooltipContent>
-				</Tooltip>
+				</Tooltip> */}
 			</nav>
 			<nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
 				<Tooltip>
