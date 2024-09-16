@@ -1,10 +1,10 @@
 'use server';
 
 import axios from '@/lib/axios';
-import type { Product } from '../types';
+import type { BookPublic } from '../types';
 import type { ShoppingCart } from '../types/shopping-carts';
 
-export const getShoppingCartMe = async (): Promise<Product[]> => {
+export const getShoppingCartMe = async (): Promise<BookPublic[]> => {
 	try {
 		// cache busting
 		// ?timestamp=${new Date().getTime()}
