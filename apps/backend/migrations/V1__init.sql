@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS authors (
 );
 
 -- TODO: ISBN is unique right?
--- TODO: add book cover image
+-- TODO: book cover image weak entity?
 CREATE TABLE IF NOT EXISTS books (
     id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS books (
     price DECIMAL(10, 2) NOT NULL,
     physical_price DECIMAL(10, 2) NULL,
     published_date DATETIME(3) NOT NULL,
+    cover_image VARCHAR(2083) NULL, --https://stackoverflow.com/questions/219569/best-database-field-type-for-a-url
     is_active BOOLEAN NOT NULL DEFAULT true,
     publisher_id VARCHAR(36) NULL,
     category_id VARCHAR(36) NULL,
