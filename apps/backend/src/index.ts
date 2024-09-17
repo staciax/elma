@@ -10,7 +10,7 @@ app.listen(
 );
 
 console.log(
-	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+	`🦊 Elysia is running at ${env.NODE_ENV !== 'production' ? 'http://' : 'https://'}${app.server?.hostname}:${app.server?.port}`,
 );
 // TODO: add this repo to the ElysiaJS Awesome list https://github.com/elysiajs/awesome-elysia
 // TODO: biomejs github action hook https://biomejs.dev/recipes/git-hooks/
