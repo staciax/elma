@@ -14,6 +14,7 @@ export const BookPublic = t.Object({
 	price: t.String(),
 	physical_price: t.Nullable(t.String()),
 	published_date: t.Date({ format: 'date-time' }),
+	cover_image: t.Nullable(t.String()),
 	is_active: t.Integer(),
 	publisher: t.Nullable(PublisherPublic),
 	category: t.Nullable(CategoryPublic),
