@@ -2,6 +2,8 @@ import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Prompt } from 'next/font/google';
 import '../styles/globals.css';
+import { getUserMe } from '@/lib/elma/actions/users';
+import { UserProvider } from '@/lib/elma/auth';
 
 const prompt = Prompt({
 	subsets: ['thai'],
@@ -21,10 +23,11 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const userPromise = getUserMe();
 	return (
 		<html lang="en">
 			<body className={prompt.className}>
-				{children}
+				<UserProvider userPromise={userPromise}>{children}</UserProvider>
 				<Toaster />
 			</body>
 		</html>
