@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { useUser } from '@/lib/elma/auth';
 import { Book, CircleUser, Search, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -17,7 +18,9 @@ import { useEffect, useRef, useState } from 'react';
 // TODO: add my book to navbar
 
 export default function Header() {
-	const isAuthenticated = true;
+	const { user } = useUser();
+
+	const isAuthenticated = user !== null;
 
 	const [showMobileSearch, setShowMobileSearch] = useState(false);
 	const mobileSearchRef = useRef<HTMLInputElement>(null);
