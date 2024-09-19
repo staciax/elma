@@ -18,8 +18,8 @@
 		"@elysiajs/jwt": "^1.1.1",
 		"@elysiajs/static": "^1.1.1",
 		"@elysiajs/swagger": "^1.1.1",
-		"elysia": "1.1.12",
-		"mysql2": "^3.11.2",
+		"elysia": "1.1.13",
+		"mysql2": "^3.11.3",
 		"uuid": "^10.0.0",
 		"yargs": "^17.7.2",
 		"zod": "^3.23.8"
