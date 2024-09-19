@@ -27,7 +27,17 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { th } from 'date-fns/locale';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -35,6 +45,15 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import {
 	Table,
@@ -54,6 +73,95 @@ import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import { CalendarIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+
+// export function ComboboxDemo() {
+// 	const [open, setOpen] = useState(false);
+// 	const [value, setValue] = useState('');
+
+// 	return (
+// 		<Popover open={open} onOpenChange={setOpen} modal={true}>
+// 			<PopoverTrigger asChild>
+// 				<Button
+// 					variant="outline"
+// 					role="combobox"
+// 					aria-expanded={open}
+// 					className="w-[200px] justify-between"
+// 				>
+// 					{value
+// 						? frameworks.find((framework) => framework.value === value)?.label
+// 						: 'เลือกสำนักพิมพ์...'}
+// 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+// 				</Button>
+// 			</PopoverTrigger>
+// 			<PopoverContent className="w-[200px] p-0">
+// 				<Command>
+// 					<CommandInput placeholder="ค้นหา สำนักพิมพ์..." />
+// 					<CommandList>
+// 						<CommandEmpty>No framework found.</CommandEmpty>
+// 						<CommandGroup>
+// 							{frameworks.map((framework) => (
+// 								<CommandItem
+// 									key={framework.value}
+// 									value={framework.value}
+// 									onSelect={(currentValue) => {
+// 										setValue(currentValue === value ? '' : currentValue);
+// 										setOpen(false);
+// 									}}
+// 								>
+// 									<Check
+// 										className={cn(
+// 											'mr-2 h-4 w-4',
+// 											value === framework.value ? 'opacity-100' : 'opacity-0',
+// 										)}
+// 									/>
+// 									{framework.label}
+// 								</CommandItem>
+// 							))}
+// 						</CommandGroup>
+// 					</CommandList>
+// 				</Command>
+// 			</PopoverContent>
+// 		</Popover>
+// 	);
+// }
+
+export function CategorySelectScrollable() {
+	return (
+		<Select>
+			<SelectTrigger className="w-[280px]">
+				<SelectValue placeholder="เลือกหมวดหมู่" />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectGroup>
+					<SelectLabel>สำนักพิมพ์</SelectLabel>
+					<SelectItem value="category-1">หมวดหมู่ 1</SelectItem>
+					<SelectItem value="category-2">หมวดหมู่ 2</SelectItem>
+					<SelectItem value="category-3">หมวดหมู่ 3</SelectItem>
+					<SelectItem value="category-4">หมวดหมู่ 4</SelectItem>
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+	);
+}
+
+export function PublisherSelectScrollable() {
+	return (
+		<Select>
+			<SelectTrigger className="w-[280px]">
+				<SelectValue placeholder="เลือกสำนักพิมพ์" />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectGroup>
+					<SelectLabel>สำนักพิมพ์</SelectLabel>
+					<SelectItem value="publisher-1">สำนักพิมพ์ 1</SelectItem>
+					<SelectItem value="publisher-2">สำนักพิมพ์ 2</SelectItem>
+					<SelectItem value="publisher-3">สำนักพิมพ์ 3</SelectItem>
+					<SelectItem value="publisher-4">สำนักพิมพ์ 4</SelectItem>
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+	);
+}
 
 export default function Page() {
 	const [result, setResult] = useState<BooksPublic>({ data: [], count: 0 });
@@ -85,6 +193,7 @@ export default function Page() {
 					price: 0,
 					physical_price: 0,
 					published_date: '',
+					cover_image: null,
 					is_active: true,
 					category: null,
 					publisher: null,
@@ -205,7 +314,11 @@ export default function Page() {
 								<TableHead>ชื่อ</TableHead>
 								{/* <TableHead>ISBN</TableHead> */}
 								<TableHead>ราคา</TableHead>
-								<TableHead className="hidden md:table-cell">ราคาปก</TableHead>
+								{/* <TableHead className="hidden md:table-cell">
+									ประเภทไฟล์
+								</TableHead> */}
+								<TableHead className="hidden md:table-cell">หมวดหมู่</TableHead>
+								{/* <TableHead className="hidden md:table-cell">ราคาปก</TableHead> */}
 								<TableHead className="hidden md:table-cell">ผู้แต่ง</TableHead>
 								<TableHead className="hidden md:table-cell">สำนักพิมพ์</TableHead>
 								{/* <TableHead className="hidden md:table-cell">อัพเดท</TableHead> */}
@@ -219,12 +332,21 @@ export default function Page() {
 							{result.data.map((product) => (
 								<TableRow key={product.id}>
 									<TableCell className="hidden sm:table-cell">
-										<Image
+										{/* <Image
 											alt="Product image"
 											className="aspect-square rounded-md object-cover"
 											height="64"
 											src="/placeholder.svg"
 											width="64"
+										/> */}
+										<img
+											src={
+												product.cover_image ||
+												'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif'
+											}
+											alt="Book Cover"
+											width={64}
+											className="aspect-auto rounded-md object-cover"
 										/>
 									</TableCell>
 									<TableCell className="font-medium">{product.title}</TableCell>
@@ -232,10 +354,15 @@ export default function Page() {
 
 									<TableCell>&#3647;{product.price}</TableCell>
 									<TableCell className="hidden md:table-cell">
-										{product.physical_price && (
-											<>&#3647;{product.physical_price}</>
-										)}
+										{product.category?.name}
 									</TableCell>
+									{/* <TableCell className="hidden md:table-cell">
+										{product.physical_price ? (
+											<>&#3647;{product.physical_price}</>
+										) : (
+											'-'
+										)}
+									</TableCell> */}
 									<TableCell className="hidden md:table-cell">
 										{/* <Badge variant="outline">Draft</Badge> */}
 										{/* <div className="grid gap-1">
@@ -291,9 +418,9 @@ export default function Page() {
 												<DropdownMenuItem
 													onClick={() => handleOpenModal(product)}
 												>
-													Edit
+													แก้ไข
 												</DropdownMenuItem>
-												<DropdownMenuItem>Delete</DropdownMenuItem>
+												<DropdownMenuItem>ลบ</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
 									</TableCell>
@@ -310,10 +437,10 @@ export default function Page() {
 				</CardFooter>
 			</Card>
 			<Dialog open={isOpen} onOpenChange={setIsOpen}>
-				<DialogContent className="max-w-xl">
+				<DialogContent className="max-w-2xl overflow-y-scroll max-h-screen">
 					<DialogHeader>
 						<DialogTitle>
-							{editingBook?.id ? 'แก้้ไขหนังสือ' : 'เพิ่มหนังสือ'}
+							{editingBook?.id ? 'แก้ไขหนังสือ' : 'เพิ่มหนังสือ'}
 						</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSaveBook} className="space-y-4">
@@ -361,6 +488,19 @@ export default function Page() {
 									required
 								/>
 							</div>
+							{/* <div className="flex-1">
+								<Label htmlFor="physical_price">ราคาปก</Label>
+								<Input
+									id="physical_price"
+									name="physical_price"
+									type="number"
+									step="0.01"
+									min="0"
+									defaultValue={editingBook?.physical_price || ''}
+									onChange={handleInputChange}
+									required
+								/>
+							</div> */}
 							<div className="flex-1">
 								<Label htmlFor="physical_price">ราคาปก</Label>
 								<Input
@@ -375,8 +515,20 @@ export default function Page() {
 								/>
 							</div>
 						</div>
+
+						<div className="flex gap-4">
+							<div className="grid gap-1.5">
+								<Label htmlFor="authors">สำนักพิมพ์</Label>
+								<PublisherSelectScrollable />
+							</div>
+
+							<div className="grid gap-1.5">
+								<Label htmlFor="authors">หมวดหมู่</Label>
+								<CategorySelectScrollable />
+							</div>
+						</div>
 						<div className="grid gap-4">
-							<Label htmlFor="published_date">Published Date</Label>
+							<Label htmlFor="published_date">เผยแพร่เมื่อ</Label>
 							{/* <Input
 								id="published_date"
 								name="published_date"
@@ -395,7 +547,13 @@ export default function Page() {
 										)}
 									>
 										<CalendarIcon className="mr-2 h-4 w-4" />
-										{date ? format(date, 'PPP') : <span>Pick a date</span>}
+										{date ? (
+											format(date, 'PPP', {
+												locale: th,
+											})
+										) : (
+											<span>Pick a date</span>
+										)}
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0">
@@ -412,8 +570,9 @@ export default function Page() {
 								</PopoverContent>
 							</Popover>
 						</div>
-						<div>
-							<Label htmlFor="authors">Authors</Label>
+
+						{/* <div>
+							<Label htmlFor="authors">ผู้แต่ง</Label>
 							<div className="flex flex-wrap gap-2 mb-2">
 								{editingBook?.authors?.map((author) => (
 									<Badge
@@ -445,6 +604,27 @@ export default function Page() {
 									Add
 								</Button>
 							</div>
+						</div> */}
+						{/* <ComboboxDemo /> */}
+
+						{/* <div className="grid gap-1.5">
+							<Label htmlFor="authors">สำนักพิมพ์</Label>
+							<PublisherSelectScrollable />
+						</div>
+
+						<div className="grid gap-1.5">
+							<Label htmlFor="authors">หมวดหมู่</Label>
+							<CategorySelectScrollable />
+						</div> */}
+
+						<div className="grid w-full max-w-sm items-center gap-1.5">
+							<Label htmlFor="book-cover">รูปหน้าปก</Label>
+							<Input id="book-cover" type="file" accept="image/*" />
+						</div>
+
+						<div className="grid w-full max-w-sm items-center gap-1.5">
+							<Label htmlFor="ebook-file">ไฟล์อีบุ๊ค</Label>
+							<Input id="ebook-file" type="file" accept=".pdf, .epub" />
 						</div>
 						<div className="flex items-center space-x-2">
 							<Switch
