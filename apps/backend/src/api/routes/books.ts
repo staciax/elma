@@ -43,6 +43,7 @@ export const router = new Elysia({
 				book.price AS price,
 				book.physical_price AS physical_price,
 				book.published_date AS published_date,
+				book.cover_image AS cover_image,
 				book.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
@@ -116,6 +117,7 @@ export const router = new Elysia({
 				book.price AS price,
 				book.physical_price AS physical_price,
 				book.published_date AS published_date,
+				book.cover_image AS cover_image,
 				book.is_active AS is_active,
 
 				IF(publisher.id IS NULL, NULL,
@@ -181,6 +183,7 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						cover_image,
 						is_active,
 						publisher_id,
 						category_id,
@@ -229,11 +232,13 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						cover_image,
 						is_active
 						publisher_id,
 						category_id
 					)
 					VALUES (
+						?,
 						?,
 						?,
 						?,
@@ -253,6 +258,7 @@ export const router = new Elysia({
 						isbn,
 						price,
 						published_date,
+						cover_image,
 						is_active,
 						publisher_id,
 						category_id,
@@ -270,6 +276,7 @@ export const router = new Elysia({
 						price: t.Number({ minimum: 0 }), // TODO: maximum ???
 						psysical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
 						published_date: t.Date({ format: 'date-time' }),
+						cover_image: t.Optional(t.String({ format: 'uri' })),
 						is_active: t.Optional(t.Boolean({ default: true })),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),
@@ -312,6 +319,7 @@ export const router = new Elysia({
 						price: t.Optional(t.Number({ minimum: 0 })),
 						psysical_price: t.Optional(t.Number({ minimum: 0 })),
 						published_date: t.Optional(t.Date({ format: 'date-time' })),
+						cover_image: t.Optional(t.String({ format: 'uri' })),
 						is_active: t.Optional(t.Boolean({ default: true })),
 						publisher_id: t.Optional(t.String({ format: 'uuid' })),
 						category_id: t.Optional(t.String({ format: 'uuid' })),

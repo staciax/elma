@@ -10,6 +10,7 @@ export type BookPublic = {
 	price: number;
 	physical_price: number;
 	published_date: string;
+	cover_image: string | null;
 	is_active: boolean;
 	category: CategoryPublic | null;
 	publisher: PublisherPublic | null;

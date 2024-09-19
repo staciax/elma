@@ -18,6 +18,10 @@ export const metadata: Metadata = {
 export default async function Page() {
 	const user = await getUserMe();
 
+	if (!user) {
+		return null;
+	}
+
 	return (
 		<main className="grid p-4">
 			<section className="w-full bg-white">
