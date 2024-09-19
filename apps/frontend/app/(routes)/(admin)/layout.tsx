@@ -1,3 +1,5 @@
+'use client';
+
 import SideBar from '@/components/admin/sidebar';
 import {
 	Breadcrumb,
@@ -19,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useUser } from '@/lib/elma/auth';
 import {
 	Home,
 	LineChart,
@@ -31,8 +34,17 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+function BreadcrumbBuilder() {
+	const pathname = usePathname();
+	const segments = pathname.split('/').filter((item) => item !== '');
+}
 
 function Header() {
+	const { user } = useUser();
+	const isAuthenticated = !!user;
+
 	return (
 		<header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 			<Sheet>
@@ -124,7 +136,7 @@ function Header() {
 						className="overflow-hidden rounded-full"
 					>
 						<Image
-							src="/placeholder-user.jpg"
+							src="/user.jpg"
 							width={36}
 							height={36}
 							alt="Avatar"
