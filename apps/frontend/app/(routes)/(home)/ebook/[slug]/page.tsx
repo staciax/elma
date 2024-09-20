@@ -6,10 +6,6 @@ import { notFound } from 'next/navigation';
 // https://github.com/MikeMcl/decimal.js
 // TODO: add skeleton loading https://ui.shadcn.com/docs/components/skeleton
 
-type Props = {
-	params: { slug: string };
-};
-
 // TODO: remove duplicate code
 
 // export async function generateMetadata({ params }: Props) {
@@ -26,11 +22,15 @@ type Props = {
 // 	};
 // }
 
+type Props = {
+	params: { slug: string };
+};
+
 export default async function Page({ params }: Props) {
 	const slug = params.slug;
 
 	const results = await getBook(slug);
-	if (!results.length) {
+	if (!results) {
 		return notFound();
 	}
 	const product = results[0];

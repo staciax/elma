@@ -3,13 +3,15 @@ import axios from '@/lib/axios';
 
 import type { BookPublic, BooksPublic } from '../types/books';
 
-export const getBook = async (id: string): Promise<BookPublic[]> => {
+// TODO: remove array of book instead of single book object in getBook from backend
+export const getBook = async (id: string): Promise<BookPublic[] | null> => {
 	console.log('product id:', id);
 	try {
 		const response = await axios.get(`/v1/books/${id}/`);
 		return response.data;
 	} catch (error) {
-		return Promise.reject(error);
+		return null;
+		// return Promise.reject(error);
 	}
 };
 
