@@ -6,7 +6,7 @@ export type UserRole =
 	| 'CUSTOMER';
 
 export type UserPublic = {
-	id: number;
+	id: string;
 	email: string;
 	first_name: string;
 	last_name: string;
