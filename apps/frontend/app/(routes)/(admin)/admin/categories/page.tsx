@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -8,6 +10,12 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
@@ -16,6 +24,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Table,
 	TableBody,
@@ -24,12 +34,63 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-
 import { getCategories } from '@/lib/elma/actions/categories';
+import type { CategoryPublic } from '@/lib/elma/types/categories';
 
-export default async function Page() {
-	const result = await getCategories();
+import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+export default function Page() {
+	const [categories, setCategories] = useState<CategoryPublic[]>([]);
+	const [isOpen, setIsOpen] = useState(false);
+	const [editingCategory, setEditingCategory] = useState<CategoryPublic | null>(
+		null,
+	);
+	const [newCategoryName, setNewCategoryName] = useState('');
+
+	const handleOpenModal = (category?: CategoryPublic) => {
+		setEditingCategory(category || null);
+		setNewCategoryName(category ? category.name : '');
+		setIsOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+		setEditingCategory(null);
+		setNewCategoryName('');
+	};
+
+	const handleSaveCategory = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (newCategoryName.trim()) {
+			if (editingCategory) {
+				setCategories(
+					categories.map((cat) =>
+						cat.id === editingCategory.id
+							? { ...cat, name: newCategoryName }
+							: cat,
+					),
+				);
+			} else {
+				const newCategory: CategoryPublic = {
+					id: String(Date.now()),
+					name: newCategoryName,
+				};
+				setCategories([...categories, newCategory]);
+			}
+			handleCloseModal();
+		}
+	};
+
+	useEffect(() => {
+		async function fetchCategories() {
+			const result = await getCategories();
+			setCategories(result.data);
+		}
+
+		fetchCategories();
+	}, []);
+
 	return (
 		<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-6">
 			<div className="ml-auto flex items-center gap-2">
@@ -49,7 +110,11 @@ export default async function Page() {
 						<DropdownMenuCheckboxItem>คำอธิบาย</DropdownMenuCheckboxItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-				<Button size="sm" className="h-8 gap-1">
+				<Button
+					size="sm"
+					className="h-8 gap-1"
+					onClick={() => handleOpenModal()}
+				>
 					<PlusCircle className="h-3.5 w-3.5" />
 					<span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
 						เพิ่มหมวดหมู่
@@ -66,19 +131,19 @@ export default async function Page() {
 						<TableHeader>
 							<TableRow>
 								<TableHead>ชื่อ</TableHead>
-								<TableHead className="hidden md:table-cell">คำอธิบาย</TableHead>
+								{/* <TableHead className="hidden md:table-cell">คำอธิบาย</TableHead> */}
 								<TableHead>
 									<span className="sr-only">Actions</span>
 								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{result.data.map((category) => (
+							{categories.map((category) => (
 								<TableRow key={category.id}>
 									<TableCell className="font-medium">{category.name}</TableCell>
-									<TableCell className="hidden md:table-cell">
+									{/* <TableCell className="hidden md:table-cell">
 										category.description
-									</TableCell>
+									</TableCell> */}
 									<TableCell>
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
@@ -105,11 +170,35 @@ export default async function Page() {
 				</CardContent>
 				<CardFooter>
 					<div className="text-muted-foreground text-xs">
-						Showing <strong>1-10</strong> of <strong>{result.count}</strong>{' '}
-						products
+						Showing <strong>1-10</strong> of{' '}
+						<strong>{categories.length}</strong> products
 					</div>
 				</CardFooter>
 			</Card>
+			<Dialog open={isOpen} onOpenChange={setIsOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							{editingCategory ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่'}
+						</DialogTitle>
+					</DialogHeader>
+					<form onSubmit={handleSaveCategory} className="space-y-4">
+						<div>
+							<Label htmlFor="categoryName">ชื่อหมวดหมู่</Label>
+							<Input
+								id="categoryName"
+								value={newCategoryName}
+								onChange={(e) => setNewCategoryName(e.target.value)}
+								placeholder="ใส่ชื่อหมวดหมู่"
+								required
+							/>
+						</div>
+						<Button type="submit">
+							{editingCategory ? 'บันทึกการแก้ไข' : 'เพิ่มหมวดหมู่'}
+						</Button>
+					</form>
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 }

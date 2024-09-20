@@ -65,10 +65,13 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { getBooks } from '@/lib/elma/actions/books';
+import type { AuthorPublic } from '@/lib/elma/types/authors';
 import type { BookPublic, BooksPublic } from '@/lib/elma/types/books';
+import type { CategoryPublic } from '@/lib/elma/types/categories';
+import type { PublisherPublic } from '@/lib/elma/types/publishers';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import { CalendarIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -163,6 +166,18 @@ export function PublisherSelectScrollable() {
 	);
 }
 
+const allPublishers: PublisherPublic[] = [
+	{ id: '1', name: 'Scribner' },
+	{ id: '2', name: 'J. B. Lippincott & Co.' },
+	{ id: '3', name: 'Penguin Books' },
+];
+
+const allCategories: CategoryPublic[] = [
+	{ id: '1', name: 'Classic Literature' },
+	{ id: '2', name: 'Science Fiction' },
+	{ id: '3', name: 'Mystery' },
+];
+
 export default function Page() {
 	const [result, setResult] = useState<BooksPublic>({ data: [], count: 0 });
 
@@ -181,6 +196,13 @@ export default function Page() {
 	const [editingBook, setEditingBook] = useState<BookPublic | null>(null);
 	const [newAuthor, setNewAuthor] = useState('');
 	const [date, setDate] = useState<Date | undefined>(new Date());
+	const [showNewAuthorInput, setShowNewAuthorInput] = useState(false);
+
+	const [newPublisher, setNewPublisher] = useState('');
+	const [showNewPublisherInput, setShowNewPublisherInput] = useState(false);
+
+	const [newCategory, setNewCategory] = useState('');
+	const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
 
 	const handleOpenModal = (book?: BookPublic) => {
 		setEditingBook(
@@ -239,7 +261,25 @@ export default function Page() {
 		}
 	};
 
-	const handleAddAuthor = () => {
+	// Sample authors data
+	const allAuthors: AuthorPublic[] = [
+		{ id: '1', name: 'F. Scott Fitzgerald' },
+		{ id: '2', name: 'Harper Lee' },
+		{ id: '3', name: 'George Orwell' },
+		{ id: '4', name: 'Jane Austen' },
+	];
+
+	const handleAddExistingAuthor = (authorId: string) => {
+		const authorToAdd = allAuthors.find((author) => author.id === authorId);
+		if (editingBook && authorToAdd) {
+			setEditingBook({
+				...editingBook,
+				authors: [...(editingBook.authors || []), authorToAdd],
+			});
+		}
+	};
+
+	const handleAddNewAuthor = () => {
 		if (editingBook && newAuthor) {
 			const newAuthorObj = { id: String(Date.now()), name: newAuthor };
 			setEditingBook({
@@ -247,6 +287,7 @@ export default function Page() {
 				authors: [...(editingBook.authors || []), newAuthorObj],
 			});
 			setNewAuthor('');
+			setShowNewAuthorInput(false);
 		}
 	};
 
@@ -257,6 +298,52 @@ export default function Page() {
 				authors:
 					editingBook.authors?.filter((author) => author.id !== authorId) || [],
 			});
+		}
+	};
+
+	const handleSelectPublisher = (publisherId: string) => {
+		const selectedPublisher = allPublishers.find(
+			(pub) => pub.id === publisherId,
+		);
+		if (editingBook && selectedPublisher) {
+			setEditingBook({
+				...editingBook,
+				publisher: selectedPublisher,
+			});
+		}
+	};
+
+	const handleAddNewPublisher = () => {
+		if (editingBook && newPublisher) {
+			const newPublisherObj = { id: String(Date.now()), name: newPublisher };
+			setEditingBook({
+				...editingBook,
+				publisher: newPublisherObj,
+			});
+			setNewPublisher('');
+			setShowNewPublisherInput(false);
+		}
+	};
+
+	const handleSelectCategory = (categoryId: string) => {
+		const selectedCategory = allCategories.find((cat) => cat.id === categoryId);
+		if (editingBook && selectedCategory) {
+			setEditingBook({
+				...editingBook,
+				category: selectedCategory,
+			});
+		}
+	};
+
+	const handleAddNewCategory = () => {
+		if (editingBook && newCategory) {
+			const newCategoryObj = { id: String(Date.now()), name: newCategory };
+			setEditingBook({
+				...editingBook,
+				category: newCategoryObj,
+			});
+			setNewCategory('');
+			setShowNewCategoryInput(false);
 		}
 	};
 
@@ -437,7 +524,7 @@ export default function Page() {
 				</CardFooter>
 			</Card>
 			<Dialog open={isOpen} onOpenChange={setIsOpen}>
-				<DialogContent className="max-w-2xl overflow-y-scroll max-h-screen">
+				<DialogContent className="max-w-xl overflow-y-scroll max-h-screen">
 					<DialogHeader>
 						<DialogTitle>
 							{editingBook?.id ? 'แก้ไขหนังสือ' : 'เพิ่มหนังสือ'}
@@ -509,6 +596,7 @@ export default function Page() {
 									type="number"
 									step="0.01"
 									min="0"
+									placeholder="ไม่บังคับ"
 									defaultValue={editingBook?.physical_price || ''}
 									onChange={handleInputChange}
 									required
@@ -516,17 +604,6 @@ export default function Page() {
 							</div>
 						</div>
 
-						<div className="flex gap-4">
-							<div className="grid gap-1.5">
-								<Label htmlFor="authors">สำนักพิมพ์</Label>
-								<PublisherSelectScrollable />
-							</div>
-
-							<div className="grid gap-1.5">
-								<Label htmlFor="authors">หมวดหมู่</Label>
-								<CategorySelectScrollable />
-							</div>
-						</div>
 						<div className="grid gap-4">
 							<Label htmlFor="published_date">เผยแพร่เมื่อ</Label>
 							{/* <Input
@@ -570,6 +647,177 @@ export default function Page() {
 								</PopoverContent>
 							</Popover>
 						</div>
+
+						{/* <div>
+							<Label htmlFor="category">หมวดหมู่</Label>
+							<div className="flex gap-2">
+								{showNewCategoryInput ? (
+									<>
+										<Input
+											value={newCategory}
+											onChange={(e) => setNewCategory(e.target.value)}
+											placeholder="ชื่อหมวดหมู่ใหม่"
+										/>
+										<Button type="button" onClick={handleAddNewCategory}>
+											เพิ่ม
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											onClick={() => setShowNewCategoryInput(false)}
+										>
+											ยกเลิก
+										</Button>
+									</>
+								) : (
+									<>
+										<Select onValueChange={handleSelectCategory}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="เลือกหมวดหมู่" />
+											</SelectTrigger>
+											<SelectContent>
+												{allCategories.map((category) => (
+													<SelectItem key={category.id} value={category.id}>
+														{category.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<Button
+											type="button"
+											onClick={() => setShowNewCategoryInput(true)}
+										>
+											<Plus className="mr-2 h-4 w-4" /> เพิ่มหมวดหมู่ใหม่
+										</Button>
+									</>
+								)}
+							</div>
+						</div> */}
+
+						{/* <div className="flex gap-4">
+							<div className="grid gap-1.5">
+								<Label htmlFor="authors">สำนักพิมพ์</Label>
+								<PublisherSelectScrollable />
+							</div>
+
+							<div className="grid gap-1.5">
+								<Label htmlFor="authors">หมวดหมู่</Label>
+								<CategorySelectScrollable />
+							</div>
+						</div> */}
+
+						{/* <div>
+							<Label htmlFor="publisher">สำนักพิมพ์</Label>
+							<div className="flex gap-2">
+								{showNewPublisherInput ? (
+									<>
+										<Input
+											value={newPublisher}
+											onChange={(e) => setNewPublisher(e.target.value)}
+											placeholder="ชื่อสำนักพิมพ์ใหม่"
+										/>
+										<Button type="button" onClick={handleAddNewPublisher}>
+											เพิ่ม
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											onClick={() => setShowNewPublisherInput(false)}
+										>
+											ยกเลิก
+										</Button>
+									</>
+								) : (
+									<>
+										<Select onValueChange={handleSelectPublisher}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="เลือกสำนักพิมพ์" />
+											</SelectTrigger>
+											<SelectContent>
+												{allPublishers.map((publisher) => (
+													<SelectItem key={publisher.id} value={publisher.id}>
+														{publisher.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<Button
+											type="button"
+											onClick={() => setShowNewPublisherInput(true)}
+										>
+											<Plus className="mr-2 h-4 w-4" /> เพิ่มสำนักพิมพ์ใหม่
+										</Button>
+									</>
+								)}
+							</div>
+						</div> */}
+
+						{/* <div>
+							<Label htmlFor="authors">ผู้แต่ง</Label>
+							<div className="flex flex-wrap gap-2 mb-2">
+								{editingBook?.authors?.map((author) => (
+									<Badge
+										key={author.id}
+										variant="secondary"
+										className="flex items-center gap-1"
+									>
+										{author.name}
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											className="h-4 w-4 p-0"
+											onClick={() => handleRemoveAuthor(author.id)}
+										>
+											<X className="h-3 w-3" />
+										</Button>
+									</Badge>
+								))}
+							</div>
+
+							<div className="flex gap-2">
+								{showNewAuthorInput ? (
+									<>
+										<Input
+											value={newAuthor}
+											onChange={(e) => setNewAuthor(e.target.value)}
+											placeholder="ชื่อผู้แต่งใหม่"
+										/>
+										<Button type="button" onClick={handleAddNewAuthor}>
+											เพิ่ม
+										</Button>
+										<Button
+											type="button"
+											variant="outline"
+											onClick={() => setShowNewAuthorInput(false)}
+										>
+											ยกเลิก
+										</Button>
+									</>
+								) : (
+									<>
+										<Select onValueChange={handleAddExistingAuthor}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="เลือกผู้แต่ง" />
+											</SelectTrigger>
+											<SelectContent>
+												{allAuthors.map((author) => (
+													<SelectItem key={author.id} value={author.id}>
+														{author.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<Button
+											type="button"
+											onClick={() => setShowNewAuthorInput(true)}
+										>
+											<Plus className="mr-2 h-4 w-4" /> เพิ่มผู้แต่งใหม่
+										</Button>
+									</>
+								)}
+							</div>
+						</div> */}
 
 						{/* <div>
 							<Label htmlFor="authors">ผู้แต่ง</Label>

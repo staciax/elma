@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -8,6 +10,12 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
@@ -16,6 +24,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Table,
 	TableBody,
@@ -24,12 +34,77 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-
 import { getPublishers } from '@/lib/elma/actions/publishers';
+import type { PublisherPublic } from '@/lib/elma/types';
+import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-export default async function Page() {
-	const result = await getPublishers();
+export default function Page() {
+	const [count, setCount] = useState(0);
+	const [publishers, setPublishers] = useState<PublisherPublic[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		async function fetchData() {
+			const result = await getPublishers();
+			setCount(result.count);
+			setPublishers(result.data);
+			setIsLoading(false);
+		}
+		fetchData();
+	}, []);
+
+	const [isOpen, setIsOpen] = useState(false);
+	const [editingPublisher, setEditingPublisher] =
+		useState<PublisherPublic | null>(null);
+	const [newPublisherName, setNewPublisherName] = useState('');
+	const [newPublisherWebsite, setNewPublisherWebsite] = useState('');
+
+	const handleOpenModal = (publisher?: PublisherPublic) => {
+		setEditingPublisher(publisher || null);
+		setNewPublisherName(publisher ? publisher.name : '');
+		setNewPublisherWebsite(publisher ? 'publisher.website' : '');
+		setIsOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+		setEditingPublisher(null);
+		setNewPublisherName('');
+		setNewPublisherWebsite('');
+	};
+
+	const handleSavePublisher = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (newPublisherName.trim()) {
+			if (editingPublisher) {
+				setPublishers(
+					publishers.map((pub) =>
+						pub.id === editingPublisher.id
+							? { ...pub, name: newPublisherName, website: newPublisherWebsite }
+							: pub,
+					),
+				);
+			} else {
+				const newPublisher: PublisherPublic = {
+					id: String(Date.now()),
+					name: newPublisherName,
+				};
+				setPublishers([...publishers, newPublisher]);
+			}
+			handleCloseModal();
+		}
+	};
+
+	const _handleDeletePublisher = (id: string) => {
+		setPublishers(publishers.filter((pub) => pub.id !== id));
+	};
+
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
+	// const result = await getPublishers();
 	return (
 		<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-6">
 			<div className="ml-auto flex items-center gap-2">
@@ -49,10 +124,14 @@ export default async function Page() {
 						<DropdownMenuCheckboxItem>ที่อยู่</DropdownMenuCheckboxItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-				<Button size="sm" className="h-8 gap-1">
+				<Button
+					size="sm"
+					className="h-8 gap-1"
+					onClick={() => handleOpenModal()}
+				>
 					<PlusCircle className="h-3.5 w-3.5" />
 					<span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-						เพิ่มสำนักพิมพ์
+						เพิ่มสำนักพิมพ์ใหม่
 					</span>
 				</Button>
 			</div>
@@ -66,20 +145,18 @@ export default async function Page() {
 						<TableHeader>
 							<TableRow>
 								<TableHead>ชื่อ</TableHead>
-								<TableHead className="hidden md:table-cell">ที่อยู่</TableHead>
-								<TableHead>
-									<span className="sr-only">Actions</span>
-								</TableHead>
+								<TableHead className="hidden md:table-cell">เว็บไซต์</TableHead>
+								<TableHead>การดำเนินการ</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{result.data.map((publisher) => (
+							{publishers.map((publisher) => (
 								<TableRow key={publisher.id}>
 									<TableCell className="font-medium">
 										{publisher.name}
 									</TableCell>
 									<TableCell className="hidden md:table-cell">
-										publisher.description
+										publisher.website
 									</TableCell>
 									<TableCell>
 										<DropdownMenu>
@@ -107,11 +184,44 @@ export default async function Page() {
 				</CardContent>
 				<CardFooter>
 					<div className="text-muted-foreground text-xs">
-						Showing <strong>1-10</strong> of <strong>{result.count}</strong>{' '}
-						products
+						Showing <strong>1-10</strong> of <strong>{count}</strong> products
 					</div>
 				</CardFooter>
 			</Card>
+			<Dialog open={isOpen} onOpenChange={setIsOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							{editingPublisher ? 'แก้ไขสำนักพิมพ์' : 'เพิ่มสำนักพิมพ์ใหม่'}
+						</DialogTitle>
+					</DialogHeader>
+					<form onSubmit={handleSavePublisher} className="space-y-4">
+						<div>
+							<Label htmlFor="publisherName">ชื่อสำนักพิมพ์</Label>
+							<Input
+								id="publisherName"
+								value={newPublisherName}
+								onChange={(e) => setNewPublisherName(e.target.value)}
+								placeholder="ใส่ชื่อสำนักพิมพ์"
+								required
+							/>
+						</div>
+						{/* <div>
+							<Label htmlFor="publisherWebsite">เว็บไซต์</Label>
+							<Input
+								id="publisherWebsite"
+								value={newPublisherWebsite}
+								onChange={(e) => setNewPublisherWebsite(e.target.value)}
+								placeholder="https://www.example.com"
+								type="url"
+							/>
+						</div> */}
+						<Button type="submit">
+							{editingPublisher ? 'บันทึกการแก้ไข' : 'เพิ่มสำนักพิมพ์'}
+						</Button>
+					</form>
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 }
