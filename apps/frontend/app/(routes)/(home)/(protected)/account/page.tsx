@@ -1,7 +1,5 @@
-// import AccountForm from './account-form';
 import AccountForm from '@/components/forms/account';
 import NewPasswordForm from '@/components/forms/new-password';
-// import { Card } from '@/components/ui/card';
 import { getUserMe } from '@/lib/elma/actions/users';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -10,10 +8,6 @@ import Link from 'next/link';
 export const metadata: Metadata = {
 	title: 'รายละเอียดบัญชี',
 };
-
-// function ChangePassword() {
-// 	return <Card></Card>;
-// }
 
 export default async function Page() {
 	const user = await getUserMe();

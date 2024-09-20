@@ -1,6 +1,5 @@
-import { getBooks } from '@/lib/elma/actions/books';
-
 import { ProductCard } from '@/components/books/product-card';
+import { getBooks } from '@/lib/elma/actions/books';
 
 export default async function Home() {
 	const results = await getBooks();
@@ -8,7 +7,6 @@ export default async function Home() {
 	return (
 		<main>
 			<section className="container">
-				{/* <div className="grid grid-cols-2 gap-4 md:grid-cols-5"> */}
 				<div className="flex flex-row flex-wrap justify-center gap-4">
 					{products.map((product) => (
 						<ProductCard
