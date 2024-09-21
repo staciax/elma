@@ -400,20 +400,7 @@ export default function Page() {
 						</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSaveUser} className="space-y-4">
-						<div>
-							<Label htmlFor="email">อีเมล</Label>
-							<Input
-								id="email"
-								type="email"
-								name="email"
-								placeholder="อีเมล"
-								value={editingUser?.email || ''}
-								onChange={handleInputChange}
-								className="w-full mt-1"
-								required
-							/>
-						</div>
-						<div>
+						{/* <div>
 							<Label htmlFor="first_name">ชื่อ</Label>
 							<Input
 								id="first_name"
@@ -434,6 +421,73 @@ export default function Page() {
 								name="last_name"
 								placeholder="นามสกุล"
 								value={editingUser?.last_name || ''}
+								onChange={handleInputChange}
+								className="w-full mt-1"
+								required
+							/>
+						</div> */}
+						<div className="grid grid-cols-2 gap-4">
+							<div className="grid gap-2">
+								<Label htmlFor="first_name">ชื่อ</Label>
+								<Input
+									id="first_name"
+									type="text"
+									name="first_name"
+									placeholder="ชื่อ"
+									value={editingUser?.first_name || ''}
+									onChange={handleInputChange}
+									className="w-full mt-1"
+									required
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="last_name">นามสกุล</Label>
+								<Input
+									id="last_name"
+									type="text"
+									name="last_name"
+									placeholder="นามสกุล"
+									value={editingUser?.last_name || ''}
+									onChange={handleInputChange}
+									className="w-full mt-1"
+									required
+								/>
+							</div>
+						</div>
+						<div>
+							<Label htmlFor="email">อีเมล</Label>
+							<Input
+								id="email"
+								type="email"
+								name="email"
+								placeholder="อีเมล"
+								value={editingUser?.email || ''}
+								onChange={handleInputChange}
+								className="w-full mt-1"
+								required
+							/>
+						</div>
+						<div>
+							<Label htmlFor="password">รหัสผ่าน</Label>
+							<Input
+								id="password"
+								type="password"
+								name="password"
+								// placeholder="อีเมล"
+								// value={editingUser?.email || ''}
+								onChange={handleInputChange}
+								className="w-full mt-1"
+								required
+							/>
+						</div>
+						<div>
+							<Label htmlFor="password">ยืนยันรหัสผ่าน</Label>
+							<Input
+								id="password"
+								type="password"
+								name="password"
+								// placeholder="อีเมล"
+								// value={editingUser?.email || ''}
 								onChange={handleInputChange}
 								className="w-full mt-1"
 								required
