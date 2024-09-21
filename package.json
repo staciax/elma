@@ -9,10 +9,10 @@
 		"test": "turbo run test"
 	},
 	"workspaces": ["apps/*", "packages/*"],
-	"packageManager": "bun@1.1.27",
+	"packageManager": "bun@1.1.29",
 	"dependencies": {},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.1",
+		"@biomejs/biome": "~1.9.2",
 		"turbo": "^2.1.2"
 	}
 }
