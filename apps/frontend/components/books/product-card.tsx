@@ -5,10 +5,10 @@ import Link from 'next/link';
 
 type Props = {
 	className?: string;
-	product: BookPublic;
+	book: BookPublic;
 };
 
-export function ProductCard({ product, className }: Props) {
+export function BookCard({ book, className }: Props) {
 	return (
 		// <Card className={cn('w-full overflow-hidden', className || 'max-w-52')}>
 		// 	<div className="group relative">
@@ -34,9 +34,12 @@ export function ProductCard({ product, className }: Props) {
 		<Card className="w-full max-w-52 rounded-md border">
 			<div className="group flex h-full flex-col justify-between">
 				<div className="aspect-[2/3] w-full overflow-hidden rounded-md">
-					<Link href={`/ebook/${product.id}`}>
+					<Link href={`/ebook/${book.id}`}>
 						<img
-							src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif"
+							src={
+								book.cover_image ||
+								'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif'
+							}
 							alt="Book Cover"
 							width={400}
 							height={600}
@@ -46,16 +49,14 @@ export function ProductCard({ product, className }: Props) {
 				</div>
 				<div className="mb-auto px-2 pt-2">
 					<Link
-						href={`/ebook/${product.id}`}
+						href={`/ebook/${book.id}`}
 						className="line-clamp-2 font-normal text-sm md:text-base"
 					>
-						{product.title}
+						{book.title}
 					</Link>
 				</div>
 				<div className="grid gap-2 px-2 pb-2">
-					<p className="font-semibold text-sm md:text-base">
-						{product.price} บาท
-					</p>
+					<p className="font-semibold text-sm md:text-base">{book.price} บาท</p>
 					<Button size="sm" className="mt-auto">
 						เพิ่มลงตะกร้า
 					</Button>

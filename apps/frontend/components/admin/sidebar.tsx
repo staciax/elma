@@ -24,7 +24,7 @@ export default function SideBar() {
 		{ name: 'บัญชีผู้ใช้', href: '/admin/users', icon: Users2 },
 		{ name: 'ผู้แต่ง', href: '/admin/authors', icon: PencilLine },
 		{ name: 'สำนักพิมพ์', href: '/admin/publishers', icon: Printer },
-		{ name: 'หมวดหมู่', href: '/admin/categories', icon: ChartBarStacked },
+		{ name: 'ประเภท', href: '/admin/categories', icon: ChartBarStacked },
 	];
 
 	return (

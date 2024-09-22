@@ -27,12 +27,15 @@ export default async function Page() {
 					<main className="w-full">
 						<h2 className="text-3xl">ตะกร้าของคุณ</h2>
 						<div className="flex flex-col">
-							{results.map((product) => (
-								<div key={product.id} className="flex max-w-xl border-b pb-6">
+							{results.map((book) => (
+								<div key={book.id} className="flex max-w-xl border-b pb-6">
 									<div className="min-w-48 max-w-48 p-4">
-										<Link href={`/ebook/${product.id}`}>
+										<Link href={`/ebook/${book.id}`}>
 											<img
-												src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif"
+												src={
+													book.cover_image ||
+													'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif'
+												}
 												alt="Book Cover"
 												width={400}
 												height={600}
@@ -42,14 +45,14 @@ export default async function Page() {
 									</div>
 									<div className="flex w-full justify-between">
 										<div className="flex flex-col">
-											<h2 className="text-sm">{product.category?.name}</h2>
-											<Link href={`/ebook/${product.id}`} className="mt-2">
-												{product.title}
+											<h2 className="text-sm">{book.category?.name}</h2>
+											<Link href={`/ebook/${book.id}`} className="mt-2">
+												{book.title}
 											</Link>
 											<h2 className="mt-2">โดย ยาเอะ อุทสึมิ</h2>
 										</div>
 										<div className="flex flex-col items-end">
-											<span>{product.price} บาท</span>
+											<span>{book.price} บาท</span>
 											<Link href="#">
 												<Trash className="h-4 w-4 text-red-500" />
 											</Link>

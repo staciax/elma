@@ -5,7 +5,7 @@ import type { BookPublic, BooksPublic } from '../types/books';
 
 // TODO: remove array of book instead of single book object in getBook from backend
 export const getBook = async (id: string): Promise<BookPublic[] | null> => {
-	console.log('product id:', id);
+	console.log('book id:', id);
 	try {
 		const response = await axios.get(`/v1/books/${id}/`);
 		return response.data;

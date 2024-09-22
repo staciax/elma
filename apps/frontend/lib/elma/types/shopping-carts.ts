@@ -1,4 +1,4 @@
 export type ShoppingCart = {
-	product_id: string;
+	book_id: string;
 	user_id: string;
 };

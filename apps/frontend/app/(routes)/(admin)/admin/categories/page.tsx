@@ -117,14 +117,14 @@ export default function Page() {
 				>
 					<PlusCircle className="h-3.5 w-3.5" />
 					<span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-						เพิ่มหมวดหมู่
+						เพิ่มประเภท
 					</span>
 				</Button>
 			</div>
 			<Card x-chunk="dashboard-06-chunk-0">
 				<CardHeader>
-					<CardTitle>หมวดหมู่</CardTitle>
-					<CardDescription>จัดการหมวดหมู่</CardDescription>
+					<CardTitle>ประเภท</CardTitle>
+					<CardDescription>จัดการประเภท</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
@@ -179,22 +179,22 @@ export default function Page() {
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
-							{editingCategory ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่'}
+							{editingCategory ? 'แก้ไขประเภท' : 'เพิ่มประเภทใหม่'}
 						</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSaveCategory} className="space-y-4">
 						<div>
-							<Label htmlFor="categoryName">ชื่อหมวดหมู่</Label>
+							<Label htmlFor="categoryName">ชื่อประเภท</Label>
 							<Input
 								id="categoryName"
 								value={newCategoryName}
 								onChange={(e) => setNewCategoryName(e.target.value)}
-								placeholder="ใส่ชื่อหมวดหมู่"
+								placeholder="ใส่ชื่อประเภท"
 								required
 							/>
 						</div>
 						<Button type="submit">
-							{editingCategory ? 'บันทึกการแก้ไข' : 'เพิ่มหมวดหมู่'}
+							{editingCategory ? 'บันทึกการแก้ไข' : 'เพิ่มประเภท'}
 						</Button>
 					</form>
 				</DialogContent>

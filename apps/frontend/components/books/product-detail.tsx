@@ -1,18 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { addProductToCartMe } from '@/lib/elma/actions/shopping-carts';
+import { addBookToCartMe } from '@/lib/elma/actions/shopping-carts';
 import type { BookPublic } from '@/lib/elma/types';
 import { ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
-
-const productAuthors = [
-	{
-		author_id: '1',
-		author_name: 'มาโคโตะ ชินไค',
-	},
-];
-// const productImages = [];
 
 // function isbnHyphen(isbn: string) {
 // 	return isbn.replace(/(\d{3})(\d{1})(\d{4})(\d{4})(\d{1})/, '$1-$2-$3-$4-$5');
@@ -28,13 +20,13 @@ const productAuthors = [
 // }
 
 type Props = {
-	product: BookPublic;
+	book: BookPublic;
 };
 
-export default function ProductDetail({ product }: Props) {
+export default function BookDetail({ book }: Props) {
 	const handleAddToCart = async () => {
 		try {
-			await addProductToCartMe(product.id);
+			await addBookToCartMe(book.id);
 			toast.success('เพิ่มสินค้าลงตะกร้าสำเร็จ', { duration: 5000 });
 		} catch (error) {
 			toast.error('เพิ่มสินค้าลงตะกร้าไม่สำเร็จ', { duration: 5000 });
@@ -47,7 +39,10 @@ export default function ProductDetail({ product }: Props) {
 				<div className="rounded-md bg-gradient-to-b from-[rgba(120,240,132,0.2)] to-transparent">
 					<div className="relative">
 						<img
-							src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif?4"
+							src={
+								book.cover_image ||
+								'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif?4'
+							}
 							alt="product-image"
 							className="mx-auto"
 						/>
@@ -60,7 +55,7 @@ export default function ProductDetail({ product }: Props) {
 					<h3 className="font-semibold text-[#414141]">
 						product.category_name
 					</h3>
-					<h3 className="mt-4 font-semibold text-2xl">product.product_title</h3>
+					<h3 className="mt-4 font-semibold text-2xl">{book.title}</h3>
 					<h3 className="mt-4">
 						โดย{' '}
 						<span className="font-semibold text-green-500">
@@ -70,12 +65,14 @@ export default function ProductDetail({ product }: Props) {
 									</Link>
 								))} */}
 							{/* TODO: how to join tag a */}
-							{productAuthors.map((author) => author.author_name).join(', ')}
+							{book.authors
+								? book.authors.map((author) => author.name).join(', ')
+								: ''}
 						</span>
 					</h3>
 					<h3 className="mt-4">
 						<span className="mr-4 font-semibold text-2xl text-red-500">
-							{product.price} บาท
+							{book.price} บาท
 						</span>
 					</h3>
 				</div>
@@ -92,15 +89,15 @@ export default function ProductDetail({ product }: Props) {
 				<hr className="my-8" />
 				<div>
 					<h3 className="font-ligh text-[#707070]">เรื่องย่อ</h3>
-					<h3 className="mt-2 font-light text-[#707070]">
-						{product.description}
-					</h3>
+					<h3 className="mt-2 font-light text-[#707070]">{book.description}</h3>
 				</div>
 				<hr className="my-8" />
 				<div className="mt-4 flex">
 					<div className="w-2/4">
 						<h3 className="font-ligh text-[#707070]">สำนักพิมพ์</h3>
-						<h3 className="font-light">product.publisher_name</h3>
+						<h3 className="font-light">
+							{book.publisher ? book.publisher.name : ''}
+						</h3>
 						{/* TODO: link to publisher */}
 					</div>
 
@@ -112,12 +109,12 @@ export default function ProductDetail({ product }: Props) {
 				<div className="mt-4 flex">
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">วันที่จำหน่าย</h3>
-						<h3 className="font-light">{product.published_date}</h3>
+						<h3 className="font-light">{book.published_date}</h3>
 						{/* TODO: show context datetime */}
 					</div>
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">ISBN</h3>
-						<h3 className="font-light">{product.isbn}</h3>
+						<h3 className="font-light">{book.isbn}</h3>
 						{/* TODO: context copy and copy without hyphen */}
 					</div>
 				</div>
@@ -129,7 +126,7 @@ export default function ProductDetail({ product }: Props) {
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">ราคาหน้าปก</h3>
 						<h3 className="font-light">
-							{product.physical_price ? <>{product.physical_price} บาท</> : '-'}
+							{book.physical_price ? <>{book.physical_price} บาท</> : '-'}
 							{/* {product.price} บาท (ประหยัด{' '}
 							{priceDiffPercent(product.price, product.product_ebook_price)}%) */}
 						</h3>

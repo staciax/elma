@@ -1,4 +1,4 @@
-import ProductDetail from '@/components/books/product-detail';
+import BookDetail from '@/components/books/product-detail';
 import { getBook } from '@/lib/elma/actions/books';
 import { notFound } from 'next/navigation';
 
@@ -37,7 +37,7 @@ export default async function Page({ params }: Props) {
 
 	return (
 		<main className="container flex flex-col items-center">
-			<ProductDetail product={product} />
+			<BookDetail book={product} />
 			<section>TEST</section>
 		</main>
 	);

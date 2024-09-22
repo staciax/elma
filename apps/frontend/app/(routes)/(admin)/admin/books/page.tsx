@@ -132,15 +132,15 @@ function CategorySelectScrollable() {
 	return (
 		<Select>
 			<SelectTrigger className="w-[280px]">
-				<SelectValue placeholder="เลือกหมวดหมู่" />
+				<SelectValue placeholder="เลือกประเภท" />
 			</SelectTrigger>
 			<SelectContent>
 				<SelectGroup>
 					<SelectLabel>สำนักพิมพ์</SelectLabel>
-					<SelectItem value="category-1">หมวดหมู่ 1</SelectItem>
-					<SelectItem value="category-2">หมวดหมู่ 2</SelectItem>
-					<SelectItem value="category-3">หมวดหมู่ 3</SelectItem>
-					<SelectItem value="category-4">หมวดหมู่ 4</SelectItem>
+					<SelectItem value="category-1">ประเภท 1</SelectItem>
+					<SelectItem value="category-2">ประเภท 2</SelectItem>
+					<SelectItem value="category-3">ประเภท 3</SelectItem>
+					<SelectItem value="category-4">ประเภท 4</SelectItem>
 				</SelectGroup>
 			</SelectContent>
 		</Select>
@@ -404,7 +404,7 @@ export default function Page() {
 								{/* <TableHead className="hidden md:table-cell">
 									ประเภทไฟล์
 								</TableHead> */}
-								<TableHead className="hidden md:table-cell">หมวดหมู่</TableHead>
+								<TableHead className="hidden md:table-cell">ประเภท</TableHead>
 								{/* <TableHead className="hidden md:table-cell">ราคาปก</TableHead> */}
 								<TableHead className="hidden md:table-cell">ผู้แต่ง</TableHead>
 								<TableHead className="hidden md:table-cell">สำนักพิมพ์</TableHead>
@@ -416,8 +416,8 @@ export default function Page() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{result.data.map((product) => (
-								<TableRow key={product.id}>
+							{result.data.map((book) => (
+								<TableRow key={book.id}>
 									<TableCell className="hidden sm:table-cell">
 										{/* <Image
 											alt="Product image"
@@ -428,7 +428,7 @@ export default function Page() {
 										/> */}
 										<img
 											src={
-												product.cover_image ||
+												book.cover_image ||
 												'https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif'
 											}
 											alt="Book Cover"
@@ -436,12 +436,12 @@ export default function Page() {
 											className="aspect-auto rounded-md object-cover"
 										/>
 									</TableCell>
-									<TableCell className="font-medium">{product.title}</TableCell>
+									<TableCell className="font-medium">{book.title}</TableCell>
 									{/* <TableCell className="font-medium">{product.isbn}</TableCell> */}
 
-									<TableCell>&#3647;{product.price}</TableCell>
+									<TableCell>&#3647;{book.price}</TableCell>
 									<TableCell className="hidden md:table-cell">
-										{product.category?.name}
+										{book.category?.name}
 									</TableCell>
 									{/* <TableCell className="hidden md:table-cell">
 										{product.physical_price ? (
@@ -467,7 +467,7 @@ export default function Page() {
 											)}
 										</div> */}
 										<div className="grid gap-1">
-											{product.authors?.map((author) => (
+											{book.authors?.map((author) => (
 												<Badge
 													key={author.id}
 													variant="secondary"
@@ -479,10 +479,10 @@ export default function Page() {
 										</div>
 									</TableCell>
 									<TableCell className="hidden md:table-cell">
-										{product.publisher ? <>{product.publisher.name}</> : <>-</>}
+										{book.publisher ? <>{book.publisher.name}</> : <>-</>}
 									</TableCell>
 									<TableCell className="hidden md:table-cell">
-										{product.is_active ? (
+										{book.is_active ? (
 											<Badge className="bg-green-500">Active</Badge>
 										) : (
 											<Badge variant={'secondary'}>Inactive</Badge>
@@ -502,9 +502,7 @@ export default function Page() {
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
 												<DropdownMenuLabel>Actions</DropdownMenuLabel>
-												<DropdownMenuItem
-													onClick={() => handleOpenModal(product)}
-												>
+												<DropdownMenuItem onClick={() => handleOpenModal(book)}>
 													แก้ไข
 												</DropdownMenuItem>
 												<DropdownMenuItem>ลบ</DropdownMenuItem>
@@ -648,15 +646,15 @@ export default function Page() {
 							</Popover>
 						</div>
 
-						{/* <div>
-							<Label htmlFor="category">หมวดหมู่</Label>
+						<div>
+							<Label htmlFor="category">ประเภท</Label>
 							<div className="flex gap-2">
 								{showNewCategoryInput ? (
 									<>
 										<Input
 											value={newCategory}
 											onChange={(e) => setNewCategory(e.target.value)}
-											placeholder="ชื่อหมวดหมู่ใหม่"
+											placeholder="ชื่อประเภทใหม่"
 										/>
 										<Button type="button" onClick={handleAddNewCategory}>
 											เพิ่ม
@@ -673,7 +671,7 @@ export default function Page() {
 									<>
 										<Select onValueChange={handleSelectCategory}>
 											<SelectTrigger className="w-full">
-												<SelectValue placeholder="เลือกหมวดหมู่" />
+												<SelectValue placeholder="เลือกประเภท" />
 											</SelectTrigger>
 											<SelectContent>
 												{allCategories.map((category) => (
@@ -687,12 +685,12 @@ export default function Page() {
 											type="button"
 											onClick={() => setShowNewCategoryInput(true)}
 										>
-											<Plus className="mr-2 h-4 w-4" /> เพิ่มหมวดหมู่ใหม่
+											<Plus className="mr-2 h-4 w-4" /> เพิ่มประเภทใหม่
 										</Button>
 									</>
 								)}
 							</div>
-						</div> */}
+						</div>
 
 						{/* <div className="flex gap-4">
 							<div className="grid gap-1.5">
@@ -701,12 +699,12 @@ export default function Page() {
 							</div>
 
 							<div className="grid gap-1.5">
-								<Label htmlFor="authors">หมวดหมู่</Label>
+								<Label htmlFor="authors">ประเภท</Label>
 								<CategorySelectScrollable />
 							</div>
 						</div> */}
 
-						{/* <div>
+						<div>
 							<Label htmlFor="publisher">สำนักพิมพ์</Label>
 							<div className="flex gap-2">
 								{showNewPublisherInput ? (
@@ -750,9 +748,9 @@ export default function Page() {
 									</>
 								)}
 							</div>
-						</div> */}
+						</div>
 
-						{/* <div>
+						<div>
 							<Label htmlFor="authors">ผู้แต่ง</Label>
 							<div className="flex flex-wrap gap-2 mb-2">
 								{editingBook?.authors?.map((author) => (
@@ -817,7 +815,7 @@ export default function Page() {
 									</>
 								)}
 							</div>
-						</div> */}
+						</div>
 
 						{/* <div>
 							<Label htmlFor="authors">ผู้แต่ง</Label>
@@ -861,7 +859,7 @@ export default function Page() {
 						</div>
 
 						<div className="grid gap-1.5">
-							<Label htmlFor="authors">หมวดหมู่</Label>
+							<Label htmlFor="authors">ประเภท</Label>
 							<CategorySelectScrollable />
 						</div> */}
 

@@ -19,13 +19,13 @@ export const getShoppingCartMe = async (): Promise<BookPublic[]> => {
 	}
 };
 
-export const addProductToCartMe = async (
-	product_id: string,
+export const addBookToCartMe = async (
+	book_id: string,
 ): Promise<ShoppingCart[]> => {
 	try {
 		const response = await axios.post(
 			'/v1/carts/me',
-			{ product_id },
+			{ book_id },
 			{
 				headers: {
 					'Cache-Control': 'no-cache',
