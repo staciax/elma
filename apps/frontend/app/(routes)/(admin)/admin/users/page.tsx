@@ -46,7 +46,7 @@ import {
 import { getUsers } from '@/lib/elma/actions/users';
 import type { UserPublic, UserRole } from '@/lib/elma/types/users';
 import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-import { useFormatter } from 'next-intl';
+// import { useFormatter } from 'next-intl';
 import { useEffect, useState } from 'react';
 // import Image from 'next/image';
 
