@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { addBookToCartMe } from '@/lib/elma/actions/shopping-carts';
 import type { BookPublic } from '@/lib/elma/types';
+import { format, formatRelative, subDays } from 'date-fns';
+import { th } from 'date-fns/locale';
 import { ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -53,7 +55,7 @@ export default function BookDetail({ book }: Props) {
 			<div className="flex w-full flex-col md:w-2/4">
 				<div>
 					<h3 className="font-semibold text-[#414141]">
-						product.category_name
+						{book.category ? book.category.name : ''}
 					</h3>
 					<h3 className="mt-4 font-semibold text-2xl">{book.title}</h3>
 					<h3 className="mt-4">
@@ -109,7 +111,11 @@ export default function BookDetail({ book }: Props) {
 				<div className="mt-4 flex">
 					<div className="w-2/4">
 						<h3 className="font-light text-[#707070]">วันที่จำหน่าย</h3>
-						<h3 className="font-light">{book.published_date}</h3>
+						<h3 className="font-light">
+							{format(book.published_date, 'PPP', {
+								locale: th,
+							})}
+						</h3>
 						{/* TODO: show context datetime */}
 					</div>
 					<div className="w-2/4">
