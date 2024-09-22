@@ -46,9 +46,10 @@ import {
 import { getUsers } from '@/lib/elma/actions/users';
 import type { UserPublic, UserRole } from '@/lib/elma/types/users';
 import { ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-// import { useFormatter } from 'next-intl';
 import { useEffect, useState } from 'react';
 // import Image from 'next/image';
+// import { intlFormatDistance } from 'date-fns';
+// import { useFormatter } from 'next-intl';
 
 const roleBadgeColors: Record<UserRole, string> = {
 	SUPERUSER: 'bg-red-500 hover:bg-red-600',
@@ -347,6 +348,13 @@ export default function Page() {
 													lang: 'th',
 												})
 											: '-'}
+										{/* {user.updated_at
+											? intlFormatDistance(
+													new Date(user.updated_at),
+													new Date(),
+													{ locale: 'th' },
+												)
+											: '-'} */}
 									</TableCell>
 									{/* <TableCell className="font-medium">{product.title}</TableCell> */}
 									{/* <TableCell className="hidden md:table-cell">
