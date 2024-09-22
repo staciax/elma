@@ -1,4 +1,4 @@
-import BookDetail from '@/components/books/product-detail';
+import BookDetail from '@/components/books/book-detail';
 import { getBook } from '@/lib/elma/actions/books';
 import { notFound } from 'next/navigation';
 

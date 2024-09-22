@@ -1,4 +1,4 @@
-import { BookCard } from '@/components/books/product-card';
+import { BookCard } from '@/components/books/book-card';
 import { getBooks } from '@/lib/elma/actions/books';
 
 export default async function Home() {
