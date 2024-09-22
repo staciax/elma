@@ -128,7 +128,7 @@ import { useEffect, useState } from 'react';
 // 	);
 // }
 
-export function CategorySelectScrollable() {
+function CategorySelectScrollable() {
 	return (
 		<Select>
 			<SelectTrigger className="w-[280px]">
@@ -147,7 +147,7 @@ export function CategorySelectScrollable() {
 	);
 }
 
-export function PublisherSelectScrollable() {
+function PublisherSelectScrollable() {
 	return (
 		<Select>
 			<SelectTrigger className="w-[280px]">

@@ -1,14 +1,14 @@
 'use server';
 
 import axios from '@/lib/axios';
-import type { User } from '@/lib/elma/types';
+import type { UserPublic } from '@/lib/elma/types';
 
 export const signUp = async (
 	email: string,
 	password: string,
 	first_name: string,
 	last_name: string,
-): Promise<User> => {
+): Promise<UserPublic> => {
 	try {
 		const response = await axios.post('/v1/users/signup', {
 			email: email,

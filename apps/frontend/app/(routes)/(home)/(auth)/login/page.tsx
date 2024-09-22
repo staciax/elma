@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 	title: 'เข้าสู่ระบบ',
 };
 
-export function LoginForm() {
+function LoginForm() {
 	return (
 		<Card className="mx-auto w-full max-w-sm">
 			<CardHeader>

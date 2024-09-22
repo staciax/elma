@@ -29,11 +29,11 @@ export default async function Page() {
 						<div className="flex flex-col">
 							{results.map((product) => (
 								<div
-									key={product.product_id}
+									key={product.id}
 									className="flex max-w-xl border-b pb-6"
 								>
 									<div className="min-w-48 max-w-48 p-4">
-										<Link href={`/ebook/${product.product_id}`}>
+										<Link href={`/ebook/${product.id}`}>
 											<img
 												src="https://cdn-local.mebmarket.com/meb/server1/240836/Thumbnail/book_detail_large.gif"
 												alt="Book Cover"
@@ -45,17 +45,17 @@ export default async function Page() {
 									</div>
 									<div className="flex w-full justify-between">
 										<div className="flex flex-col">
-											<h2 className="text-sm">{product.category_name}</h2>
+											<h2 className="text-sm">{product.category?.name}</h2>
 											<Link
-												href={`/ebook/${product.product_id}`}
+												href={`/ebook/${product.id}`}
 												className="mt-2"
 											>
-												{product.product_title}
+												{product.title}
 											</Link>
 											<h2 className="mt-2">โดย ยาเอะ อุทสึมิ</h2>
 										</div>
 										<div className="flex flex-col items-end">
-											<span>{product.product_ebook_price} บาท</span>
+											<span>{product.price} บาท</span>
 											<Link href="#">
 												<Trash className="h-4 w-4 text-red-500" />
 											</Link>

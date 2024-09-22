@@ -59,7 +59,7 @@ const roleBadgeColors: Record<UserRole, string> = {
 };
 
 // https://www.builder.io/blog/relative-time
-export function getRelativeTimeString(
+function getRelativeTimeString(
 	date: Date | number,
 	lang = navigator.language,
 ): string {
