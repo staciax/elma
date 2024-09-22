@@ -28,10 +28,7 @@ export default async function Page() {
 						<h2 className="text-3xl">ตะกร้าของคุณ</h2>
 						<div className="flex flex-col">
 							{results.map((product) => (
-								<div
-									key={product.id}
-									className="flex max-w-xl border-b pb-6"
-								>
+								<div key={product.id} className="flex max-w-xl border-b pb-6">
 									<div className="min-w-48 max-w-48 p-4">
 										<Link href={`/ebook/${product.id}`}>
 											<img
@@ -46,10 +43,7 @@ export default async function Page() {
 									<div className="flex w-full justify-between">
 										<div className="flex flex-col">
 											<h2 className="text-sm">{product.category?.name}</h2>
-											<Link
-												href={`/ebook/${product.id}`}
-												className="mt-2"
-											>
+											<Link href={`/ebook/${product.id}`} className="mt-2">
 												{product.title}
 											</Link>
 											<h2 className="mt-2">โดย ยาเอะ อุทสึมิ</h2>
