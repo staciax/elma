@@ -28,7 +28,10 @@
 		"rules": {
 			"recommended": true,
 			"correctness": {
-				"noUnusedVariables": "warn",
+				"noUnusedVariables": {
+					"fix": "none",
+					"level": "warn"
+				},
 				"noUnusedImports": {
 					"fix": "none",
 					"level": "warn"
