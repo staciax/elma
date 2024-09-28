@@ -1,5 +1,6 @@
 import { env } from '@/config';
 import mysql, { type RowDataPacket } from 'mysql2/promise';
+import { v7 } from 'uuid';
 
 export const pool = mysql.createPool({
 	uri: env.DATABASE_URI,
@@ -234,7 +235,30 @@ async function getProductsJson() {
 	console.log(rows);
 }
 
+async function createOrder() {
+	const sql = `
+	INSERT INTO orders
+		id,
+		user_id,
+		total_price,
+		status
+	VAlUES (
+		?,
+		?,
+		?,
+		?
+	);
+	`;
+	const user_id = '0191da68-a5cf-7993-9ed2-ac4780fdbafc';
+	const total_price = 152;
+	const status = 'PENDING';
+
+	await conn.query(sql, [v7(), user_id, total_price, status]);
+}
+
 // await getProducts();
-await getProductsJson();
+// await getProductsJson();
+
+await createOrder();
 
 await pool.end();
