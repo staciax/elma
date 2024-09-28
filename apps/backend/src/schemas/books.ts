@@ -31,7 +31,7 @@ export const BookCreate = t.Object({
 	description: t.String({ minLength: 1, maxLength: 65535 }), // NOTE: mysql maximum length of TEXT is 65,535
 	isbn: t.String({ minLength: 13, maxLength: 13 }), // TODO: isbn how many minl
 	price: t.Number({ minimum: 0 }), // TODO: maximum ??? or string
-	psysical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
+	physical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
 	published_date: t.Date({ format: 'date-time' }),
 	cover_image: t.Optional(t.String({ format: 'uri' })),
 	is_active: t.Boolean({ default: true }),
