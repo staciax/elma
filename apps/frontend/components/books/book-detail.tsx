@@ -1,12 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { addBookToCartMe } from '@/lib/elma/actions/shopping-carts';
 import type { BookPublic } from '@/lib/elma/types';
+import { type AxiosError, isAxiosError } from 'axios';
 import { format, formatRelative, subDays } from 'date-fns';
 import { th } from 'date-fns/locale';
-import { ShoppingCart } from 'lucide-react';
-import { toast } from 'sonner';
+import { BookOpen, Heart, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 
 // function isbnHyphen(isbn: string) {
 // 	return isbn.replace(/(\d{3})(\d{1})(\d{4})(\d{4})(\d{1})/, '$1-$2-$3-$4-$5');
@@ -26,13 +28,59 @@ type Props = {
 };
 
 export default function BookDetail({ book }: Props) {
+	const { toast } = useToast();
+
+	const [isWishlisted, setIsWishlisted] = useState(false);
+
+	const handleToggleWishlist = () => {
+		setIsWishlisted(!isWishlisted);
+		console.log(
+			isWishlisted ? 'Removed from wishlist:' : 'Added to wishlist:',
+			book.title,
+		);
+	};
+
 	const handleAddToCart = async () => {
-		try {
-			await addBookToCartMe(book.id);
-			toast.success('เพิ่มสินค้าลงตะกร้าสำเร็จ', { duration: 5000 });
-		} catch (error) {
-			toast.error('เพิ่มสินค้าลงตะกร้าไม่สำเร็จ', { duration: 5000 });
+		const { data, error } = await addBookToCartMe(book.id);
+		if (error) {
+			// const { message } = (await error) as AxiosError;
+			toast({
+				title: 'เพิ่มสินค้าลงตะกร้าไม่สำเร็จ',
+				description: 'test',
+				variant: 'destructive',
+				duration: 5000,
+			});
+			return;
 		}
+		toast({
+			title: 'เพิ่มสินค้าลงตะกร้าสำเร็จ',
+			variant: 'default',
+			duration: 5000,
+		});
+
+		// try {
+		// 	await addBookToCartMe(book.id);
+		// 	toast({
+		// 		title: 'เพิ่มสินค้าลงตะกร้าสำเร็จ',
+		// 		variant: 'default',
+		// 		duration: 5000,
+		// 	});
+		// 	toast({});
+		// } catch (error) {
+		// 	const { message } = error as Error;
+		// 	console.log(isAxiosError(error));
+		// 	toast({
+		// 		title: 'เพิ่มสินค้าลงตะกร้าไม่สำเร็จ',
+		// 		description: message,
+		// 		variant: 'destructive',
+		// 		duration: 5000,
+		// 	}); // clear toast
+		// 	// toast.error('เพิ่มสินค้าลงตะกร้าไม่สำเร็จ', { duration: 5000 });
+		// }
+	};
+
+	const handleSampleRead = () => {
+		console.log('Opening sample read for:', book.title);
 	};
 
 	return (
@@ -79,13 +127,33 @@ export default function BookDetail({ book }: Props) {
 					</h3>
 				</div>
 				<hr className="my-8" />
-				<div className="flex justify-between gap-8">
-					<Button variant={'secondary'} className="w-full rounded-full ">
+				<div className="flex justify-between gap-4">
+					{/* <Button variant={'secondary'} className="w-full rounded-full ">
 						<span className="font-light text-base">ทดลองอ่าน</span>
+					</Button> */}
+					<Button
+						variant="outline"
+						onClick={handleSampleRead}
+						className="flex-1"
+					>
+						<BookOpen className="mr-2 h-4 w-4" /> ทดลองอ่าน
 					</Button>
-					<Button className="w-full rounded-full" onClick={handleAddToCart}>
+					{/* <Button className="w-full rounded-full" onClick={handleAddToCart}>
 						<ShoppingCart />
 						<span className="ml-2 font-light text-base">เพิ่มลงตะกร้า</span>
+					</Button> */}
+					<Button onClick={handleAddToCart} className="flex-1">
+						<ShoppingCart className="mr-2 h-4 w-4" /> เพิ่มลงตะกร้า
+					</Button>
+					<Button
+						variant={isWishlisted ? 'secondary' : 'outline'}
+						onClick={handleToggleWishlist}
+						className="w-10 h-10 p-0"
+						aria-label={isWishlisted ? 'นำออกจากรายการโปรด' : 'เพิ่มในรายการโปรด'}
+					>
+						<Heart
+							className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`}
+						/>
 					</Button>
 				</div>
 				<hr className="my-8" />
