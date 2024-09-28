@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/lib/elma/auth';
 import { Book, CircleUser, Search, ShoppingBag, User } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -101,14 +102,14 @@ export default function Header() {
 									size="icon"
 									className="overflow-hidden rounded-full"
 								>
-									{/* <Image
-										src="/placeholder-user.jpg"
+									<Image
+										src="/user.jpg"
 										width={36}
 										height={36}
 										alt="Avatar"
 										className="overflow-hidden rounded-full"
-									/> */}
-									<CircleUser className="h-5 w-5" />
+									/>
+									{/* <CircleUser className="h-5 w-5" /> */}
 									<span className="sr-only">Toggle user menu</span>
 								</Button>
 							</DropdownMenuTrigger>
