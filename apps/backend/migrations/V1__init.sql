@@ -17,13 +17,22 @@ CREATE TABLE IF NOT EXISTS users (
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    -- last_login DATETIME(3) NULL,
 
     PRIMARY KEY (id),
     UNIQUE INDEX users_email_key(email),
     INDEX idx_users_email(email)
 );
 
--- TODO: publishers name is unique right?
+-- CREATE TABLE IF NOT EXISTS user_profiles (
+--     user_id VARCHAR(36) NOT NULL,
+--     avatar_path VARCHAR(2083) NULL, --https://stackoverflow.com/questions/219569/best-database-field-type-for-a-url
+--     updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+--     PRIMARY KEY (user_id),
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+-- );
+
 -- TODO: add such as address, phone, email, etc.
 CREATE TABLE IF NOT EXISTS publishers (
     id VARCHAR(36) NOT NULL,
@@ -33,7 +42,6 @@ CREATE TABLE IF NOT EXISTS publishers (
     UNIQUE INDEX publishers_name_key(name)
 );
 
--- TODO: categories name is unique right?
 CREATE TABLE IF NOT EXISTS categories (
     id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -52,6 +60,7 @@ CREATE TABLE IF NOT EXISTS authors (
 
 -- TODO: ISBN is unique right?
 -- TODO: book cover image weak entity?
+-- TOD: book slug
 CREATE TABLE IF NOT EXISTS books (
     id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -89,7 +98,7 @@ CREATE TABLE IF NOT EXISTS book_authors (
     FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- TODO: maybe add candidate key for shopping_carts 
+-- TODO: maybe add surrogate key for shopping_carts
 CREATE TABLE IF NOT EXISTS shopping_carts (
     book_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
@@ -111,8 +120,9 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- TODO: maybe add candidate key for order_items 
+-- TODO: surrogate key for order_items
 CREATE TABLE IF NOT EXISTS order_items (
+    -- id VARCHAR(36) NOT NULL,
     order_id VARCHAR(36) NOT NULL,
     book_id VARCHAR(36) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
@@ -122,7 +132,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- TODO: ช่องทางการชำระเงิน มีอะไรบ้าง
+-- TODO: surrogate key for payments
 CREATE TABLE IF NOT EXISTS payments (
     -- id VARCHAR(36) NOT NULL,
     order_id VARCHAR(36) NOT NULL,
