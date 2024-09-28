@@ -1,4 +1,4 @@
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster } from '@/components/ui/toaster';
 import type { Metadata } from 'next';
 import { Prompt } from 'next/font/google';
 import '../styles/globals.css';
