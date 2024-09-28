@@ -1,22 +1,16 @@
-import { BookCard } from '@/components/books/book-card';
-import { getBooks } from '@/lib/elma/actions/books';
+import BookCarousel from '@/components/books/book-carousel';
+import BookSection from '@/components/books/book-section';
+// import { getBooks } from '@/lib/elma/actions/books';
 
 export default async function Home() {
-	const results = await getBooks();
-	const books = results.data;
+	// const results = await getBooks();
+	// const books = results.data;
 	return (
-		<main>
-			<section className="container">
-				<div className="flex flex-row flex-wrap justify-center gap-4">
-					{books.map((book) => (
-						<BookCard
-							key={book.id}
-							book={book}
-							className="w-[calc(20%_-_30px)]"
-						/>
-					))}
-				</div>
-			</section>
+		<main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+			<BookCarousel />
+			<BookSection title="ร้านหนังขายดี" subtitle="หนังสือที่ขายดีที่สุดในร้าน" />
+			<BookSection title="หนังสือยอดนิยม" />
+			<BookSection title="หนังสือมาใหม่" />
 		</main>
 	);
 }

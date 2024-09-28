@@ -31,32 +31,33 @@ export default function BookDetail({ book }: Props) {
 	const { toast } = useToast();
 
 	const [isWishlisted, setIsWishlisted] = useState(false);
+	// const [addingToCart, setAddingToCart] = useState(false);
 
 	const handleToggleWishlist = () => {
+		// console.log(
+		// 	isWishlisted ? 'Removed from wishlist:' : 'Added to wishlist:',
+		// 	book.title,
+		// );
 		setIsWishlisted(!isWishlisted);
-		console.log(
-			isWishlisted ? 'Removed from wishlist:' : 'Added to wishlist:',
-			book.title,
-		);
+		toast({
+			description: isWishlisted ? 'นำออกจากรายการโปรด' : 'เพิ่มในรายการโปรด',
+			duration: 4000,
+		});
 	};
 
 	const handleAddToCart = async () => {
-		const { data, error } = await addBookToCartMe(book.id);
+		// setAddingToCart(true);
+		// await new Promise((resolve) => setTimeout(resolve, 300));
+		const { error } = await addBookToCartMe(book.id);
 		if (error) {
-			// const { message } = (await error) as AxiosError;
 			toast({
-				title: 'เพิ่มสินค้าลงตะกร้าไม่สำเร็จ',
-				description: 'test',
-				variant: 'destructive',
-				duration: 5000,
+				description: 'คุณมีหนังสือนี้อยู่ในตะกร้าแล้ว',
+				duration: 4000,
 			});
-			return;
+		} else {
+			toast({ description: 'เพิ่มสินค้าลงตะกร้าสำเร็จ', duration: 4000 });
 		}
-		toast({
-			title: 'เพิ่มสินค้าลงตะกร้าสำเร็จ',
-			variant: 'default',
-			duration: 5000,
-		});
+		// setAddingToCart(false);
 
 		// try {
 		// 	await addBookToCartMe(book.id);
@@ -142,7 +143,11 @@ export default function BookDetail({ book }: Props) {
 						<ShoppingCart />
 						<span className="ml-2 font-light text-base">เพิ่มลงตะกร้า</span>
 					</Button> */}
-					<Button onClick={handleAddToCart} className="flex-1">
+					<Button
+						onClick={handleAddToCart}
+						className="flex-1"
+						// disabled={addingToCart}
+					>
 						<ShoppingCart className="mr-2 h-4 w-4" /> เพิ่มลงตะกร้า
 					</Button>
 					<Button
