@@ -261,24 +261,6 @@ export default function Page() {
 					</div>
 				</div>
 			</div>
-
-			<div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2">
-				<Button variant="ghost" size="icon">
-					<Book className="w-6 h-6" />
-				</Button>
-				<Button variant="ghost" size="icon">
-					<ShoppingCart className="w-6 h-6" />
-				</Button>
-				<Button variant="ghost" size="icon">
-					<Heart className="w-6 h-6" />
-				</Button>
-				<Button variant="ghost" size="icon">
-					<Bell className="w-6 h-6" />
-				</Button>
-				<Button variant="ghost" size="icon">
-					<User className="w-6 h-6" />
-				</Button>
-			</div>
 		</div>
 	);
 }
