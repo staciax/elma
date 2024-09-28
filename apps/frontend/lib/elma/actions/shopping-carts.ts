@@ -1,6 +1,7 @@
 'use server';
 
 import axios from '@/lib/axios';
+import { AxiosError, type AxiosResponse, isAxiosError } from 'axios';
 import type { BookPublic } from '../types';
 import type { ShoppingCart } from '../types/shopping-carts';
 
@@ -19,9 +20,18 @@ export const getShoppingCartMe = async (): Promise<BookPublic[]> => {
 	}
 };
 
+type Response<R> = {
+	data: R;
+	error?: {
+		name: string;
+		message: string;
+		status?: number;
+	};
+};
+
 export const addBookToCartMe = async (
 	book_id: string,
-): Promise<ShoppingCart[]> => {
+): Promise<Response<ShoppingCart[]>> => {
 	try {
 		const response = await axios.post(
 			'/v1/carts/me',
@@ -32,8 +42,21 @@ export const addBookToCartMe = async (
 				},
 			},
 		);
-		return response.data;
+		return {
+			data: response.data,
+		};
 	} catch (error) {
+		if (isAxiosError(error)) {
+			const { response } = error;
+			return {
+				data: response?.data,
+				error: {
+					name: error.name,
+					message: error.message,
+					status: error?.status,
+				},
+			};
+		}
 		return Promise.reject(error);
 	}
 };
