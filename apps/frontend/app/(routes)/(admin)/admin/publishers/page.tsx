@@ -196,6 +196,17 @@ export default function Page() {
 						</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSavePublisher} className="space-y-4">
+						{/* TODO: remove id  */}
+						<div>
+							<Label htmlFor="id">ไอดี</Label>
+							<Input
+								id="id"
+								type="text"
+								name="id"
+								className="w-full mt-1"
+								required
+							/>
+						</div>
 						<div>
 							<Label htmlFor="publisherName">ชื่อสำนักพิมพ์</Label>
 							<Input

@@ -529,6 +529,18 @@ export default function Page() {
 						</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSaveBook} className="space-y-4">
+						{/* TODO: remove id  */}
+						<div>
+							<Label htmlFor="id">ไอดี</Label>
+							<Input
+								id="id"
+								type="text"
+								name="id"
+								onChange={handleInputChange}
+								className="w-full mt-1"
+								required
+							/>
+						</div>
 						<div>
 							<Label htmlFor="title">ชื่อ</Label>
 							<Input

@@ -434,6 +434,17 @@ export default function Page() {
 								required
 							/>
 						</div> */}
+						{/* TODO: remove id  */}
+						<div>
+							<Label htmlFor="id">ไอดี</Label>
+							<Input
+								id="id"
+								type="text"
+								name="id"
+								className="w-full mt-1"
+								required
+							/>
+						</div>
 						<div className="grid grid-cols-2 gap-4">
 							<div className="grid gap-2">
 								<Label htmlFor="first_name">ชื่อ</Label>
@@ -442,7 +453,7 @@ export default function Page() {
 									type="text"
 									name="first_name"
 									placeholder="ชื่อ"
-									value={editingUser?.first_name || ''}
+									defaultValue={editingUser?.first_name || ''}
 									onChange={handleInputChange}
 									className="w-full mt-1"
 									required
@@ -524,11 +535,14 @@ export default function Page() {
 									<SelectValue placeholder="เลือกบทบาท" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="SUPERUSER">Superuser</SelectItem>
-									<SelectItem value="ADMIN">Admin</SelectItem>
-									<SelectItem value="MANAGER">Manager</SelectItem>
-									<SelectItem value="EMPLOYEE">Employee</SelectItem>
-									<SelectItem value="CUSTOMER">Customer</SelectItem>
+									{/* <SelectItem value="SUPERUSER">แอดมินสูงสุด</SelectItem> */}
+									{editingUser?.role !== 'SUPERUSER' && (
+										<SelectItem value="SUPERUSER">แอดมินสูงสุด</SelectItem>
+									)}
+									<SelectItem value="ADMIN">แอดมิน</SelectItem>
+									<SelectItem value="MANAGER">ผู้จัดการ</SelectItem>
+									<SelectItem value="EMPLOYEE">พนักงาน</SelectItem>
+									<SelectItem value="CUSTOMER">ลูกค้า</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
