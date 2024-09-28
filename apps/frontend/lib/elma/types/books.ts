@@ -7,7 +7,7 @@ export type BookPublic = {
 	title: string;
 	description: string;
 	isbn: string;
-	price: number;
+	price: string;
 	physical_price: number;
 	published_date: string;
 	cover_image: string | null;
