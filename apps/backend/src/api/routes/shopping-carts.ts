@@ -87,6 +87,7 @@ export const router = new Elysia({
 						book.price AS price,
 						book.physical_price AS physical_price,
 						book.published_date AS published_date,
+						book.cover_image AS cover_image,
 						book.is_active AS is_active,
 
 						IF(publisher.id IS NULL, NULL,
