@@ -212,7 +212,7 @@ export default function Page() {
 					title: '',
 					description: '',
 					isbn: '',
-					price: 0,
+					price: '0',
 					physical_price: 0,
 					published_date: '',
 					cover_image: null,
