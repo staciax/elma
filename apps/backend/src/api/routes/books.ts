@@ -96,8 +96,8 @@ export const router = new Elysia({
 		},
 		{
 			query: t.Object({
-				limit: t.Optional(t.Number({ minimum: 1, default: 100 })),
-				offset: t.Optional(t.Number({ minimum: 0, default: 0 })),
+				limit: t.Number({ minimum: 1, default: 100 }),
+				offset: t.Number({ minimum: 0, default: 0 }),
 			}),
 			response: {
 				200: BooksPublic,
