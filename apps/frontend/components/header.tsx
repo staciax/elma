@@ -1,5 +1,6 @@
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -11,7 +12,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/lib/elma/auth';
-import { Book, CircleUser, Search, ShoppingBag, User } from 'lucide-react';
+import {
+	Bell,
+	Book,
+	Heart,
+	Moon,
+	Search,
+	ShoppingBag,
+	ShoppingCart,
+	User,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
@@ -44,7 +54,7 @@ export default function Header() {
 
 	return (
 		<header className="border-b bg-background px-4 py-4 sm:px-6 lg:px-8">
-			<div className="container flex items-center justify-between">
+			<div className="container flex items-center justify-between ">
 				{/* Logo */}
 				<div className="w-[20%]">
 					<Link href="/" className="flex items-center space-x-2">
@@ -76,7 +86,7 @@ export default function Header() {
 				{/* Shopping Bag, Search Icon, and Register/Login */}
 				{/* TODO: after auth show button for bookshelf or profile or something */}
 
-				<div className="flex w-[20%] items-center justify-end space-x-4">
+				<div className="flex w-[20%] items-center justify-end ">
 					<Button
 						variant="ghost"
 						size="icon"
@@ -88,15 +98,22 @@ export default function Header() {
 					</Button>
 
 					<Button variant="ghost" size="icon" className="hover:text-[#5AB772]">
+						<Link href="/wishlist">
+							<Heart className="h-5 w-5 " />
+						</Link>
+						<span className="sr-only">Shopping Bag</span>
+					</Button>
+
+					<Button variant="ghost" size="icon" className="hover:text-[#5AB772]">
 						<Link href="/cart">
-							<ShoppingBag className="h-6 w-6 " />
+							<ShoppingBag className="h-5 w-5 " />
 						</Link>
 						<span className="sr-only">Shopping Bag</span>
 					</Button>
 
 					{isAuthenticated ? (
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
+							<DropdownMenuTrigger asChild className="ml-2">
 								<Button
 									variant="outline"
 									size="icon"
