@@ -1,7 +1,14 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
-import { type BookRowPacketData, BooksPublic } from '@/schemas/books';
+import {
+	BookCreate,
+	BookPublic,
+	type BookRowPacketData,
+	BookUpdate,
+	BooksPublic,
+} from '@/schemas/books';
+import { Message } from '@/schemas/message';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -28,7 +35,8 @@ export const router = new Elysia({
 			// TODO: set isolation level
 
 			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
-			const [count_results] = await conn.query<RowDataPacket[]>(count_stmt);
+			const [count_results] =
+				await conn.query<(RowDataPacket & { count: number })[]>(count_stmt);
 			if (!count_results.length) {
 				throw new HTTPError(404, 'Book not found');
 			}
@@ -157,17 +165,20 @@ export const router = new Elysia({
 			`;
 			// TODO: join book_images
 
-			const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			const [results] = await conn.query<BookRowPacketData[]>(stmt, [id]);
 			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Book not found');
 			}
-			return results;
+			return results[0];
 		},
 		{
 			params: t.Object({
 				id: t.String({ format: 'uuid' }),
 			}),
+			response: {
+				200: BookPublic,
+			},
 		},
 	)
 	.guard((app) =>
@@ -191,6 +202,18 @@ export const router = new Elysia({
 				}) => {
 					// TODO: make function for get publisher, category, series, authors
 					// TODO: begin transaction
+
+					console.log({
+						title,
+						description,
+						isbn,
+						price,
+						published_date,
+						cover_image,
+						is_active,
+						publisher_id,
+						category_id,
+					});
 					const conn = await pool.getConnection();
 
 					const publisher_stmt = `
@@ -205,7 +228,8 @@ export const router = new Elysia({
 						[publisher_id],
 					);
 					if (publisher_id && !publisher.length) {
-						throw new HTTPError(404, 'publisher');
+						conn.release();
+						throw new HTTPError(404, 'Publisher not found');
 					}
 
 					const category_stmt = `
@@ -219,68 +243,71 @@ export const router = new Elysia({
 						category_id,
 					]);
 					if (category_id && !category.length) {
-						throw new HTTPError(404, 'category');
+						conn.release();
+						throw new HTTPError(404, 'Category not found');
 					}
 
 					// TODO: book_authors?
 
-					const book_stmt = `
-					INSERT INTO books (
-						id,
-						title,
-						description,
-						isbn,
-						price,
-						published_date,
-						cover_image,
-						is_active
-						publisher_id,
-						category_id
-					)
-					VALUES (
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?,
-						?
-					);
-					`;
+					try {
+						await conn.beginTransaction();
 
-					await conn.query<ResultSetHeader>(book_stmt, [
-						uuidv7(),
-						title,
-						description,
-						isbn,
-						price,
-						published_date,
-						cover_image,
-						is_active,
-						publisher_id,
-						category_id,
-					]);
+						const book_stmt = `
+						INSERT INTO books (
+							id,
+							title,
+							description,
+							isbn,
+							price,
+							published_date,
+							cover_image,
+							is_active,
+							publisher_id,
+							category_id
+						)
+						VALUES (
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?
+						);
+						`;
+						await conn.query<ResultSetHeader>(book_stmt, [
+							uuidv7(),
+							title,
+							description,
+							isbn,
+							price,
+							published_date,
+							cover_image,
+							is_active,
+							publisher_id,
+							category_id,
+						]);
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
+						conn.release();
+					}
 
 					// TODO: refresh book and return book data
 					set.status = 201;
 					return { message: 'Book created successfully' };
 				},
 				{
-					body: t.Object({
-						title: t.String({ minLength: 1, maxLength: 255 }),
-						description: t.String({ minLength: 1, maxLength: 65535 }), // NOTE: mysql maximum length of TEXT is 65,535
-						isbn: t.String({ minLength: 13, maxLength: 13 }), // TODO: isbn how many minl
-						price: t.Number({ minimum: 0 }), // TODO: maximum ???
-						psysical_price: t.Optional(t.Number({ minimum: 0 })), // TODO: maximum ???
-						published_date: t.Date({ format: 'date-time' }),
-						cover_image: t.Optional(t.String({ format: 'uri' })),
-						is_active: t.Optional(t.Boolean({ default: true })),
-						publisher_id: t.Optional(t.String({ format: 'uuid' })),
-						category_id: t.Optional(t.String({ format: 'uuid' })),
-					}),
+					body: BookCreate,
+					response: {
+						201: Message,
+					},
 				},
 			)
 			.patch(
@@ -369,6 +396,9 @@ export const router = new Elysia({
 					params: t.Object({
 						id: t.String({ format: 'uuid' }),
 					}),
+					response: {
+						200: Message,
+					},
 				},
 			),
 	);
