@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 
 import { router as authRouter } from './routes/auth';
 import { router as authorsRouter } from './routes/authors';
+// import { router as bookAuthorsRouter } from './routes/book-authors';
 import { router as booksRouter } from './routes/books';
 import { router as categoriesRouter } from './routes/categories';
 import { router as ordersRouter } from './routes/orders';
@@ -24,5 +25,6 @@ export const apiRouter = <T extends string>(config: { prefix: T }) =>
 		.use(booksRouter)
 		.use(shoppingCartsRouter)
 		.use(ordersRouter);
+// .use(bookAuthorsRouter);
 
 // TODO: add begin transaction for all routes except GET
