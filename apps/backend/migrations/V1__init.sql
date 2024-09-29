@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 -- TODO: surrogate key for order_items
+-- TODO: maybe renamed order_items to order_details
 CREATE TABLE IF NOT EXISTS order_items (
     -- id VARCHAR(36) NOT NULL,
     order_id VARCHAR(36) NOT NULL,
