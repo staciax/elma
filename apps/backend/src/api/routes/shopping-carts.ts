@@ -40,10 +40,18 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.get('/:id', async ({ params: { id } }) => id)
+			.get('/:id', async ({ params: { id } }) => id, {
+				params: t.Object({
+					id: t.String({ format: 'uuid' }),
+				}),
+			})
 			.post('/', async ({ body }) => body)
 			// .patch('/:id', async ({ body, params: { id } }) => [id, body])
-			.delete('/:id', async ({ params: { id } }) => id),
+			.delete('/:id', async ({ params: { id } }) => id, {
+				params: t.Object({
+					id: t.String({ format: 'uuid' }),
+				}),
+			}),
 	)
 	.guard((app) =>
 		app
@@ -139,7 +147,11 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.get('/me/:id', async ({ params: { id } }) => id)
+			.get('/me/:id', async ({ params: { id } }) => id, {
+				params: t.Object({
+					id: t.String({ format: 'uuid' }),
+				}),
+			})
 			.post(
 				'/me',
 				async ({ body: { book_id }, user }) => {
@@ -192,7 +204,11 @@ export const router = new Elysia({
 				},
 			)
 			// .patch('/me/:id', async ({ body, params: { id } }) => [id, body])
-			.delete('/me/:id', async ({ params: { id } }) => id),
+			.delete('/me/:id', async ({ params: { id } }) => id, {
+				params: t.Object({
+					id: t.String({ format: 'uuid' }),
+				}),
+			}),
 	);
 
 // TODO: carts me routes

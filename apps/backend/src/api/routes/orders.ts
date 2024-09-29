@@ -37,10 +37,12 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.get('/:id', async ({ params: { id } }) => {
-				const conn = await pool.getConnection();
+			.get(
+				'/:id',
+				async ({ params: { id } }) => {
+					const conn = await pool.getConnection();
 
-				const stmt = `
+					const stmt = `
 				SELECT
 					*
 				FROM
@@ -48,14 +50,20 @@ export const router = new Elysia({
 				WHERE
 					id = ?;
 				`;
-				const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
-				if (!results.length) {
+					const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+					if (!results.length) {
+						conn.release();
+						throw new HTTPError(404, 'Order not found');
+					}
 					conn.release();
-					throw new HTTPError(404, 'Order not found');
-				}
-				conn.release();
-				return results;
-			})
+					return results;
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+				},
+			)
 			.post(
 				'/',
 				async ({ set, body }) => {

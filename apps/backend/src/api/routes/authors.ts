@@ -74,6 +74,9 @@ export const router = new Elysia({
 			return results[0];
 		},
 		{
+			params: t.Object({
+				id: t.String({ format: 'uuid' }),
+			}),
 			query: t.Object({
 				limit: t.Optional(t.Number({ default: 100 })),
 				offset: t.Optional(t.Number({ default: 0, minimum: 0 })),
