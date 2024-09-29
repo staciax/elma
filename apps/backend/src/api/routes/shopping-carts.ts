@@ -132,13 +132,16 @@ export const router = new Elysia({
 						authors AS author ON product_author.author_id = author.id
 					JOIN
 						shopping_carts AS cart ON book.id = cart.book_id AND cart.user_id = ?
-					GROUP BY book.id
-					LIMIT ? OFFSET ?;
-			`;
+					GROUP BY
+						book.id
+					LIMIT ?
+					OFFSET ?;
+					`;
 
 					const [results] = await conn.query(sql, [user.id, limit, offset]);
 					conn.release();
-					return results;
+
+					return { data: results };
 				},
 				{
 					query: t.Object({
@@ -162,7 +165,8 @@ export const router = new Elysia({
 						*
 					FROM
 						books
-					WHERE id = ?;
+					WHERE
+						id = ?;
 					`;
 					const [bookResults] = await conn.query<RowDataPacket[]>(bookStmt, [
 						book_id,
@@ -175,8 +179,16 @@ export const router = new Elysia({
 					try {
 						await conn.beginTransaction();
 						const stmt = `
-						INSERT INTO shopping_carts(user_id, book_id)
-						VALUES (?, ?);
+						INSERT INTO shopping_carts
+						(
+							user_id,
+							book_id
+						)
+						VALUES
+						(
+							?,
+							?
+						);
 						`;
 						await conn.query<ResultSetHeader>(stmt, [user.id, book_id]);
 						await conn.commit();
@@ -204,11 +216,55 @@ export const router = new Elysia({
 				},
 			)
 			// .patch('/me/:id', async ({ body, params: { id } }) => [id, body])
-			.delete('/me/:id', async ({ params: { id } }) => id, {
-				params: t.Object({
-					id: t.String({ format: 'uuid' }),
-				}),
-			}),
+			.delete(
+				'/me/:id',
+				async ({ user, params: { id } }) => {
+					const conn = await pool.getConnection();
+
+					try {
+						await conn.beginTransaction();
+
+						const cart_stmt = `
+						SELECT
+							*
+						FROM
+							shopping_carts
+						WHERE
+							book_id = ? AND user_id = ?;
+						`;
+
+						const [cart] = await conn.query<RowDataPacket[]>(cart_stmt, [
+							id,
+							user.id,
+						]);
+						if (!cart.length) {
+							throw new HTTPError(404, 'Product not found in cart');
+						}
+
+						const cart_delete_stmt = `
+						DELETE FROM shopping_carts
+						WHERE
+							book_id = ? AND user_id = ?;
+						`;
+
+						await conn.query<ResultSetHeader>(cart_delete_stmt, [id, user.id]);
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						throw error;
+					} finally {
+						conn.release();
+					}
+
+					return { message: `Product '${id}' removed from cart` };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: 'uuid' }),
+					}),
+				},
+			),
 	);
 
 // TODO: carts me routes
