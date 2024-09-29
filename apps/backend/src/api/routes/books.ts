@@ -248,7 +248,24 @@ export const router = new Elysia({
 						throw new HTTPError(404, 'Category not found');
 					}
 
-					// TODO: book_authors?
+					// // TODO: author_ids? for book_authors?
+					// const author_ids: string[] = [];
+					// for (const author_id of author_ids) {
+					// 	const author_stmt = `
+					// 	SELECT
+					// 		*
+					// 	FROM
+					// 		authors
+					// 	WHERE
+					// 		id = ?`;
+					// 	const [author] = await conn.query<RowDataPacket[]>(author_stmt, [
+					// 		author_id,
+					// 	]);
+					// 	if (!author.length) {
+					// 		conn.release();
+					// 		throw new HTTPError(404, `Author ${author_id} not found`);
+					// 	}
+					// }
 
 					try {
 						await conn.beginTransaction();
