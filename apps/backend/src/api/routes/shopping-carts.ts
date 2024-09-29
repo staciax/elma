@@ -136,7 +136,7 @@ export const router = new Elysia({
 					LIMIT ? OFFSET ?;
 			`;
 
-					const [results] = await conn.query(sql, [user.id, 100, 0]);
+					const [results] = await conn.query(sql, [user.id, limit, offset]);
 					conn.release();
 					return results;
 				},
