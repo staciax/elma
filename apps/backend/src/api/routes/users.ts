@@ -2,7 +2,7 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
-import { UserRegiser } from '@/schemas/users';
+import { UserRegiser, type UserRowPacketData } from '@/schemas/users';
 import {
 	UpdatePassword,
 	UserCreate,
@@ -14,7 +14,7 @@ import {
 } from '@/schemas/users';
 import { getPasswordHash, verifyPassword } from '@/security';
 
-import { Elysia, type UnwrapSchema, t } from 'elysia';
+import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
@@ -41,8 +41,6 @@ const _session = new Elysia() //
 // TODO: response schema
 // TODO: signup/register schema
 
-type UserRowPacketData = RowDataPacket & UnwrapSchema<typeof UserPublic>;
-
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	// .use(session)
 	// .onAfterHandle(async ({ conn }) => {
@@ -67,7 +65,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						users.first_name as first_name,
 						users.last_name as last_name,
 						users.phone_number as phone_number,
-						users.hashed_password as hashed_password,
+						-- users.hashed_password as hashed_password,
 						users.role as role,
 						users.is_active as is_active,
 						users.created_at as created_at,
@@ -121,18 +119,21 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					WHERE id = ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.query<RowDataPacket[]>(stmt, [id]);
+					const [results] = await conn.query<UserRowPacketData[]>(stmt, [id]);
 					if (!results.length) {
 						conn.release();
 						throw new HTTPError(404, 'User not found');
 					}
 					conn.release();
-					return results;
+					return results[0];
 				},
 				{
 					params: t.Object({
 						id: t.String({ format: 'uuid' }),
 					}),
+					response: {
+						200: UserPublic,
+					},
 				},
 			)
 			.post(
@@ -221,27 +222,22 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					}
 
 					set.status = 201;
-					return userCreated;
+					return userCreated[0];
 				},
 				{
 					body: UserCreate,
-					response: { 201: t.Array(UserPublic) },
+					response: {
+						201: UserPublic,
+					},
 				},
 			)
 			.patch(
 				'/:id',
-				async ({
-					params: { id },
-					body: {
-						email,
-						password,
-						first_name,
-						last_name,
-						phone_number,
-						role,
-						is_active,
-					},
-				}) => {
+				async ({ params: { id }, body }) => {
+					if (!Object.keys(body).length) {
+						throw new HTTPError(400, 'No data to update');
+					}
+
 					const conn = await pool.getConnection();
 
 					const stmt = 'SELECT * FROM users WHERE id = ?';
@@ -250,6 +246,16 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						conn.release();
 						throw new HTTPError(404, 'User not found');
 					}
+
+					const {
+						email,
+						password,
+						first_name,
+						last_name,
+						phone_number,
+						role,
+						is_active,
+					} = body;
 
 					const columns = [];
 					const values = [];
@@ -285,7 +291,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						values.push(role);
 					}
 
-					if (is_active) {
+					if (is_active !== undefined) {
 						columns.push('is_active = ?');
 						values.push(is_active);
 					}
@@ -324,7 +330,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						id: t.String({ format: 'uuid' }),
 					}),
 					body: UserUpdate,
-					response: { 200: Message },
+					response: {
+						200: Message,
+					},
 				},
 			)
 			.delete(
@@ -332,8 +340,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
-					const stmt = 'SELECT * FROM users WHERE id = ?';
-					const [deleteUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
+					const userStmt = 'SELECT * FROM users WHERE id = ?';
+					const [deleteUser] = await conn.query<RowDataPacket[]>(userStmt, [
+						id,
+					]);
 
 					// console.log(deleteUser);
 					if (!deleteUser.length) {
@@ -352,14 +362,16 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					params: t.Object({
 						id: t.String({ format: 'uuid' }),
 					}),
-					response: { 200: Message },
+					response: {
+						200: Message,
+					},
 				},
 			),
 	)
 	.guard(
 		(app) =>
 			app
-				.use(currentUser()) //
+				.use(currentUser())
 				.get('/me', async ({ user }) => user, {
 					response: {
 						200: UserMePublic,
@@ -367,21 +379,20 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				})
 				.patch(
 					'/me',
-					async ({
-						user,
-						body: { email, first_name, last_name, phone_number },
-					}) => {
-						console.log({
-							email,
-							first_name,
-							last_name,
-							phone_number,
-						});
-						// TODO: omit hashed_password, is_active, created_at, updated_at
-						const conn = await pool.getConnection();
+					async ({ user, body }) => {
+						if (!Object.keys(body).length) {
+							throw new HTTPError(400, 'No data to update');
+						}
+
+						const { email, first_name, last_name, phone_number } = body;
 
 						const columns = [];
 						const values = [];
+
+						// for (const [key, value] of Object.entries(body)) {
+						// 	columns.push(`${key} = ?`);
+						// 	values.push(value);
+						// }
 
 						if (email) {
 							columns.push('email = ?');
@@ -404,14 +415,15 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						}
 
 						if (!columns.length || !values.length) {
-							conn.release();
 							throw new HTTPError(400, 'No data to update');
 						}
+
+						const conn = await pool.getConnection();
 
 						try {
 							await conn.beginTransaction();
 
-							const updateStmt = `
+							const stmt = `
 							UPDATE
 								users
 							SET
@@ -420,10 +432,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 								id = ?;
 							`;
 
-							await conn.execute<ResultSetHeader>(updateStmt, [
-								...values,
-								user.id,
-							]);
+							await conn.execute<ResultSetHeader>(stmt, [...values, user.id]);
 							await conn.commit();
 						} catch (error) {
 							// TODO: error handling
@@ -443,6 +452,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				.patch(
 					'/me/password',
 					async ({ user, body: { current_password, new_password } }) => {
+						// TODO: check password is same as current password?
 						const passwordIsValid = await verifyPassword(
 							current_password,
 							user.hashed_password,
@@ -487,7 +497,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					},
 					{
 						body: UpdatePassword,
-						response: { 200: Message },
+						response: {
+							200: Message,
+						},
 					},
 				)
 				.delete(
@@ -518,7 +530,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 						return { message: 'User deleted successfully' };
 					},
 					{
-						response: { 200: Message },
+						response: {
+							200: Message,
+						},
 					},
 				),
 		// TODO: me update password
@@ -528,8 +542,10 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		async ({ set, body }) => {
 			const conn = await pool.getConnection();
 
+			const { email, password, first_name, last_name } = body;
+
 			const stmt = 'SELECT * FROM users WHERE email = ?';
-			const [user] = await conn.query<RowDataPacket[]>(stmt, [body.email]);
+			const [user] = await conn.query<RowDataPacket[]>(stmt, [email]);
 			if (user.length) {
 				conn.release();
 				throw new HTTPError(400, 'Email already exists');
@@ -560,12 +576,12 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					?
 				);
 				`;
-				const hashedPassword = await getPasswordHash(body.password);
+				const hashedPassword = await getPasswordHash(password);
 				await conn.query<ResultSetHeader>(insertStmt, [
 					uuidv7(),
-					body.email,
-					body.first_name,
-					body.last_name,
+					email,
+					first_name,
+					last_name,
 					hashedPassword,
 					Role.CUSTOMER,
 					true, // TODO: to false wehn email verification is implemented
@@ -584,6 +600,8 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 		},
 		{
 			body: UserRegiser,
-			response: { 201: Message },
+			response: {
+				201: Message,
+			},
 		},
 	);
