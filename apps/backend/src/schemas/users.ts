@@ -4,7 +4,7 @@ import type { RowDataPacket } from 'mysql2';
 // TODO: regex pattern for password
 
 export const UserRegiser = t.Object({
-	email: t.String({ format: 'email' }), // TODO: max length?
+	email: t.String({ format: 'email', maxLength: 320 }),
 	password: t.String({ minLength: 8, maxLength: 255 }),
 	first_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
 	last_name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
