@@ -266,5 +266,3 @@ export const router = new Elysia({
 				},
 			),
 	);
-
-// TODO: carts me routes

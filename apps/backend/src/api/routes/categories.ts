@@ -187,7 +187,7 @@ export const router = new Elysia({
 				},
 			),
 	)
-	// TODO: get products by category
+	// get products by category
 	.get(
 		'/:id/books',
 		async ({ params: { id: category_id }, query: { limit, offset } }) => {

@@ -38,7 +38,6 @@ const _session = new Elysia() //
 // https://stackoverflow.com/a/57121491/19394867
 // https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
 // TODO: check conn not release
-// TODO: response schema
 // TODO: signup/register schema
 
 export const router = new Elysia({ prefix: '/users', tags: ['users'] })
