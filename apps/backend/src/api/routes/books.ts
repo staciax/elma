@@ -160,8 +160,9 @@ export const router = new Elysia({
 				book_authors AS book_author ON book.id = book_author.book_id
 			LEFT JOIN
 				authors AS author ON book_author.author_id = author.id
-			GROUP BY book.id
-			HAVING book.id = ?;
+			WHERE
+				book.id = ?
+			GROUP BY book.id;
 			`;
 			// TODO: join book_images
 
