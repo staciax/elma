@@ -203,20 +203,10 @@ export const router = new Elysia({
 					},
 				}) => {
 					// TODO: make function for get publisher, category, series, authors
-					// TODO: begin transaction
 
-					console.log({
-						title,
-						description,
-						isbn,
-						price,
-						published_date,
-						cover_image,
-						is_active,
-						publisher_id,
-						category_id,
-					});
 					const conn = await pool.getConnection();
+
+					await conn.beginTransaction();
 
 					const publisher_stmt = `
 					SELECT
@@ -269,8 +259,6 @@ export const router = new Elysia({
 					// }
 
 					try {
-						await conn.beginTransaction();
-
 						const book_stmt = `
 						INSERT INTO books (
 							id,
@@ -410,6 +398,9 @@ export const router = new Elysia({
 						values.push(is_active);
 					}
 
+					// start transaction
+					await conn.beginTransaction();
+
 					if (publisher_id) {
 						const publisher_stmt = `
 						SELECT
@@ -453,8 +444,6 @@ export const router = new Elysia({
 					}
 
 					try {
-						await conn.beginTransaction();
-
 						const update_stmt = `
 						UPDATE
 							books
@@ -472,7 +461,7 @@ export const router = new Elysia({
 					} finally {
 						conn.release();
 					}
-					console.log(columns.join(', '));
+					// console.log(columns.join(', '));
 
 					return { message: 'Book updated successfully' };
 				},
@@ -490,37 +479,45 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
-					const book_stmt = `
-					SELECT
-						*
-					FROM
-						books
-					WHERE
-						id = ?
-					`;
-					const [results] = await conn.query<RowDataPacket[]>(book_stmt, [id]);
 
-					if (!results.length) {
+					try {
+						await conn.beginTransaction();
+						const book_stmt = `
+						SELECT
+							*
+						FROM
+							books
+						WHERE
+							id = ?
+						`;
+						const [results] = await conn.query<RowDataPacket[]>(book_stmt, [
+							id,
+						]);
+
+						if (!results.length) {
+							throw new HTTPError(404, 'Book not found');
+						}
+
+						const delete_stmt = `
+						DELETE
+						FROM
+							books
+						WHERE
+							id = ?`;
+						const [deleted] = await conn.execute<ResultSetHeader>(delete_stmt, [
+							id,
+						]);
+						if (!deleted) {
+							throw new HTTPError(500, 'Book not deleted');
+						}
+					} catch (error) {
+						// TODO: error handling
+						await conn.rollback();
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Book not found');
 					}
 
-					// console.log(results);
-
-					const delete_stmt = `
-					DELETE
-					FROM
-						books
-					WHERE
-						id = ?`;
-					const [deleted] = await conn.execute<ResultSetHeader>(delete_stmt, [
-						id,
-					]);
-					conn.release();
-
-					if (!deleted) {
-						throw new HTTPError(500, 'Book not deleted');
-					}
 					return {
 						message: 'Book deleted successfully',
 					};
