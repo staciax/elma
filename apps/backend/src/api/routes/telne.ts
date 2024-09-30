@@ -1,10 +1,18 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
+import type { OrderRowPacketData } from '@/schemas/orders';
 
 import { Elysia, t } from 'elysia';
-import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { type ResultSetHeader, type RowDataPacket, format } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
+
+enum OrderStatus {
+	PENDING = 'PENDING',
+	PROCESSING = 'PROCESSING',
+	COMPLETED = 'COMPLETED',
+	CANCELLED = 'CANCELLED',
+}
 
 export const router = new Elysia({
 	prefix: '/telne',
@@ -44,7 +52,7 @@ export const router = new Elysia({
                 orders.id;
             `;
 
-			const [orders] = await conn.query<RowDataPacket[]>(stmt);
+			const [orders] = await conn.query<OrderRowPacketData[]>(stmt);
 
 			return {
 				data: orders,
@@ -81,13 +89,14 @@ export const router = new Elysia({
                 orders
             LEFT JOIN
                 order_items ON orders.id = order_items.order_id
-            GROUP BY
-                orders.id
-			HAVING
+			WHERE
 				orders.id = ?;
+            GROUP BY
+                orders.id;
             `;
 
-			const [orders] = await conn.query<RowDataPacket[]>(stmt, [id]);
+			const [orders] = await conn.query<OrderRowPacketData[]>(stmt, [id]);
+			conn.release();
 
 			if (!orders.length) {
 				throw new HTTPError(404, 'Order not found');
@@ -183,6 +192,7 @@ export const router = new Elysia({
 
 				// TODO: multiple insertions
 				// https://www.geeksforgeeks.org/mysql-insert-multiple-rows/
+				// https://stackoverflow.com/a/74846861/19394867
 
 				const orderDetails_stmt = `
 				INSERT INTO order_items
@@ -191,25 +201,35 @@ export const router = new Elysia({
 					book_id,
 					price
 				)
-				VALUES (
-					?,
-					?,
-					?
-				);
+				VALUES ?;
 				`;
 
-				// VALUES ${'(?,?,?),'.repeat(cart.length).slice(0, -1)};
+				// bulk insert
+				// thanks for https://github.com/sidorares/node-mysql2/issues/1244
+				const values = cart.map((book) => [order_id, book.id, book.price]);
 
+				// console.log(format(orderDetails_stmt, [values]));
+
+				const [results] = await conn.query<ResultSetHeader>(orderDetails_stmt, [
+					values,
+				]);
+
+				console.log(results);
+				if (results.affectedRows !== cart.length) {
+					throw new HTTPError(500, 'Failed to create order');
+				}
+
+				// VALUES ${'(?,?,?),'.repeat(cart.length).slice(0, -1)};
 				// thanks for https://stackoverflow.com/questions/36094865/how-to-do-promise-all-for-array-of-array-of-promises
-				const promises = await Promise.all(
-					cart.map(async (book) => {
-						return await conn.query<ResultSetHeader>(orderDetails_stmt, [
-							order_id,
-							book.id,
-							book.price,
-						]);
-					}),
-				);
+				// const promises = await Promise.all(
+				// 	cart.map(async (book) => {
+				// 		return await conn.query<ResultSetHeader>(orderDetails_stmt, [
+				// 			order_id,
+				// 			book.id,
+				// 			book.price,
+				// 		]);
+				// 	}),
+				// );
 
 				// try selecting the order
 
@@ -236,13 +256,13 @@ export const router = new Elysia({
 					orders
 				LEFT JOIN
 					order_items ON orders.id = order_items.order_id
+				WHERE
+					orders.id = ?
 				GROUP BY
-					orders.id
-				HAVING
-					orders.id = ?;
+					orders.id;
 				`;
 
-				const [selectedOrder] = await conn.query<RowDataPacket[]>(
+				const [selectedOrder] = await conn.query<OrderRowPacketData[]>(
 					order_selected_stmt,
 					[order_id],
 				);
@@ -252,12 +272,12 @@ export const router = new Elysia({
 				}
 
 				await conn.rollback();
+				// await conn.commit();
 
 				return {
 					data: selectedOrder[0],
 				};
 
-				// await conn.commit();
 				// return { message: cart };
 			} catch (error) {
 				// TODO: error handling and logging?
@@ -401,8 +421,45 @@ export const router = new Elysia({
 				'/orders/me',
 				async ({ user, query: { limit, offset } }) => {
 					const conn = await pool.getConnection();
+
+					const stmt = `
+					SELECT
+						orders.id AS id,
+						orders.user_id AS user_id,
+						orders.total_price AS total_price,
+						orders.status AS status,
+						orders.created_at AS created_at,
+						orders.updated_at AS updated_at,
+
+						IF(COUNT(order_items.order_id) = 0, NULL,
+							JSON_ARRAYAGG(
+								JSON_OBJECT(
+									'order_id', order_items.order_id,
+									'book_id', order_items.book_id,
+									'price', order_items.price
+								)
+							)
+						) AS items
+					FROM
+						orders
+					LEFT JOIN
+						order_items ON orders.id = order_items.order_id
+					WHERE
+						orders.user_id = ?
+					GROUP BY
+						orders.id
+					LIMIT ?
+					OFFSET ?;
+					`;
+
+					const [orders] = await conn.query<OrderRowPacketData[]>(stmt, [
+						user.id,
+						limit,
+						offset,
+					]);
 					conn.release();
-					return { user, limit, offset };
+
+					return { data: orders };
 				},
 				{
 					query: t.Object({
@@ -415,8 +472,47 @@ export const router = new Elysia({
 				'/orders/me/:id',
 				async ({ params: { id }, user }) => {
 					const conn = await pool.getConnection();
+
+					const stmt = `
+					SELECT
+						orders.id AS id,
+						orders.user_id AS user_id,
+						orders.total_price AS total_price,
+						orders.status AS status,
+						orders.created_at AS created_at,
+						orders.updated_at AS updated_at,
+
+						IF(COUNT(order_items.order_id) = 0, NULL,
+							JSON_ARRAYAGG(
+								JSON_OBJECT(
+									'order_id', order_items.order_id,
+									'book_id', order_items.book_id,
+									'price', order_items.price
+								)
+							)
+						) AS items
+
+					FROM
+						orders
+					LEFT JOIN
+						order_items ON orders.id = order_items.order_id
+					WHERE
+						orders.id = ? AND orders.user_id = ?
+					GROUP BY
+						orders.id
+					`;
+
+					const [results] = await conn.query<RowDataPacket[]>(stmt, [
+						id,
+						user.id,
+					]);
 					conn.release();
-					return { id, user };
+
+					if (!results.length) {
+						throw new HTTPError(404, 'Order not found');
+					}
+
+					return { data: results[0] };
 				},
 				{
 					params: t.Object({
