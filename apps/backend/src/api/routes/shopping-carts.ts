@@ -9,6 +9,7 @@ import type { QueryError } from 'mysql2';
 // import { v7 as uuidv7 } from 'uuid';
 
 // TODO: Ebook ที่ซื้อแล้ว ไม่สามารถซื้อซ้ำได้ และ ไม่สามารถเพิ่มเข้าตะกร้าซ้ำได้
+// TODO: surrogate key for shopping_carts
 
 export const router = new Elysia({
 	prefix: '/carts',
@@ -40,12 +41,17 @@ export const router = new Elysia({
 					}),
 				},
 			)
-			.get('/:id', async ({ params: { id } }) => id, {
-				params: t.Object({
-					id: t.String({ format: 'uuid' }),
+			// .get('/:id', async ({ params: { id } }) => id, {
+			// 	params: t.Object({
+			// 		id: t.String({ format: 'uuid' }),
+			// 	}),
+			// })
+			.post('/', async ({ body }) => body, {
+				body: t.Object({
+					book_id: t.String({ format: 'uuid' }),
+					user_id: t.String({ format: 'uuid' }),
 				}),
 			})
-			.post('/', async ({ body }) => body)
 			// .patch('/:id', async ({ body, params: { id } }) => [id, body])
 			.delete('/:id', async ({ params: { id } }) => id, {
 				params: t.Object({

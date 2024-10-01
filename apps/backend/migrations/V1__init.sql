@@ -100,10 +100,13 @@ CREATE TABLE IF NOT EXISTS book_authors (
 
 -- TODO: maybe add surrogate key for shopping_carts
 CREATE TABLE IF NOT EXISTS shopping_carts (
+    -- id VARCHAR(36) NOT NULL,
     book_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
 
-    PRIMARY KEY (book_id, user_id),
+    -- PRIMARY KEY (id),
+    -- UNIQUE INDEX shopping_carts_book_id_user_id_key(book_id, user_id),
+    primary key (book_id, user_id),
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
