@@ -523,3 +523,5 @@ export const router = new Elysia({
 	);
 
 // router for my orders
+// TODO: migrate to orders.ts
+// TODO: route for cancel order (status change)
