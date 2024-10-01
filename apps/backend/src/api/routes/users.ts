@@ -54,21 +54,21 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				async ({ query: { limit, offset } }) => {
 					const conn = await pool.getConnection();
 
-					const countStmt = 'SELECT COUNT(*) as count FROM users;';
+					const countStmt = 'SELECT COUNT(*) AS count FROM users;';
 					const [count] = await conn.query<RowDataPacket[]>(countStmt);
 
 					const stmt = `
 					SELECT
-						users.id as id,
-						users.email as email,
-						users.first_name as first_name,
-						users.last_name as last_name,
-						users.phone_number as phone_number,
-						-- users.hashed_password as hashed_password,
-						users.role as role,
-						users.is_active as is_active,
-						users.created_at as created_at,
-						users.updated_at as updated_at
+						users.id AS id,
+						users.email AS email,
+						users.first_name AS first_name,
+						users.last_name AS last_name,
+						users.phone_number AS phone_number,
+						-- users.hashed_password AS hashed_password,
+						users.role AS role,
+						users.is_active AS is_active,
+						users.created_at AS created_at,
+						users.updated_at AS updated_at
 					FROM
 						users
 					LIMIT ?
@@ -103,16 +103,16 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 
 					const stmt = `
 					SELECT
-						users.id as id,
-						users.email as email,
-						users.first_name as first_name,
-						users.last_name as last_name,
-						users.phone_number as phone_number,
-						-- users.hashed_password as hashed_password,
-						users.role as role,
-						users.is_active as is_active,
-						users.created_at as created_at,
-						users.updated_at as updated_at
+						users.id AS id,
+						users.email AS email,
+						users.first_name AS first_name,
+						users.last_name AS last_name,
+						users.phone_number AS phone_number,
+						-- users.hashed_password AS hashed_password,
+						users.role AS role,
+						users.is_active AS is_active,
+						users.created_at AS created_at,
+						users.updated_at AS updated_at
 					FROM
 						users
 					WHERE id = ?;
