@@ -68,6 +68,9 @@ export const router = new Elysia({
 				'/',
 				async ({ set, body }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
+
 					const stmt = `
 					INSERT INTO orders
 					(
@@ -92,6 +95,9 @@ export const router = new Elysia({
 				'/:id',
 				async ({ body, params: { id } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
+
 					const orderStmt = `
 					SELECT
 						*
@@ -124,6 +130,8 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
 
 					const orderStmt = `
 					SELECT
@@ -158,19 +166,24 @@ export const router = new Elysia({
 				},
 			),
 	)
-	.guard((app) =>
-		app
-			.use(currentUser())
-			.get('/me', async ({ user, query: { limit, offset } }) => user, {
-				query: t.Object({
-					limit: t.Number({ minimum: 1, default: 100 }),
-					offset: t.Number({ minimum: 0, default: 0 }),
-				}),
-			})
-			.get('/me/:id', async ({ params: { id }, user }) => [id, user], {
-				params: t.Object({
-					id: t.String({ format: 'uuid' }),
-				}),
-			}),
+	.guard(
+		(app) =>
+			app.use(currentUser()).get(
+				'/me',
+				async ({ user, query: { limit, offset } }) => {
+					return user;
+				},
+				{
+					query: t.Object({
+						limit: t.Number({ minimum: 1, default: 100 }),
+						offset: t.Number({ minimum: 0, default: 0 }),
+					}),
+				},
+			),
+		// .get('/me/:id', async ({ params: { id }, user }) => [id, user], {
+		// 	params: t.Object({
+		// 		id: t.String({ format: 'uuid' }),
+		// 	}),
+		// }),
 	);
 // TODO: order me routes

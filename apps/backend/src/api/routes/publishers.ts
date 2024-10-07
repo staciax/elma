@@ -91,6 +91,9 @@ export const router = new Elysia({
 				'/',
 				async ({ set, body: { name } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
+
 					const stmt = `
 					INSERT INTO publishers
 					(	
@@ -122,6 +125,9 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id }, body: { name } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
+
 					const publisherStmt = `
 					SELECT
 						*
@@ -160,6 +166,8 @@ export const router = new Elysia({
 				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
 
 					const publisherStmt = `
 					SELECT

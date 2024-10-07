@@ -206,6 +206,8 @@ export const router = new Elysia({
 
 					const conn = await pool.getConnection();
 
+					// TODO: try catch ?
+
 					await conn.beginTransaction();
 
 					const publisher_stmt = `

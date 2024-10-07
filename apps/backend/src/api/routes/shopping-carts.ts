@@ -166,6 +166,8 @@ export const router = new Elysia({
 				async ({ body: { book_id }, user }) => {
 					const conn = await pool.getConnection();
 
+					// TODO: transaction
+
 					const bookStmt = `
 					SELECT
 						*
