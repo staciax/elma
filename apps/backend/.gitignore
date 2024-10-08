@@ -3,3 +3,7 @@
 *.log
 .DS_Store
 migrations/*.json
+
+# Bun compile
+*.bun-build
+*
