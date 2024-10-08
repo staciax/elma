@@ -1,9 +1,16 @@
+# dependencies
 /node_modules
-/dist
-*.log
-.DS_Store
-migrations/*.json
 
-# Bun compile
+# build
+/dist
 *.bun-build
 *
+
+# migrations
+migrations/*.json
+
+# log
+*.log
+
+# mics
+.DS_Store
