@@ -22,18 +22,6 @@ ENV NODE_ENV=production
 RUN bun run build:compile
 
 # runner stage
-# FROM base AS runner
-
-# WORKDIR /app
-
-# COPY --from=builder /app/server ./server
-# # COPY --from=builder /app/package.json ./package.json
-# COPY --from=builder /app/public ./public
-
-# EXPOSE 8000
-
-# CMD ["./server"]
-
 FROM gcr.io/distroless/base
 
 WORKDIR /app
