@@ -9,14 +9,7 @@ import staticPlugin from '@elysiajs/static';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 
-// TODO: Ebook ที่ซื้อแล้ว ไม่สามารถซื้อซ้ำได้
-
 export const app = new Elysia()
-	.use(
-		logger({
-			level: env.NODE_ENV === 'production' ? 'info' : 'debug',
-		}),
-	)
 	.guard({
 		as: 'global',
 		response: {
@@ -49,7 +42,20 @@ export const app = new Elysia()
 	.onAfterHandle(() => {})
 
 	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
-	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
+	.use(
+		staticPlugin({
+			assets: 'public',
+			prefix: '/public',
+			staticLimit: 1024,
+		}),
+	)
+
+	// Logger
+	.use(
+		logger({
+			level: env.NODE_ENV === 'production' ? 'info' : 'debug',
+		}),
+	)
 
 	// Routes
 	.use(apiRouter({ prefix: env.API_V1_STR }));
