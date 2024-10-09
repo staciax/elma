@@ -28,12 +28,16 @@ enum Role {
 	CUSTOMER = 'CUSTOMER',
 }
 
-const _session = new Elysia() //
+const _session = new Elysia({ name: 'session' })
 	.derive({ as: 'scoped' }, async () => {
 		const conn = await pool.getConnection();
-		// await conn.beginTransaction();
+		await conn.beginTransaction();
 		console.log('get conn');
-		return { conn };
+		return { session: conn };
+	})
+	.onAfterResponse({ as: 'scoped' }, ({ session }) => {
+		console.log('release conn');
+		session.release();
 	});
 
 // TODO: try catch every query // finally always release connection
