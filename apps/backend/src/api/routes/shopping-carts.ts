@@ -142,6 +142,7 @@ export const router = new Elysia({
 					LIMIT ?
 					OFFSET ?;
 					`;
+					// TODO: add WHERE book.is_active = 1
 
 					const [results] = await conn.query(sql, [user.id, limit, offset]);
 					conn.release();
