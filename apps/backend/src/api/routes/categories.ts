@@ -1,13 +1,11 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
-import { type BookRowPacketData, BooksPublic } from '@/schemas/books';
-import {
-	CategoriesPublic,
-	CategoryPublic,
-	type CategoryRowPacketData,
-} from '@/schemas/categories';
+import { BooksPublic } from '@/schemas/books';
+import { CategoriesPublic, CategoryPublic } from '@/schemas/categories';
 import { OffsetBasedPagination } from '@/schemas/query';
+import type { BookRowPacketData } from '@/types/books';
+import type { CategoryRowPacketData } from '@/types/categories';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';

@@ -1,5 +1,4 @@
-import { type UnwrapSchema, t } from 'elysia';
-import type { RowDataPacket } from 'mysql2';
+import { t } from 'elysia';
 
 // TODO: regex pattern for password
 
@@ -75,8 +74,6 @@ export const UpdatePassword = t.Object({
 	current_password: t.String({ minLength: 1, maxLength: 255 }),
 	new_password: t.String({ minLength: 8, maxLength: 255 }),
 });
-
-export type UserRowPacketData = RowDataPacket & UnwrapSchema<typeof UserPublic>;
 
 // export const UserMeUpdate = t.Object({
 // 	email: t.Optional(t.String({ format: 'email', maxLength: 320 })),

@@ -2,9 +2,9 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { Login } from '@/schemas/auth';
 import { Token } from '@/schemas/token';
-import type { UserRowPacketData } from '@/schemas/users';
 import { security } from '@/security';
 import { verifyPassword } from '@/security';
+import type { UserRowPacketData } from '@/types/users';
 
 import { Elysia } from 'elysia';
 

@@ -3,7 +3,7 @@ import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
 import { OffsetBasedPagination } from '@/schemas/query';
-import { UserRegiser, type UserRowPacketData } from '@/schemas/users';
+import { UserRegiser } from '@/schemas/users';
 import {
 	UpdatePassword,
 	UserCreate,
@@ -14,6 +14,7 @@ import {
 	UsersPublic,
 } from '@/schemas/users';
 import { getPasswordHash, verifyPassword } from '@/security';
+import type { UserRowPacketData } from '@/types/users';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';

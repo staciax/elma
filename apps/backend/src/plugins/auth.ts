@@ -1,7 +1,7 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
-import type { UserRowPacketData } from '@/schemas/users';
 import { security } from '@/security';
+import type { UserRowPacketData } from '@/types/users';
 
 import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';

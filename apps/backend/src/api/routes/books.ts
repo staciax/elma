@@ -4,12 +4,12 @@ import { superuser } from '@/plugins/auth';
 import {
 	BookCreate,
 	BookPublic,
-	type BookRowPacketData,
 	BookUpdate,
 	BooksPublic,
 } from '@/schemas/books';
 import { Message } from '@/schemas/message';
 import { OffsetBasedPagination } from '@/schemas/query';
+import type { BookRowPacketData } from '@/types/books';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';

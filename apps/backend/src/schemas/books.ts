@@ -1,6 +1,4 @@
 import { t } from 'elysia';
-import type { UnwrapSchema } from 'elysia';
-import type { RowDataPacket } from 'mysql2';
 
 import { AuthorPublic } from './authors';
 import { CategoryPublic } from './categories';
@@ -40,5 +38,3 @@ export const BookCreate = t.Object({
 });
 
 export const BookUpdate = t.Partial(BookCreate); // TODO remove default values
-
-export type BookRowPacketData = RowDataPacket & UnwrapSchema<typeof BookPublic>;

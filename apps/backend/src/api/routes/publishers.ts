@@ -1,14 +1,12 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
-import { type BookRowPacketData, BooksPublic } from '@/schemas/books';
+import { BooksPublic } from '@/schemas/books';
 import { Message } from '@/schemas/message';
-import {
-	PublisherPublic,
-	type PublisherRowPacketData,
-	PublishersPublic,
-} from '@/schemas/publishers';
+import { PublisherPublic, PublishersPublic } from '@/schemas/publishers';
 import { OffsetBasedPagination } from '@/schemas/query';
+import type { BookRowPacketData } from '@/types/books';
+import type { PublisherRowPacketData } from '@/types/publishers';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';

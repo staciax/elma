@@ -1,8 +1,9 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
-import { AuthorPublic, type AuthorRowPacketData } from '@/schemas/authors';
+import { AuthorPublic } from '@/schemas/authors';
 import { Message } from '@/schemas/message';
+import type { AuthorRowPacketData } from '@/types/authors';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
