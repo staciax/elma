@@ -21,11 +21,13 @@ COPY tsconfig.json .
 ENV NODE_ENV=production
 RUN bun build \
     --compile \
-    --minify-whitespace \
-    --minify-syntax \
+    --minify \
     --target bun \
     --outfile server \
     ./src/index.ts
+
+# https://elysiajs.com/patterns/deployment.html#why-not-minify 
+# remove --minify when opentelemetry is implemented ?
 
 # runner stage
 FROM gcr.io/distroless/base:nonroot
