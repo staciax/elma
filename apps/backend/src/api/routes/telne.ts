@@ -119,6 +119,8 @@ export const router = new Elysia({
 
 			// TODO: refresh user cart before creating order
 			// check status of books in cart
+			// TODO: implement order created with user select item
+			// such as user select book 1, book 2, book 3 in cart before checkout
 
 			try {
 				await conn.beginTransaction();
@@ -147,6 +149,8 @@ export const router = new Elysia({
 				if (!cart.length) {
 					throw new HTTPError(400, 'No items in shopping cart');
 				}
+
+				const cart_item_active = cart.filter((book) => book.is_active);
 
 				const order_id = uuidv7();
 				// TODO: decimal js for price calculation or something
@@ -206,7 +210,11 @@ export const router = new Elysia({
 
 				// bulk insert
 				// thanks for https://github.com/sidorares/node-mysql2/issues/1244
-				const values = cart.map((book) => [order_id, book.id, book.price]);
+				const values = cart_item_active.map((book) => [
+					order_id,
+					book.id,
+					book.price,
+				]);
 
 				// console.log(format(orderDetails_stmt, [values]));
 
@@ -214,7 +222,7 @@ export const router = new Elysia({
 					values,
 				]);
 
-				console.log(results);
+				// console.log(results);
 				if (results.affectedRows !== cart.length) {
 					throw new HTTPError(500, 'Failed to create order');
 				}
@@ -267,29 +275,39 @@ export const router = new Elysia({
 					[order_id],
 				);
 				if (!selectedOrder.length) {
-					await conn.rollback();
+					// await conn.rollback();
 					throw new HTTPError(400, 'Order not found');
 				}
 
-				await conn.rollback();
-				// await conn.commit();
+				// clear book from shopping carts
+
+				const cart_clear_stmt = `
+				DELETE FROM
+					shopping_carts
+				WHERE
+					user_id = ?
+				`;
+				await conn.query(cart_clear_stmt, [user.id]);
+
+				// await conn.rollback();
+				await conn.commit();
 
 				return {
 					data: selectedOrder[0],
 				};
-
-				// return { message: cart };
 			} catch (error) {
 				// TODO: error handling and logging?
 				await conn.rollback();
 				throw error;
 			} finally {
-				console.log('Connection released');
 				conn.release();
 			}
-			// return { message: 'test' };
 		},
-		{},
+		{
+			response: {
+				200: t.Object({}),
+			},
+		},
 	)
 	.guard((app) =>
 		app
