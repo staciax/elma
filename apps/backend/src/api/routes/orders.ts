@@ -6,6 +6,8 @@ import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
+// TODO: Ebook ที่ซื้อแล้ว ไม่สามารถซื้อซ้ำได้
+
 export const router = new Elysia({
 	prefix: '/orders',
 	tags: ['orders'],
