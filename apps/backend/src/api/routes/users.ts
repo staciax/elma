@@ -55,7 +55,8 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					const conn = await pool.getConnection();
 
 					const countStmt = 'SELECT COUNT(*) AS count FROM users;';
-					const [count] = await conn.query<RowDataPacket[]>(countStmt);
+					const [count] =
+						await conn.query<(RowDataPacket & { count: number })[]>(countStmt);
 
 					const stmt = `
 					SELECT
