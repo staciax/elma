@@ -2,6 +2,7 @@ import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
+import { OffsetBasedPagination } from '@/schemas/query';
 import { UserRegiser, type UserRowPacketData } from '@/schemas/users';
 import {
 	UpdatePassword,
@@ -89,10 +90,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					};
 				},
 				{
-					query: t.Object({
-						limit: t.Number({ minimum: 1, default: 100 }),
-						offset: t.Number({ minimum: 0, default: 0 }),
-					}),
+					query: OffsetBasedPagination,
 					response: {
 						200: UsersPublic,
 					},

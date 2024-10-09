@@ -1,6 +1,7 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
+import { OffsetBasedPagination } from '@/schemas/query';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -35,10 +36,8 @@ export const router = new Elysia({
 					return results;
 				},
 				{
-					query: t.Object({
-						limit: t.Number({ minimum: 1, default: 100 }),
-						offset: t.Number({ minimum: 0, default: 0 }),
-					}),
+					query: OffsetBasedPagination,
+					// TODO: response
 				},
 			)
 			// .get('/:id', async ({ params: { id } }) => id, {
@@ -150,10 +149,7 @@ export const router = new Elysia({
 					return { data: results };
 				},
 				{
-					query: t.Object({
-						limit: t.Number({ minimum: 1, default: 100 }),
-						offset: t.Number({ minimum: 0, default: 0 }),
-					}),
+					query: OffsetBasedPagination,
 				},
 			)
 			.get('/me/:id', async ({ params: { id } }) => id, {

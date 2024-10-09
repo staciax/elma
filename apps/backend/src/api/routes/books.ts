@@ -9,6 +9,7 @@ import {
 	BooksPublic,
 } from '@/schemas/books';
 import { Message } from '@/schemas/message';
+import { OffsetBasedPagination } from '@/schemas/query';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -103,10 +104,7 @@ export const router = new Elysia({
 			};
 		},
 		{
-			query: t.Object({
-				limit: t.Number({ minimum: 1, default: 100 }),
-				offset: t.Number({ minimum: 0, default: 0 }),
-			}),
+			query: OffsetBasedPagination,
 			response: {
 				200: BooksPublic,
 			},
