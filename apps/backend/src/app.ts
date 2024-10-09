@@ -35,6 +35,7 @@ export const app = new Elysia()
 				set.status = 500;
 				return { message: error.toString() };
 		}
+		// TODO: https://github.com/elysiajs/elysia/releases/tag/1.1.18
 	})
 
 	// Middleware
