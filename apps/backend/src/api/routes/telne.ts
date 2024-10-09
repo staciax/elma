@@ -131,12 +131,11 @@ export const router = new Elysia({
 				const cart_stmt = `
 				SELECT
 					books.id AS id,
-					books.price AS price,
-					books.is_active AS is_active
+					books.price AS price
 				FROM
 					shopping_carts
 				JOIN
-					books ON shopping_carts.book_id = books.id
+					books ON shopping_carts.book_id = books.id AND books.is_active = 1
 				WHERE
 					user_id = ?
 				`;
@@ -144,15 +143,12 @@ export const router = new Elysia({
 					(RowDataPacket & {
 						id: string;
 						price: string;
-						is_active: string; // TODO: someting for is_active
 					})[]
 				>(cart_stmt, [user.id]);
 
 				if (!cart.length) {
 					throw new HTTPError(400, 'No items in shopping cart');
 				}
-
-				const cart_item_active = cart.filter((book) => book.is_active);
 
 				const order_id = uuidv7();
 				// TODO: decimal js for price calculation or something
@@ -212,11 +208,7 @@ export const router = new Elysia({
 
 				// bulk insert
 				// thanks for https://github.com/sidorares/node-mysql2/issues/1244
-				const values = cart_item_active.map((book) => [
-					order_id,
-					book.id,
-					book.price,
-				]);
+				const values = cart.map((book) => [order_id, book.id, book.price]);
 
 				// console.log(format(orderDetails_stmt, [values]));
 
