@@ -166,26 +166,24 @@ export const router = new Elysia({
 				async ({ body: { book_id }, user }) => {
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
-
-					const bookStmt = `
-					SELECT
-						*
-					FROM
-						books
-					WHERE
-						id = ?;
-					`;
-					const [bookResults] = await conn.query<RowDataPacket[]>(bookStmt, [
-						book_id,
-					]);
-					if (!bookResults.length) {
-						conn.release();
-						throw new HTTPError(404, 'Product not found');
-					}
-
 					try {
 						await conn.beginTransaction();
+
+						const bookStmt = `
+						SELECT
+							*
+						FROM
+							books
+						WHERE
+							id = ?;
+						`;
+						const [bookResults] = await conn.query<RowDataPacket[]>(bookStmt, [
+							book_id,
+						]);
+						if (!bookResults.length) {
+							throw new HTTPError(404, 'Product not found');
+						}
+
 						const stmt = `
 						INSERT INTO shopping_carts
 						(

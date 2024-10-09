@@ -129,29 +129,48 @@ export const router = new Elysia({
 			.patch(
 				'/:id',
 				async ({ params: { id }, body: { name } }) => {
-					console.log(name);
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
+					try {
+						await conn.beginTransaction();
 
-					const authorStmt = `
-					SELECT
-						*
-					FROM
-						authors
-					WHERE
-						id = ?`;
-					const [updateAuthor] = await conn.query<RowDataPacket[]>(authorStmt, [
-						id,
-					]);
-					if (!updateAuthor.length) {
+						const authorStmt = `
+						SELECT
+							*
+						FROM
+							authors
+						WHERE
+							id = ?;`;
+						const [updateAuthor] = await conn.query<RowDataPacket[]>(
+							authorStmt,
+							[id],
+						);
+						if (!updateAuthor.length) {
+							throw new HTTPError(404, 'Author not found');
+						}
+
+						const update_author_stmt = `
+						UPDATE FROM
+							authors
+						SET
+							name = ?
+						WHERE
+							id = ?;
+						`;
+						const updated = await conn.execute<ResultSetHeader>(
+							update_author_stmt,
+							[name, id],
+						);
+						// TODO: check something from updated
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Author not found');
 					}
-
-					// TODO: update author
-
-					conn.release();
 
 					return { message: 'Author updated successfully' };
 				},
@@ -172,31 +191,39 @@ export const router = new Elysia({
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
+					try {
+						await conn.beginTransaction();
 
-					const authorStmt = `
-					SELECT
-						*
-					FROM
-						authors
-					WHERE
-						id = ?`;
-					const [deleteAuthor] = await conn.query<RowDataPacket[]>(authorStmt, [
-						id,
-					]);
-					if (!deleteAuthor.length) {
+						const authorStmt = `
+						SELECT
+							*
+						FROM
+							authors
+						WHERE
+							id = ?`;
+						const [deleteAuthor] = await conn.query<RowDataPacket[]>(
+							authorStmt,
+							[id],
+						);
+						if (!deleteAuthor.length) {
+							throw new HTTPError(404, 'Author not found');
+						}
+
+						const deleteAuthorStmt = `
+						DELETE FROM
+							authors 
+						WHERE 
+							id = ?
+						`;
+						await conn.execute<ResultSetHeader>(deleteAuthorStmt, [id]);
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Author not found');
 					}
-
-					const deleteAuthorStmt = `
-					DELETE FROM
-						authors 
-					WHERE 
-						id = ?
-					`;
-					await conn.execute<ResultSetHeader>(deleteAuthorStmt, [id]);
-					conn.release();
 
 					return { message: 'Author deleted successfully' };
 				},
@@ -217,6 +244,8 @@ export const router = new Elysia({
 			// TODO: remove duplicate code
 
 			const conn = await pool.getConnection();
+
+			// TODO: transaction
 
 			const author_stmt = `
 			SELECT

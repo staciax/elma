@@ -87,6 +87,9 @@ export const router = new Elysia({
 				'/',
 				async ({ set, body: { name } }) => {
 					const conn = await pool.getConnection();
+
+					// TODO: transaction
+
 					const stmt = `
 					INSERT INTO categories
 					(	
@@ -114,27 +117,37 @@ export const router = new Elysia({
 			.patch(
 				'/:id',
 				async ({ params: { id }, body: { name } }) => {
-					console.log(name);
 					const conn = await pool.getConnection();
-					const categoryStmt = `
-					SELECT
-						*
-					FROM
-						categories
-					WHERE
-						id = ?`;
-					const [updateCategory] = await conn.query<RowDataPacket[]>(
-						categoryStmt,
-						[id],
-					);
-					if (!updateCategory.length) {
+
+					try {
+						await conn.beginTransaction();
+
+						const categoryStmt = `
+						SELECT
+							*
+						FROM
+							categories
+						WHERE
+							id = ?`;
+						const [updateCategory] = await conn.query<RowDataPacket[]>(
+							categoryStmt,
+							[id],
+						);
+
+						if (!updateCategory.length) {
+							throw new HTTPError(404, 'Category not found');
+						}
+
+						// TODO: update category
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Category not found');
 					}
-
-					// TODO: update category
-
-					conn.release();
 
 					return { message: 'Category updated successfully' };
 				},
@@ -152,31 +165,42 @@ export const router = new Elysia({
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
-					const categoryStmt = `
-					SELECT
-						*
-					FROM
-						categories
-					WHERE
-						id = ?
-					`;
-					const [deleteCategory] = await conn.query<RowDataPacket[]>(
-						categoryStmt,
-						[id],
-					);
-					if (!deleteCategory.length) {
-						conn.release();
-						throw new HTTPError(404, 'Category not found');
-					}
+					try {
+						await conn.beginTransaction();
 
-					const deleteCategoryStmt = `
-					DELETE FROM
-						categories 
-					WHERE 
-						id = ?
-					`;
-					await conn.execute<ResultSetHeader>(deleteCategoryStmt, [id]);
-					conn.release();
+						const categoryStmt = `
+						SELECT
+							*
+						FROM
+							categories
+						WHERE
+							id = ?
+						`;
+						const [deleteCategory] = await conn.query<RowDataPacket[]>(
+							categoryStmt,
+							[id],
+						);
+						if (!deleteCategory.length) {
+							conn.release();
+							throw new HTTPError(404, 'Category not found');
+						}
+
+						const deleteCategoryStmt = `
+						DELETE FROM
+							categories 
+						WHERE 
+							id = ?
+						`;
+						await conn.execute<ResultSetHeader>(deleteCategoryStmt, [id]);
+						conn.release();
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
+						conn.release();
+					}
 
 					return { message: 'Category deleted successfully' };
 				},

@@ -341,111 +341,109 @@ export const router = new Elysia({
 				}) => {
 					const conn = await pool.getConnection();
 
-					const book_stmt = `
-					SELECT
-						*
-					FROM
-						books
-					WHERE
-						id = ?`;
-
-					const [results] = await conn.query<RowDataPacket[]>(book_stmt, [id]);
-					if (!results.length) {
-						conn.release();
-						throw new HTTPError(404, 'Book not found');
-					}
-
-					const columns = [];
-					const values = [];
-
-					// TODO: should be check every field is not undefined?
-
-					if (title) {
-						columns.push('title = ?');
-						values.push(title);
-					}
-
-					if (description) {
-						columns.push('description = ?');
-						values.push(description);
-					}
-
-					if (isbn) {
-						columns.push('isbn = ?');
-						values.push(isbn);
-					}
-
-					if (price) {
-						columns.push('price = ?');
-						values.push(price);
-					}
-
-					if (physical_price) {
-						columns.push('physical_price = ?');
-						values.push(physical_price);
-					}
-
-					if (published_date) {
-						columns.push('published_date = ?');
-						values.push(published_date);
-					}
-
-					if (cover_image) {
-						columns.push('cover_image = ?');
-						values.push(cover_image);
-					}
-
-					if (is_active !== undefined) {
-						columns.push('is_active = ?');
-						values.push(is_active);
-					}
-
-					// start transaction
-					await conn.beginTransaction();
-
-					if (publisher_id) {
-						const publisher_stmt = `
-						SELECT
-							*
-						FROM
-							publishers
-						WHERE
-							id = ?`;
-						const [publisher] = await conn.query<RowDataPacket[]>(
-							publisher_stmt,
-							[publisher_id],
-						);
-						if (!publisher.length) {
-							conn.release();
-							throw new HTTPError(404, 'Publisher not found');
-						}
-
-						columns.push('publisher_id = ?');
-						values.push(publisher_id);
-					}
-
-					if (category_id) {
-						const category_stmt = `
-						SELECT
-							*
-						FROM
-							categories
-						WHERE
-							id = ?`;
-						const [category] = await conn.query<RowDataPacket[]>(
-							category_stmt,
-							[category_id],
-						);
-						if (!category.length) {
-							conn.release();
-							throw new HTTPError(404, 'Category not found');
-						}
-
-						columns.push('category_id = ?');
-						values.push(category_id);
-					}
-
 					try {
+						await conn.beginTransaction();
+
+						const book_stmt = `
+						SELECT
+							*
+						FROM
+							books
+						WHERE
+							id = ?`;
+
+						const [results] = await conn.query<RowDataPacket[]>(book_stmt, [
+							id,
+						]);
+						if (!results.length) {
+							throw new HTTPError(404, 'Book not found');
+						}
+
+						const columns = [];
+						const values = [];
+
+						// TODO: should be check every field is not undefined?
+
+						if (title) {
+							columns.push('title = ?');
+							values.push(title);
+						}
+
+						if (description) {
+							columns.push('description = ?');
+							values.push(description);
+						}
+
+						if (isbn) {
+							columns.push('isbn = ?');
+							values.push(isbn);
+						}
+
+						if (price) {
+							columns.push('price = ?');
+							values.push(price);
+						}
+
+						if (physical_price) {
+							columns.push('physical_price = ?');
+							values.push(physical_price);
+						}
+
+						if (published_date) {
+							columns.push('published_date = ?');
+							values.push(published_date);
+						}
+
+						if (cover_image) {
+							columns.push('cover_image = ?');
+							values.push(cover_image);
+						}
+
+						if (is_active !== undefined) {
+							columns.push('is_active = ?');
+							values.push(is_active);
+						}
+
+						if (publisher_id) {
+							const publisher_stmt = `
+							SELECT
+								*
+							FROM
+								publishers
+							WHERE
+								id = ?`;
+							const [publisher] = await conn.query<RowDataPacket[]>(
+								publisher_stmt,
+								[publisher_id],
+							);
+							if (!publisher.length) {
+								throw new HTTPError(404, 'Publisher not found');
+							}
+
+							columns.push('publisher_id = ?');
+							values.push(publisher_id);
+						}
+
+						if (category_id) {
+							const category_stmt = `
+							SELECT
+								*
+							FROM
+								categories
+							WHERE
+								id = ?`;
+							const [category] = await conn.query<RowDataPacket[]>(
+								category_stmt,
+								[category_id],
+							);
+							if (!category.length) {
+								throw new HTTPError(404, 'Category not found');
+							}
+
+							columns.push('category_id = ?');
+							values.push(category_id);
+						}
+
 						const update_stmt = `
 						UPDATE
 							books
@@ -484,6 +482,7 @@ export const router = new Elysia({
 
 					try {
 						await conn.beginTransaction();
+
 						const book_stmt = `
 						SELECT
 							*

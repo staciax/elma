@@ -92,23 +92,29 @@ export const router = new Elysia({
 				async ({ set, body: { name } }) => {
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
-
-					const stmt = `
-					INSERT INTO publishers
-					(	
-						id,
-						name
-					)
-					VALUES
-					(	
-						?,
-						?
-					);
-					`;
-					await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
-					conn.release();
-
+					try {
+						await conn.beginTransaction();
+						const stmt = `
+						INSERT INTO publishers
+						(	
+							id,
+							name
+						)
+						VALUES
+						(	
+							?,
+							?
+						);
+						`;
+						await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
+						conn.release();
+					}
 					set.status = 201;
 					return { message: 'Publisher created' };
 				},
@@ -126,27 +132,35 @@ export const router = new Elysia({
 				async ({ params: { id }, body: { name } }) => {
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
+					try {
+						await conn.beginTransaction();
 
-					const publisherStmt = `
-					SELECT
-						*
-					FROM
-						publishers
-					WHERE
-						id = ?`;
-					const [updatePublisher] = await conn.query<RowDataPacket[]>(
-						publisherStmt,
-						[id],
-					);
-					if (!updatePublisher.length) {
+						const publisherStmt = `
+						SELECT
+							*
+						FROM
+							publishers
+						WHERE
+							id = ?`;
+						const [updatePublisher] = await conn.query<RowDataPacket[]>(
+							publisherStmt,
+							[id],
+						);
+						if (!updatePublisher.length) {
+							conn.release();
+							throw new HTTPError(404, 'Publisher not found');
+						}
+
+						// TODO: update publisher
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Publisher not found');
 					}
-
-					// TODO: update publisher
-
-					conn.release();
 
 					return { message: 'Publisher updated successfully' };
 				},
@@ -167,32 +181,40 @@ export const router = new Elysia({
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
-					// TODO: transaction
+					try {
+						await conn.beginTransaction();
 
-					const publisherStmt = `
-					SELECT
-						*
-					FROM
-						publishers
-					WHERE
-						id = ?`;
-					const [deletePublisher] = await conn.query<RowDataPacket[]>(
-						publisherStmt,
-						[id],
-					);
-					if (!deletePublisher.length) {
+						const publisherStmt = `
+						SELECT
+							*
+						FROM
+							publishers
+						WHERE
+							id = ?`;
+						const [deletePublisher] = await conn.query<RowDataPacket[]>(
+							publisherStmt,
+							[id],
+						);
+						if (!deletePublisher.length) {
+							throw new HTTPError(404, 'Publisher not found');
+						}
+
+						const deletePublisherStmt = `
+						DELETE FROM
+							publishers 
+						WHERE 
+							id = ?
+						`;
+						await conn.execute<ResultSetHeader>(deletePublisherStmt, [id]);
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
 						conn.release();
-						throw new HTTPError(404, 'Publisher not found');
 					}
-
-					const deletePublisherStmt = `
-					DELETE FROM
-						publishers 
-					WHERE 
-						id = ?
-					`;
-					await conn.execute<ResultSetHeader>(deletePublisherStmt, [id]);
-					conn.release();
 
 					return { message: 'Publisher deleted successfully' };
 				},
