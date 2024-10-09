@@ -50,6 +50,8 @@ export const app = new Elysia()
 
 	// TODO: docs auth https://github.com/elysiajs/elysia-swagger/blob/main/example/index2.ts
 	.use(staticPlugin({ assets: 'public', prefix: '/public', staticLimit: 1024 }))
+
+	// Routes
 	.use(apiRouter({ prefix: env.API_V1_STR }));
 
 if (env.NODE_ENV !== 'production') {
