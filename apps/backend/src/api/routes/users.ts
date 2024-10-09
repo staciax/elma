@@ -29,6 +29,7 @@ enum Role {
 const _session = new Elysia() //
 	.derive({ as: 'scoped' }, async () => {
 		const conn = await pool.getConnection();
+		// await conn.beginTransaction();
 		console.log('get conn');
 		return { conn };
 	});

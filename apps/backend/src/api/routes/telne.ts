@@ -14,6 +14,8 @@ enum OrderStatus {
 	CANCELLED = 'CANCELLED',
 }
 
+// TODO: migrate to order
+
 export const router = new Elysia({
 	prefix: '/telne',
 	detail: {
