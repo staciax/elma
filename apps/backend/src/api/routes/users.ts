@@ -14,7 +14,7 @@ import {
 	UsersPublic,
 } from '@/schemas/users';
 import { getPasswordHash, verifyPassword } from '@/security';
-import type { UserRowPacketData } from '@/types/users';
+import type { UserRow } from '@/types/users';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -85,7 +85,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					OFFSET ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
+					const [results] = await conn.execute<UserRow[]>(stmt, [
 						limit.toString(),
 						offset.toString(),
 					]);
@@ -125,7 +125,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					WHERE id = ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.execute<UserRowPacketData[]>(stmt, [id]);
+					const [results] = await conn.execute<UserRow[]>(stmt, [id]);
 					if (!results.length) {
 						conn.release();
 						throw new HTTPError(404, 'User not found');

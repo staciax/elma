@@ -4,7 +4,7 @@ import { Login } from '@/schemas/auth';
 import { Token } from '@/schemas/token';
 import { security } from '@/security';
 import { verifyPassword } from '@/security';
-import type { UserRowPacketData } from '@/types/users';
+import type { UserRow } from '@/types/users';
 
 import { Elysia } from 'elysia';
 
@@ -23,9 +23,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			// TODO: should begin transaction here right?
 
 			const stmt = 'SELECT * FROM users WHERE email=?';
-			const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
-				username,
-			]);
+			const [results] = await conn.execute<UserRow[]>(stmt, [username]);
 			conn.release();
 
 			if (!results.length) {

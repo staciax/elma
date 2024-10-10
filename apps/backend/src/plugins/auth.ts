@@ -1,7 +1,7 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { security } from '@/security';
-import type { UserRowPacketData } from '@/types/users';
+import type { UserRow } from '@/types/users';
 
 import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
@@ -48,9 +48,7 @@ export const currentUser = (_role?: UserRole) =>
 			const conn = await pool.getConnection();
 
 			const stmt = 'SELECT * FROM users WHERE id=?';
-			const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
-				jwtPayload.sub,
-			]);
+			const [results] = await conn.execute<UserRow[]>(stmt, [jwtPayload.sub]);
 			conn.release();
 
 			if (!results.length) {
@@ -82,9 +80,7 @@ export const superuser = () =>
 			const conn = await pool.getConnection();
 
 			const stmt = 'SELECT * FROM users WHERE id=?';
-			const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
-				jwtPayload.sub,
-			]);
+			const [results] = await conn.execute<UserRow[]>(stmt, [jwtPayload.sub]);
 			conn.release();
 
 			if (!results.length) {

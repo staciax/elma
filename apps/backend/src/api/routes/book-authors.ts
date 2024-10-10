@@ -3,7 +3,7 @@ import { HTTPError } from '@/errors';
 import { superuser } from '@/plugins/auth';
 import { AuthorPublic } from '@/schemas/authors';
 import { Message } from '@/schemas/message';
-import type { AuthorRowPacketData } from '@/types/authors';
+import type { AuthorRow } from '@/types/authors';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -76,10 +76,9 @@ export const router = new Elysia({
 				authors
 			WHERE
 				id = ?;`;
-			const [author_results] = await conn.query<AuthorRowPacketData[]>(
-				author_stmt,
-				[author_id],
-			);
+			const [author_results] = await conn.query<AuthorRow[]>(author_stmt, [
+				author_id,
+			]);
 
 			if (!author_results.length) {
 				conn.release();

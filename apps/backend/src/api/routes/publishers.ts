@@ -5,8 +5,8 @@ import { BooksPublic } from '@/schemas/books';
 import { Message } from '@/schemas/message';
 import { PublisherPublic, PublishersPublic } from '@/schemas/publishers';
 import { OffsetBasedPagination } from '@/schemas/query';
-import type { BookRowPacketData } from '@/types/books';
-import type { PublisherRowPacketData } from '@/types/publishers';
+import type { BookRow } from '@/types/books';
+import type { PublisherRow } from '@/types/publishers';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -29,7 +29,7 @@ export const router = new Elysia({
 				publishers
 			LIMIT ? OFFSET ?;
 			`;
-			const [results] = await conn.execute<PublisherRowPacketData[]>(stmt, [
+			const [results] = await conn.execute<PublisherRow[]>(stmt, [
 				limit.toString(),
 				offset.toString(),
 			]);
@@ -58,9 +58,7 @@ export const router = new Elysia({
 				publishers
 			WHERE id = ?;
 			`;
-			const [results] = await conn.execute<PublisherRowPacketData[]>(stmt, [
-				id,
-			]);
+			const [results] = await conn.execute<PublisherRow[]>(stmt, [id]);
 			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Publisher not found');
@@ -251,7 +249,7 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [publisher_results] = await conn.execute<BookRowPacketData[]>(
+			const [publisher_results] = await conn.execute<BookRow[]>(
 				publisher_stmt,
 				[publisher_id],
 			);
@@ -325,10 +323,11 @@ export const router = new Elysia({
 			LIMIT ? OFFSET ?;
 			`;
 
-			const [book_results] = await conn.execute<BookRowPacketData[]>(
-				book_stmt,
-				[publisher_id, limit.toString(), offset.toString()],
-			);
+			const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
+				publisher_id,
+				limit.toString(),
+				offset.toString(),
+			]);
 
 			await conn.commit();
 			conn.release();

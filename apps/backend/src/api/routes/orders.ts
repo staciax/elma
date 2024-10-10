@@ -4,8 +4,8 @@ import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
 import { OrderCreate, OrderPublic, OrdersPublic } from '@/schemas/orders';
 import { OffsetBasedPagination } from '@/schemas/query';
-import type { OrderRowPacketData } from '@/types/orders';
-import type { UserRowPacketData } from '@/types/users';
+import type { OrderRow } from '@/types/orders';
+import type { UserRow } from '@/types/users';
 
 import { Elysia, t } from 'elysia';
 import { type ResultSetHeader, type RowDataPacket, format } from 'mysql2';
@@ -71,10 +71,7 @@ export const router = new Elysia({
 						offset.toString(),
 					]);
 
-					const [orders] = await conn.execute<OrderRowPacketData[]>(
-						stmt,
-						values,
-					);
+					const [orders] = await conn.execute<OrderRow[]>(stmt, values);
 
 					return {
 						count: orders.length,
@@ -129,10 +126,7 @@ export const router = new Elysia({
 
 					// console.log(format(stmt, [id, user.id]));
 
-					const [orders] = await conn.execute<OrderRowPacketData[]>(stmt, [
-						id,
-						user.id,
-					]);
+					const [orders] = await conn.execute<OrderRow[]>(stmt, [id, user.id]);
 
 					conn.release();
 
@@ -172,10 +166,9 @@ export const router = new Elysia({
 						WHERE
 							id = ?;
 						`;
-						const [user_results] = await conn.execute<UserRowPacketData[]>(
-							user_stmt,
-							[user_id],
-						);
+						const [user_results] = await conn.execute<UserRow[]>(user_stmt, [
+							user_id,
+						]);
 						if (!user_results.length) {
 							throw new HTTPError(404, 'User not found');
 						}

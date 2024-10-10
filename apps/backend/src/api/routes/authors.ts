@@ -5,8 +5,8 @@ import { AuthorPublic, AuthorsPublic } from '@/schemas/authors';
 import { BooksPublic } from '@/schemas/books';
 import { Message } from '@/schemas/message';
 import { OffsetBasedPagination } from '@/schemas/query';
-import type { AuthorRowPacketData } from '@/types/authors';
-import type { BookRowPacketData } from '@/types/books';
+import type { AuthorRow } from '@/types/authors';
+import type { BookRow } from '@/types/books';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -29,7 +29,7 @@ export const router = new Elysia({
 			LIMIT ?
 			OFFSET ?;
 			`;
-			const [results] = await conn.execute<AuthorRowPacketData[]>(stmt, [
+			const [results] = await conn.execute<AuthorRow[]>(stmt, [
 				limit.toString(),
 				offset.toString(),
 			]);
@@ -60,7 +60,7 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [results] = await conn.execute<AuthorRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<AuthorRow[]>(stmt, [id]);
 			conn.release();
 
 			if (!results.length) {
@@ -249,10 +249,9 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [author_results] = await conn.execute<BookRowPacketData[]>(
-				author_stmt,
-				[author_id],
-			);
+			const [author_results] = await conn.execute<BookRow[]>(author_stmt, [
+				author_id,
+			]);
 
 			if (!author_results.length) {
 				conn.release();
@@ -322,10 +321,11 @@ export const router = new Elysia({
 				JSON_CONTAINS(authors, JSON_OBJECT('id', ?))
 			LIMIT ? OFFSET ?;
 			`;
-			const [book_results] = await conn.execute<BookRowPacketData[]>(
-				book_stmt,
-				[author_id, limit.toString(), offset.toString()],
-			);
+			const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
+				author_id,
+				limit.toString(),
+				offset.toString(),
+			]);
 
 			await conn.commit();
 			conn.release();

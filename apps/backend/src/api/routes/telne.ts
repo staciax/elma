@@ -1,7 +1,7 @@
 import { pool } from '@/db';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
-import type { OrderRowPacketData } from '@/types/orders';
+import type { OrderRow } from '@/types/orders';
 
 import { Elysia, t } from 'elysia';
 import { type ResultSetHeader, type RowDataPacket, format } from 'mysql2';
@@ -54,7 +54,7 @@ export const router = new Elysia({
                 orders.id;
             `;
 
-			const [orders] = await conn.query<OrderRowPacketData[]>(stmt);
+			const [orders] = await conn.query<OrderRow[]>(stmt);
 
 			return {
 				data: orders,
@@ -97,7 +97,7 @@ export const router = new Elysia({
                 orders.id;
             `;
 
-			const [orders] = await conn.query<OrderRowPacketData[]>(stmt, [id]);
+			const [orders] = await conn.query<OrderRow[]>(stmt, [id]);
 			conn.release();
 
 			if (!orders.length) {
@@ -264,7 +264,7 @@ export const router = new Elysia({
 					orders.id;
 				`;
 
-				const [selectedOrder] = await conn.query<OrderRowPacketData[]>(
+				const [selectedOrder] = await conn.query<OrderRow[]>(
 					order_selected_stmt,
 					[order_id],
 				);
@@ -465,7 +465,7 @@ export const router = new Elysia({
 					OFFSET ?;
 					`;
 
-					const [orders] = await conn.query<OrderRowPacketData[]>(stmt, [
+					const [orders] = await conn.query<OrderRow[]>(stmt, [
 						user.id,
 						limit,
 						offset,

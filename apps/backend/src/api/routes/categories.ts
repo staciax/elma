@@ -4,8 +4,8 @@ import { superuser } from '@/plugins/auth';
 import { BooksPublic } from '@/schemas/books';
 import { CategoriesPublic, CategoryPublic } from '@/schemas/categories';
 import { OffsetBasedPagination } from '@/schemas/query';
-import type { BookRowPacketData } from '@/types/books';
-import type { CategoryRowPacketData } from '@/types/categories';
+import type { BookRow } from '@/types/books';
+import type { CategoryRow } from '@/types/categories';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -28,7 +28,7 @@ export const router = new Elysia({
 			LIMIT ?
 			OFFSET ?;
 			`;
-			const [results] = await conn.execute<CategoryRowPacketData[]>(stmt, [
+			const [results] = await conn.execute<CategoryRow[]>(stmt, [
 				limit.toString(),
 				offset.toString(),
 			]);
@@ -58,7 +58,7 @@ export const router = new Elysia({
 				categories
 			WHERE id = ?;
 			`;
-			const [results] = await conn.execute<CategoryRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<CategoryRow[]>(stmt, [id]);
 			conn.release();
 
 			if (!results.length) {
@@ -232,10 +232,9 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [catetory_results] = await conn.execute<BookRowPacketData[]>(
-				catetory_stmt,
-				[category_id],
-			);
+			const [catetory_results] = await conn.execute<BookRow[]>(catetory_stmt, [
+				category_id,
+			]);
 
 			if (!catetory_results.length) {
 				conn.release();
@@ -305,10 +304,11 @@ export const router = new Elysia({
 				JSON_CONTAINS(category, JSON_OBJECT('id', ?))
 			LIMIT ? OFFSET ?;
 			`;
-			const [book_results] = await conn.execute<BookRowPacketData[]>(
-				book_stmt,
-				[category_id, limit.toString(), offset.toString()],
-			);
+			const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
+				category_id,
+				limit.toString(),
+				offset.toString(),
+			]);
 
 			await conn.commit();
 			conn.release();

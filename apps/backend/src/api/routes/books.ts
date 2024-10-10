@@ -9,7 +9,7 @@ import {
 } from '@/schemas/books';
 import { Message } from '@/schemas/message';
 import { OffsetBasedPagination } from '@/schemas/query';
-import type { BookRowPacketData } from '@/types/books';
+import type { BookRow } from '@/types/books';
 
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -90,7 +90,7 @@ export const router = new Elysia({
 			GROUP BY book.id
 			LIMIT ? OFFSET ?;
 			`;
-			const [results] = await conn.execute<BookRowPacketData[]>(book_stmt, [
+			const [results] = await conn.execute<BookRow[]>(book_stmt, [
 				limit.toString(),
 				offset.toString(),
 			]);
@@ -164,7 +164,7 @@ export const router = new Elysia({
 			`;
 			// TODO: join book_images
 
-			const [results] = await conn.execute<BookRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<BookRow[]>(stmt, [id]);
 			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Book not found');
