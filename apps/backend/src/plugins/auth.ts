@@ -82,7 +82,7 @@ export const superuser = () =>
 			const conn = await pool.getConnection();
 
 			const stmt = 'SELECT * FROM users WHERE id=?';
-			const [results] = await conn.query<UserRowPacketData[]>(stmt, [
+			const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
 				jwtPayload.sub,
 			]);
 			conn.release();

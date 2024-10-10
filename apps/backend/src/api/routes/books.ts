@@ -250,7 +250,7 @@ export const router = new Elysia({
 					// 		authors
 					// 	WHERE
 					// 		id = ?`;
-					// 	const [author] = await conn.query<RowDataPacket[]>(author_stmt, [
+					// 	const [author] = await conn.execute<RowDataPacket[]>(author_stmt, [
 					// 		author_id,
 					// 	]);
 					// 	if (!author.length) {

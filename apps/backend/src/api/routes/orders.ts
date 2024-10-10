@@ -61,12 +61,20 @@ export const router = new Elysia({
 					OFFSET ?;
 					`;
 
-					const values: (string | number)[] = [limit, offset];
-					if (user.role === 'CUSTOMER') {
-						values.unshift(user.id);
-					}
+					// const values = [limit.toString(), offset.toString()];
+					// if (user.role === 'CUSTOMER') {
+					// 	values.unshift(user.id);
+					// }
 
-					const [orders] = await conn.query<OrderRowPacketData[]>(stmt, values);
+					const values = (user.role === 'CUSTOMER' ? [user.id] : []).concat([
+						limit.toString(),
+						offset.toString(),
+					]);
+
+					const [orders] = await conn.execute<OrderRowPacketData[]>(
+						stmt,
+						values,
+					);
 
 					return {
 						count: orders.length,
@@ -121,7 +129,7 @@ export const router = new Elysia({
 
 					// console.log(format(stmt, [id, user.id]));
 
-					const [orders] = await conn.query<OrderRowPacketData[]>(stmt, [
+					const [orders] = await conn.execute<OrderRowPacketData[]>(stmt, [
 						id,
 						user.id,
 					]);
@@ -164,7 +172,7 @@ export const router = new Elysia({
 						WHERE
 							id = ?;
 						`;
-						const [user_results] = await conn.query<UserRowPacketData[]>(
+						const [user_results] = await conn.execute<UserRowPacketData[]>(
 							user_stmt,
 							[user_id],
 						);
@@ -196,7 +204,7 @@ export const router = new Elysia({
 						`;
 						// create order
 
-						await conn.query<ResultSetHeader>(order_stmt, [
+						await conn.execute<ResultSetHeader>(order_stmt, [
 							uuidv7(),
 							user.id,
 							total_price,
@@ -227,6 +235,7 @@ export const router = new Elysia({
 			.patch(
 				'/orders/:id',
 				async ({ params: { id } }) => {
+					// TODO: transaction and update order
 					const conn = await pool.getConnection();
 					conn.release();
 					return { message: `Order ${id} updated` };
@@ -256,7 +265,9 @@ export const router = new Elysia({
 						WHERE
 							id = ?;
 						`;
-						const [order] = await conn.query<RowDataPacket[]>(order_stmt, [id]);
+						const [order] = await conn.execute<RowDataPacket[]>(order_stmt, [
+							id,
+						]);
 						if (!order.length) {
 							throw new HTTPError(404, 'Order not found');
 						}
@@ -266,7 +277,7 @@ export const router = new Elysia({
 						WHERE
 							id = ?;
 						`;
-						await conn.query<ResultSetHeader>(order_delete_stmt, [id]); // TODO: or execute ?
+						await conn.execute<ResultSetHeader>(order_delete_stmt, [id]); // TODO: or execute ?
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
@@ -326,7 +337,7 @@ export const router = new Elysia({
 // 						user_id = ?
 // 					`;
 
-// 					const [cart_resutls] = await conn.query<
+// 					const [cart_resutls] = await conn.execute<
 // 						(RowDataPacket & {
 // 							user_id: string;
 // 							book_id: string;
@@ -356,7 +367,7 @@ export const router = new Elysia({
 // 					);
 // 					`;
 
-// 					await conn.query<ResultSetHeader>(create_order_stmt, [
+// 					await conn.execute<ResultSetHeader>(create_order_stmt, [
 // 						order_id,
 // 						user.id,
 // 						500,
@@ -378,11 +389,11 @@ export const router = new Elysia({
 // 					);
 // 					`;
 
-// 					// await conn.query<ResultSetHeader>(create_order_items_stmt, [
+// 					// await conn.execute<ResultSetHeader>(create_order_items_stmt, [
 // 					// 	[order_id, '01920129-d06e-722c-a123-1b96396b0389', 100],
 // 					// 	[order_id, '01920129-ea46-7eea-ac76-f871bc56cfe9', 200],
 // 					// ]);
-// 					await conn.query<ResultSetHeader>(create_order_items_stmt, [
+// 					await conn.execute<ResultSetHeader>(create_order_items_stmt, [
 // 						order_id,
 // 						'01920129-d06e-722c-a123-1b96396b0389',
 // 						100,
