@@ -63,7 +63,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 
 					const countStmt = 'SELECT COUNT(*) AS count FROM users;';
 					const [count] =
-						await conn.query<(RowDataPacket & { count: number })[]>(countStmt);
+						await conn.execute<(RowDataPacket & { count: number })[]>(
+							countStmt,
+						);
 
 					const stmt = `
 					SELECT
@@ -83,9 +85,9 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					OFFSET ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.query<UserRowPacketData[]>(stmt, [
-						limit,
-						offset,
+					const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
+						limit.toString(),
+						offset.toString(),
 					]);
 					conn.release();
 
@@ -123,7 +125,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					WHERE id = ?;
 					`;
 					// TODO: join ?
-					const [results] = await conn.query<UserRowPacketData[]>(stmt, [id]);
+					const [results] = await conn.execute<UserRowPacketData[]>(stmt, [id]);
 					if (!results.length) {
 						conn.release();
 						throw new HTTPError(404, 'User not found');
@@ -156,9 +158,11 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				}) => {
 					const conn = await pool.getConnection();
 
+					// TODO: transaction
+
 					// check email if exists
 					const checkStmt = 'SELECT * FROM users WHERE email = ?';
-					const [checkUser] = await conn.query<RowDataPacket[]>(checkStmt, [
+					const [checkUser] = await conn.execute<RowDataPacket[]>(checkStmt, [
 						email.toLowerCase(),
 					]);
 
@@ -195,7 +199,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 							?
 						);
 				`;
-						await conn.query<ResultSetHeader>(stmt, [
+						await conn.execute<ResultSetHeader>(stmt, [
 							uuidv7(),
 							email.toLowerCase(),
 							first_name,
@@ -214,7 +218,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 
 					// TODO: refresh user created
 
-					const [userCreated] = await conn.query<RowDataPacket[]>(
+					const [userCreated] = await conn.execute<RowDataPacket[]>(
 						'SELECT * FROM users WHERE email = ?',
 						[email],
 					);
@@ -245,7 +249,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					const conn = await pool.getConnection();
 
 					const stmt = 'SELECT * FROM users WHERE id = ?';
-					const [updateUser] = await conn.query<RowDataPacket[]>(stmt, [id]);
+					const [updateUser] = await conn.execute<RowDataPacket[]>(stmt, [id]);
 					if (!updateUser.length) {
 						conn.release();
 						throw new HTTPError(404, 'User not found');
@@ -345,7 +349,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					const conn = await pool.getConnection();
 
 					const userStmt = 'SELECT * FROM users WHERE id = ?';
-					const [deleteUser] = await conn.query<RowDataPacket[]>(userStmt, [
+					const [deleteUser] = await conn.execute<RowDataPacket[]>(userStmt, [
 						id,
 					]);
 
@@ -549,7 +553,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 			const { email, password, first_name, last_name } = body;
 
 			const stmt = 'SELECT * FROM users WHERE email = ?';
-			const [user] = await conn.query<RowDataPacket[]>(stmt, [email]);
+			const [user] = await conn.execute<RowDataPacket[]>(stmt, [email]);
 			if (user.length) {
 				conn.release();
 				throw new HTTPError(400, 'Email already exists');
@@ -581,7 +585,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				);
 				`;
 				const hashedPassword = await getPasswordHash(password);
-				await conn.query<ResultSetHeader>(insertStmt, [
+				await conn.execute<ResultSetHeader>(insertStmt, [
 					uuidv7(),
 					email,
 					first_name,

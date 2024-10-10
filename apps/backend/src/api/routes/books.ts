@@ -37,7 +37,7 @@ export const router = new Elysia({
 
 			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
 			const [count_results] =
-				await conn.query<(RowDataPacket & { count: number })[]>(count_stmt);
+				await conn.execute<(RowDataPacket & { count: number })[]>(count_stmt);
 			if (!count_results.length) {
 				throw new HTTPError(404, 'Book not found');
 			}
@@ -90,9 +90,9 @@ export const router = new Elysia({
 			GROUP BY book.id
 			LIMIT ? OFFSET ?;
 			`;
-			const [results] = await conn.query<BookRowPacketData[]>(book_stmt, [
-				limit,
-				offset,
+			const [results] = await conn.execute<BookRowPacketData[]>(book_stmt, [
+				limit.toString(),
+				offset.toString(),
 			]);
 
 			await conn.commit();
@@ -164,7 +164,7 @@ export const router = new Elysia({
 			`;
 			// TODO: join book_images
 
-			const [results] = await conn.query<BookRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<BookRowPacketData[]>(stmt, [id]);
 			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Book not found');
@@ -215,7 +215,7 @@ export const router = new Elysia({
 						publishers
 					WHERE
 						id = ?`;
-					const [publisher] = await conn.query<RowDataPacket[]>(
+					const [publisher] = await conn.execute<RowDataPacket[]>(
 						publisher_stmt,
 						[publisher_id],
 					);
@@ -231,9 +231,10 @@ export const router = new Elysia({
 						categories
 					WHERE
 						id = ?`;
-					const [category] = await conn.query<RowDataPacket[]>(category_stmt, [
-						category_id,
-					]);
+					const [category] = await conn.execute<RowDataPacket[]>(
+						category_stmt,
+						[category_id],
+					);
 					if (category_id && !category.length) {
 						conn.release();
 						throw new HTTPError(404, 'Category not found');
@@ -287,7 +288,7 @@ export const router = new Elysia({
 							?
 						);
 						`;
-						await conn.query<ResultSetHeader>(book_stmt, [
+						await conn.execute<ResultSetHeader>(book_stmt, [
 							uuidv7(),
 							title,
 							description,
@@ -350,7 +351,7 @@ export const router = new Elysia({
 						WHERE
 							id = ?`;
 
-						const [results] = await conn.query<RowDataPacket[]>(book_stmt, [
+						const [results] = await conn.execute<RowDataPacket[]>(book_stmt, [
 							id,
 						]);
 						if (!results.length) {
@@ -410,7 +411,7 @@ export const router = new Elysia({
 								publishers
 							WHERE
 								id = ?`;
-							const [publisher] = await conn.query<RowDataPacket[]>(
+							const [publisher] = await conn.execute<RowDataPacket[]>(
 								publisher_stmt,
 								[publisher_id],
 							);
@@ -430,7 +431,7 @@ export const router = new Elysia({
 								categories
 							WHERE
 								id = ?`;
-							const [category] = await conn.query<RowDataPacket[]>(
+							const [category] = await conn.execute<RowDataPacket[]>(
 								category_stmt,
 								[category_id],
 							);
@@ -489,7 +490,7 @@ export const router = new Elysia({
 						WHERE
 							id = ?
 						`;
-						const [results] = await conn.query<RowDataPacket[]>(book_stmt, [
+						const [results] = await conn.execute<RowDataPacket[]>(book_stmt, [
 							id,
 						]);
 

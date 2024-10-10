@@ -27,13 +27,11 @@ export const router = new Elysia({
 				publishers.name AS name
 			FROM
 				publishers
-			-- ORDER BY id
-			LIMIT ?
-			OFFSET ?;
+			LIMIT ? OFFSET ?;
 			`;
-			const [results] = await conn.query<PublisherRowPacketData[]>(stmt, [
-				limit,
-				offset,
+			const [results] = await conn.execute<PublisherRowPacketData[]>(stmt, [
+				limit.toString(),
+				offset.toString(),
 			]);
 			conn.release();
 			return {
@@ -60,7 +58,9 @@ export const router = new Elysia({
 				publishers
 			WHERE id = ?;
 			`;
-			const [results] = await conn.query<PublisherRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<PublisherRowPacketData[]>(stmt, [
+				id,
+			]);
 			conn.release();
 			if (!results.length) {
 				throw new HTTPError(404, 'Publisher not found');
@@ -102,7 +102,7 @@ export const router = new Elysia({
 							?
 						);
 						`;
-						await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
+						await conn.execute<ResultSetHeader>(stmt, [uuidv7(), name]);
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
@@ -138,7 +138,7 @@ export const router = new Elysia({
 							publishers
 						WHERE
 							id = ?`;
-						const [updatePublisher] = await conn.query<RowDataPacket[]>(
+						const [updatePublisher] = await conn.execute<RowDataPacket[]>(
 							publisherStmt,
 							[id],
 						);
@@ -187,7 +187,7 @@ export const router = new Elysia({
 							publishers
 						WHERE
 							id = ?`;
-						const [deletePublisher] = await conn.query<RowDataPacket[]>(
+						const [deletePublisher] = await conn.execute<RowDataPacket[]>(
 							publisherStmt,
 							[id],
 						);
@@ -240,7 +240,7 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [publisher_results] = await conn.query<BookRowPacketData[]>(
+			const [publisher_results] = await conn.execute<BookRowPacketData[]>(
 				publisher_stmt,
 				[publisher_id],
 			);
@@ -257,7 +257,7 @@ export const router = new Elysia({
 
 			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
 			const [count_results] =
-				await conn.query<(RowDataPacket & { count: number })[]>(count_stmt);
+				await conn.execute<(RowDataPacket & { count: number })[]>(count_stmt);
 			if (!count_results.length) {
 				throw new HTTPError(404, 'Book not found');
 			}
@@ -313,11 +313,11 @@ export const router = new Elysia({
 				JSON_CONTAINS(publisher, JSON_OBJECT('id', ?))
 			LIMIT ? OFFSET ?;
 			`;
-			const [book_results] = await conn.query<BookRowPacketData[]>(book_stmt, [
-				publisher_id,
-				limit,
-				offset,
-			]);
+
+			const [book_results] = await conn.execute<BookRowPacketData[]>(
+				book_stmt,
+				[publisher_id, limit.toString(), offset.toString()],
+			);
 
 			await conn.commit();
 			conn.release();

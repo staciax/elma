@@ -28,9 +28,9 @@ export const router = new Elysia({
 			LIMIT ?
 			OFFSET ?;
 			`;
-			const [results] = await conn.query<CategoryRowPacketData[]>(stmt, [
-				limit,
-				offset,
+			const [results] = await conn.execute<CategoryRowPacketData[]>(stmt, [
+				limit.toString(),
+				offset.toString(),
 			]);
 			conn.release();
 			return {
@@ -58,7 +58,7 @@ export const router = new Elysia({
 				categories
 			WHERE id = ?;
 			`;
-			const [results] = await conn.query<CategoryRowPacketData[]>(stmt, [id]);
+			const [results] = await conn.execute<CategoryRowPacketData[]>(stmt, [id]);
 			conn.release();
 
 			if (!results.length) {
@@ -98,7 +98,7 @@ export const router = new Elysia({
 						?
 					);
 					`;
-					await conn.query<ResultSetHeader>(stmt, [uuidv7(), name]);
+					await conn.execute<ResultSetHeader>(stmt, [uuidv7(), name]);
 					conn.release();
 
 					set.status = 201;
@@ -125,7 +125,7 @@ export const router = new Elysia({
 							categories
 						WHERE
 							id = ?`;
-						const [updateCategory] = await conn.query<RowDataPacket[]>(
+						const [updateCategory] = await conn.execute<RowDataPacket[]>(
 							categoryStmt,
 							[id],
 						);
@@ -172,7 +172,7 @@ export const router = new Elysia({
 						WHERE
 							id = ?
 						`;
-						const [deleteCategory] = await conn.query<RowDataPacket[]>(
+						const [deleteCategory] = await conn.execute<RowDataPacket[]>(
 							categoryStmt,
 							[id],
 						);
@@ -215,6 +215,8 @@ export const router = new Elysia({
 
 			const conn = await pool.getConnection();
 
+			// TODO: transaction
+
 			const catetory_stmt = `
 			SELECT
 				*
@@ -223,7 +225,7 @@ export const router = new Elysia({
 			WHERE
 				id = ?;
 			`;
-			const [catetory_results] = await conn.query<BookRowPacketData[]>(
+			const [catetory_results] = await conn.execute<BookRowPacketData[]>(
 				catetory_stmt,
 				[category_id],
 			);
@@ -240,7 +242,7 @@ export const router = new Elysia({
 
 			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
 			const [count_results] =
-				await conn.query<(RowDataPacket & { count: number })[]>(count_stmt);
+				await conn.execute<(RowDataPacket & { count: number })[]>(count_stmt);
 			if (!count_results.length) {
 				throw new HTTPError(404, 'Book not found');
 			}
@@ -296,11 +298,10 @@ export const router = new Elysia({
 				JSON_CONTAINS(category, JSON_OBJECT('id', ?))
 			LIMIT ? OFFSET ?;
 			`;
-			const [book_results] = await conn.query<BookRowPacketData[]>(book_stmt, [
-				category_id,
-				limit,
-				offset,
-			]);
+			const [book_results] = await conn.execute<BookRowPacketData[]>(
+				book_stmt,
+				[category_id, limit.toString(), offset.toString()],
+			);
 
 			await conn.commit();
 			conn.release();

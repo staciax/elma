@@ -31,7 +31,10 @@ export const router = new Elysia({
 					LIMIT ?
 					OFFSET ?;
 					`;
-					const [results] = await conn.query(stmt, [limit, offset]);
+					const [results] = await conn.execute(stmt, [
+						limit.toString(),
+						offset.toString(),
+					]);
 					conn.release();
 					return results;
 				},
@@ -144,7 +147,11 @@ export const router = new Elysia({
 					`;
 					// TODO: add WHERE book.is_active = 1
 
-					const [results] = await conn.query(sql, [user.id, limit, offset]);
+					const [results] = await conn.execute(sql, [
+						user.id,
+						limit.toString(),
+						offset.toString(),
+					]);
 					conn.release();
 
 					return { data: results };
@@ -174,9 +181,10 @@ export const router = new Elysia({
 						WHERE
 							id = ?;
 						`;
-						const [bookResults] = await conn.query<RowDataPacket[]>(bookStmt, [
-							book_id,
-						]);
+						const [bookResults] = await conn.execute<RowDataPacket[]>(
+							bookStmt,
+							[book_id],
+						);
 						if (!bookResults.length) {
 							throw new HTTPError(404, 'Product not found');
 						}
@@ -193,7 +201,7 @@ export const router = new Elysia({
 							?
 						);
 						`;
-						await conn.query<ResultSetHeader>(stmt, [user.id, book_id]);
+						await conn.execute<ResultSetHeader>(stmt, [user.id, book_id]);
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
@@ -236,7 +244,7 @@ export const router = new Elysia({
 							book_id = ? AND user_id = ?;
 						`;
 
-						const [cart] = await conn.query<RowDataPacket[]>(cart_stmt, [
+						const [cart] = await conn.execute<RowDataPacket[]>(cart_stmt, [
 							id,
 							user.id,
 						]);
@@ -250,7 +258,10 @@ export const router = new Elysia({
 							book_id = ? AND user_id = ?;
 						`;
 
-						await conn.query<ResultSetHeader>(cart_delete_stmt, [id, user.id]);
+						await conn.execute<ResultSetHeader>(cart_delete_stmt, [
+							id,
+							user.id,
+						]);
 
 						await conn.commit();
 					} catch (error) {

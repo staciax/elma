@@ -23,7 +23,9 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			// TODO: should begin transaction here right?
 
 			const stmt = 'SELECT * FROM users WHERE email=?';
-			const [results] = await conn.query<UserRowPacketData[]>(stmt, [username]);
+			const [results] = await conn.execute<UserRowPacketData[]>(stmt, [
+				username,
+			]);
 			conn.release();
 
 			if (!results.length) {
