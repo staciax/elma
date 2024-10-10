@@ -147,7 +147,18 @@ export const router = new Elysia({
 							throw new HTTPError(404, 'Publisher not found');
 						}
 
-						// TODO: update publisher
+						const updatePublisherStmt = `
+						UPDATE
+							publishers
+						SET
+							name = ?
+						WHERE
+							id = ?;
+						`;
+						await conn.execute<ResultSetHeader>(updatePublisherStmt, [
+							name,
+							id,
+						]);
 
 						await conn.commit();
 					} catch (error) {

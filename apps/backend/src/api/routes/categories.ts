@@ -134,7 +134,14 @@ export const router = new Elysia({
 							throw new HTTPError(404, 'Category not found');
 						}
 
-						// TODO: update category
+						const updateCategoryStmt = `
+						UPDATE categories
+						SET
+							name = ?
+						WHERE
+							id = ?
+						`;
+						await conn.execute<ResultSetHeader>(updateCategoryStmt, [name, id]);
 
 						await conn.commit();
 					} catch (error) {
