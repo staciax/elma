@@ -2,6 +2,52 @@ import z from 'zod';
 
 const envSchema = z
 	.object({
+		// Application
+		NODE_ENV: z
+			.enum(['development', 'test', 'production'], {
+				message: 'NODE_ENV must be one of "development", "test", "production"',
+			})
+			.default('development')
+			.describe('Node environment'),
+		HOSTNAME: z
+			.string()
+			.default('localhost') // TODO: wait for support hostname https://github.com/colinhacks/zod/pull/3692
+			.describe('API hostname'),
+		PORT: z
+			.number({
+				coerce: true,
+				message: 'PORT must be a number',
+			})
+			.int()
+			.positive({ message: 'PORT must be a positive number' })
+			.min(1000, { message: 'PORT should be >= 1000 and < 65536' })
+			.max(65535, { message: 'PORT should be >= 1000 and < 65536' })
+			.default(8000)
+			.describe('API port'),
+
+		// Security
+		BACKEND_CORS_ORIGINS: z
+			.string()
+			.optional()
+			.transform((value) => (value ? value.split(',') : undefined))
+			.pipe(
+				z
+					.union([z.string().trim().url(), z.literal('*')])
+					.array()
+					.optional(),
+			)
+			.describe('Comma-separated list of origins for the CORS policy'),
+		SECRET_KEY: z
+			.string()
+			.default(new Bun.CryptoHasher('sha256').digest('hex'))
+			.describe('Secret key for hashing'),
+		ACCESS_TOKEN_EXPIRE: z
+			.string()
+			.default('1d')
+			.refine((value) => /^\d+[smhdwMy]$/.test(value))
+			.describe('Access token expiration time'),
+
+		// API
 		API_V1_STR: z
 			.string()
 			.trim()
@@ -12,6 +58,8 @@ const envSchema = z
 			}) // TODO: wait for support .not() https://github.com/colinhacks/zod/pull/3709
 			.default('/api/v1')
 			.describe('API version'),
+
+		// Database
 		MYSQL_HOST: z
 			.string()
 			.min(1)
@@ -42,47 +90,8 @@ const envSchema = z
 		// 	.string()
 		// 	.url()
 		// 	.describe('Database connection URL'),
-		NODE_ENV: z
-			.enum(['development', 'test', 'production'], {
-				message: 'NODE_ENV must be one of "development", "test", "production"',
-			})
-			.default('development')
-			.describe('Node environment'),
-		BACKEND_CORS_ORIGINS: z
-			.string()
-			.optional()
-			.transform((value) => (value ? value.split(',') : undefined))
-			.pipe(
-				z
-					.union([z.string().trim().url(), z.literal('*')])
-					.array()
-					.optional(),
-			)
-			.describe('Comma-separated list of origins for the CORS policy'),
-		HOSTNAME: z
-			.string()
-			.default('localhost') // TODO: wait for support hostname https://github.com/colinhacks/zod/pull/3692
-			.describe('API hostname'),
-		PORT: z
-			.number({
-				coerce: true,
-				message: 'PORT must be a number',
-			})
-			.int()
-			.positive({ message: 'PORT must be a positive number' })
-			.min(1000, { message: 'PORT should be >= 1000 and < 65536' })
-			.max(65535, { message: 'PORT should be >= 1000 and < 65536' })
-			.default(8000)
-			.describe('API port'),
-		SECRET_KEY: z
-			.string()
-			.default(new Bun.CryptoHasher('sha256').digest('hex'))
-			.describe('Secret key for hashing'),
-		ACCESS_TOKEN_EXPIRE: z
-			.string()
-			.default('1d')
-			.refine((value) => /^\d+[smhdwMy]$/.test(value))
-			.describe('Access token expiration time'),
+
+		// First superuser
 		FIRST_SUPERUSER: z
 			.string({
 				message: 'FIRST_SUPERUSER is required',
@@ -126,3 +135,5 @@ if (!envServer.success) {
 export type Environment = z.infer<typeof envSchema>;
 
 export const env: Environment = envServer.data;
+
+// export const DATABASE_URI = `mysql://${env.MYSQL_USER}:${env.MYSQL_PASSWORD}@${env.MYSQL_HOST}:${env.MYSQL_PORT}/${env.MYSQL_DB}`;
