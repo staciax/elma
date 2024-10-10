@@ -1,4 +1,5 @@
 import { pool } from '@/db';
+import { UserRoles } from '@/enums';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
@@ -54,7 +55,7 @@ export const router = new Elysia({
 						orders
 					LEFT JOIN
 						order_items ON orders.id = order_items.order_id
-					${user.role === 'CUSTOMER' ? 'WHERE orders.user_id = ?' : ''}
+					${user.role === UserRoles.MEMBER ? 'WHERE orders.user_id = ?' : ''}
 					GROUP BY
 						orders.id
 					LIMIT ?
@@ -62,14 +63,13 @@ export const router = new Elysia({
 					`;
 
 					// const values = [limit.toString(), offset.toString()];
-					// if (user.role === 'CUSTOMER') {
+					// if (user.role === 'MEMBER') {
 					// 	values.unshift(user.id);
 					// }
 
-					const values = (user.role === 'CUSTOMER' ? [user.id] : []).concat([
-						limit.toString(),
-						offset.toString(),
-					]);
+					const values = (
+						user.role === UserRoles.MEMBER ? [user.id] : []
+					).concat([limit.toString(), offset.toString()]);
 
 					const [orders] = await conn.execute<OrderRow[]>(stmt, values);
 
@@ -122,7 +122,7 @@ export const router = new Elysia({
 					`;
 					// orders.user_id = ? should be on WHERE vs JOIN ?
 					// WHERE orders.id = ? AND orders.user_id = ?
-					// WHERE orders.id = ? ${user.role === 'CUSTOMER' ? 'AND orders.user_id = ?' : ''};
+					// WHERE orders.id = ? ${user.role === 'MEMBER' ? 'AND orders.user_id = ?' : ''};
 
 					// console.log(format(stmt, [id, user.id]));
 
@@ -175,8 +175,8 @@ export const router = new Elysia({
 						const user = user_results[0];
 
 						// check user role
-						if (user.role !== 'CUSTOMER') {
-							throw new HTTPError(403, 'Only customer can create order');
+						if (user.role !== UserRoles.MEMBER) {
+							throw new HTTPError(403, 'Only member can create order');
 						}
 
 						// create order

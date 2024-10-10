@@ -1,4 +1,5 @@
 import { pool } from '@/db';
+import { UserRoles } from '@/enums';
 import { HTTPError } from '@/errors';
 import { currentUser, superuser } from '@/plugins/auth';
 import { Message } from '@/schemas/message';
@@ -15,18 +16,9 @@ import {
 } from '@/schemas/users';
 import { getPasswordHash, verifyPassword } from '@/security';
 import type { UserRow } from '@/types/users';
-
 import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
-
-enum Role {
-	SUPERUSER = 'SUPERUSER',
-	ADMIN = 'ADMIN',
-	MANAGER = 'MANAGER',
-	EMPLOYEE = 'EMPLOYEE',
-	CUSTOMER = 'CUSTOMER',
-}
 
 const _session = new Elysia({ name: 'session' })
 	.derive({ as: 'scoped' }, async () => {
@@ -513,7 +505,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 				.delete(
 					'/me',
 					async ({ user }) => {
-						if (user.role === Role.SUPERUSER) {
+						if (user.role === UserRoles.SUPERUSER) {
 							throw new HTTPError(
 								403,
 								'Super user are not allowed to delete themselves',
@@ -591,7 +583,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 					first_name,
 					last_name,
 					hashedPassword,
-					Role.CUSTOMER,
+					UserRoles.MEMBER, // default role
 					true, // TODO: to false wehn email verification is implemented
 				]);
 				await conn.commit();

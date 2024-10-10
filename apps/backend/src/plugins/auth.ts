@@ -1,37 +1,30 @@
 import { pool } from '@/db';
+import { UserRoles } from '@/enums';
 import { HTTPError } from '@/errors';
 import { security } from '@/security';
 import type { UserRow } from '@/types/users';
 
 import { bearer } from '@elysiajs/bearer';
-import { Elysia } from 'elysia';
+import { type Context, Elysia } from 'elysia';
 
-async function _findUserById(_userId: string) {
-	// return prisma.user.findUnique({
-	// 	where: {
-	// 		id: userId,
-	// 	},
-	// });
-	return {};
-}
+// async function _findUserById(_userId: string) {
+// 	// return prisma.user.findUnique({
+// 	// 	where: {
+// 	// 		id: userId,
+// 	// 	},
+// 	// });
+// 	return {};
+// }
 
 // TODO: role-based access control
-type UserRole = {
-	role?: 'user' | 'admin';
-	isSuperuser?: boolean;
-};
-
-enum _Role {
-	SUPERUSER = 'SUPERUSER',
-	ADMIN = 'ADMIN',
-	MANAGER = 'MANAGER',
-	EMPLOYEE = 'EMPLOYEE',
-	CUSTOMER = 'CUSTOMER',
-}
+// type UserRole = {
+// 	role?: 'user' | 'admin';
+// 	isSuperuser?: boolean;
+// };
 
 // TODO: remove duplicate code
 
-export const currentUser = (_role?: UserRole) =>
+export const currentUser = (_role?: UserRoles) =>
 	new Elysia({ name: 'current-user' })
 		.use(bearer())
 		.use(security)
@@ -89,7 +82,7 @@ export const superuser = () =>
 			const user = results[0];
 
 			// TODO: user?.role or user.role
-			if (user?.role !== 'SUPERUSER') {
+			if (user?.role !== UserRoles.SUPERUSER) {
 				throw new HTTPError(403, 'Forbidden');
 			}
 
