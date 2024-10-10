@@ -233,7 +233,7 @@ export const router = new Elysia({
 				},
 			)
 			.patch(
-				'/orders/:id',
+				'/:id',
 				async ({ params: { id } }) => {
 					// TODO: transaction and update order
 					const conn = await pool.getConnection();
@@ -250,7 +250,7 @@ export const router = new Elysia({
 				},
 			)
 			.delete(
-				'/orders/:id',
+				'/:id',
 				async ({ params: { id } }) => {
 					const conn = await pool.getConnection();
 
