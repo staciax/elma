@@ -10,12 +10,20 @@ export const UserRegiser = t.Object({
 	phone_number: t.Optional(t.String({ minLength: 1, maxLength: 20 })),
 });
 
-export type UserRole =
-	| 'SUPERUSER'
-	| 'ADMIN'
-	| 'MANAGER'
-	| 'EMPLOYEE'
-	| 'CUSTOMER';
+// export type UserRole =
+// 	| 'SUPERUSER'
+// 	| 'ADMIN'
+// 	| 'MANAGER'
+// 	| 'EMPLOYEE'
+// 	| 'CUSTOMER';
+
+// enum UserRole {
+// 	SUPERUSER = 'SUPERUSER',
+// 	ADMIN = 'ADMIN',
+// 	MANAGER = 'MANAGER',
+// 	EMPLOYEE = 'EMPLOYEE',
+// 	CUSTOMER = 'CUSTOMER',
+// }
 
 export const UserPublic = t.Object({
 	id: t.String({ format: 'uuid' }),
@@ -24,7 +32,13 @@ export const UserPublic = t.Object({
 	last_name: t.Nullable(t.String()),
 	phone_number: t.Nullable(t.String()),
 	// hashed_password: t.String(),
-	role: t.String(),
+	role: t.Union([
+		t.Literal('SUPERUSER'),
+		t.Literal('ADMIN'),
+		t.Literal('MANAGER'),
+		t.Literal('EMPLOYEE'),
+		t.Literal('CUSTOMER'),
+	]),
 	is_active: t.Integer(), // TODO: cast to boolean
 	created_at: t.Date(),
 	updated_at: t.Date(),
@@ -54,7 +68,6 @@ export const UserCreate = t.Object({
 export const UserUpdate = t.Partial(UserCreate); // TODO remove default values
 
 export const UserMePublic = t.Omit(UserPublic, [
-	'id',
 	'hashed_password',
 	'role',
 	'is_active',
