@@ -116,7 +116,7 @@ export const router = new Elysia({
 	)
 	.post(
 		'/orders',
-		async ({ user }) => {
+		async ({ set, user }) => {
 			const conn = await pool.getConnection();
 
 			// TODO: refresh user cart before creating order
@@ -286,6 +286,7 @@ export const router = new Elysia({
 				// await conn.rollback();
 				await conn.commit();
 
+				set.status = 201;
 				return {
 					data: selectedOrder[0],
 				};
@@ -299,7 +300,7 @@ export const router = new Elysia({
 		},
 		{
 			response: {
-				200: t.Object({}),
+				201: t.Object({}),
 			},
 		},
 	)
