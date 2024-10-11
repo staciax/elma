@@ -42,7 +42,7 @@ export const currentUser = new Elysia({ name: 'current-user' })
 		// get user
 		const conn = await pool.getConnection();
 
-		const stmt = 'SELECT * FROM users WHERE id=?';
+		const stmt = 'SELECT * FROM users WHERE id = ?';
 		const [results] = await conn.execute<UserRow[]>(stmt, [jwtPayload.sub]);
 		conn.release();
 
