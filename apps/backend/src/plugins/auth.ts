@@ -28,6 +28,7 @@ export const currentUser = new Elysia({ name: 'current-user' })
 	.use(bearer())
 	.use(security)
 	.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
+		// validate token
 		if (!bearer) {
 			set.headers['WWW-Authenticate'] = 'Bearer';
 			throw new HTTPError(401, 'Unauthorized');
@@ -37,6 +38,8 @@ export const currentUser = new Elysia({ name: 'current-user' })
 		if (!jwtPayload) {
 			throw new HTTPError(401, 'Unauthorized');
 		}
+
+		// get user
 		const conn = await pool.getConnection();
 
 		const stmt = 'SELECT * FROM users WHERE id=?';
@@ -44,14 +47,13 @@ export const currentUser = new Elysia({ name: 'current-user' })
 		conn.release();
 
 		if (!results.length) {
-			throw new HTTPError(401, 'Unauthorized');
+			throw new HTTPError(404, 'User not found');
 		}
 		const user = results[0];
 
-		// const user = await findUserById(data.sub);
-		// if (!user) {
-		// 	throw new HTTPError(401, 'Unauthorized');
-		// }
+		if (!user.is_active) {
+			throw new HTTPError(400, 'Inactive user');
+		}
 
 		return { user };
 	});
@@ -76,9 +78,13 @@ export const superuser = () =>
 			conn.release();
 
 			if (!results.length) {
-				throw new HTTPError(401, 'Unauthorized');
+				throw new HTTPError(404, 'User not found');
 			}
 			const user = results[0];
+
+			if (!user.is_active) {
+				throw new HTTPError(400, 'Inactive user');
+			}
 
 			// TODO: user?.role or user.role
 			if (user?.role !== UserRoles.SUPERUSER) {
