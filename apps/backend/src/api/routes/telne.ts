@@ -22,7 +22,7 @@ export const router = new Elysia({
 		hide: true,
 	},
 })
-	.use(currentUser())
+	.use(currentUser)
 	.get(
 		'/orders',
 		async () => {
@@ -429,7 +429,7 @@ export const router = new Elysia({
 	)
 	.guard((app) =>
 		app
-			.use(currentUser())
+			.use(currentUser)
 			.get(
 				'/orders/me',
 				async ({ user, query: { limit, offset } }) => {

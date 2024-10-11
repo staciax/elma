@@ -63,7 +63,7 @@ export const router = new Elysia({
 	)
 	.guard((app) =>
 		app
-			.use(currentUser())
+			.use(currentUser)
 			.get(
 				'/me',
 				async ({ user, query: { limit, offset } }) => {

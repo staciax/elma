@@ -24,38 +24,37 @@ import { type Context, Elysia } from 'elysia';
 
 // TODO: remove duplicate code
 
-export const currentUser = (_role?: UserRoles) =>
-	new Elysia({ name: 'current-user' })
-		.use(bearer())
-		.use(security)
-		.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
-			if (!bearer) {
-				set.headers['WWW-Authenticate'] = 'Bearer';
-				throw new HTTPError(401, 'Unauthorized');
-			}
+export const currentUser = new Elysia({ name: 'current-user' })
+	.use(bearer())
+	.use(security)
+	.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
+		if (!bearer) {
+			set.headers['WWW-Authenticate'] = 'Bearer';
+			throw new HTTPError(401, 'Unauthorized');
+		}
 
-			const jwtPayload = await jwt.verify(bearer);
-			if (!jwtPayload) {
-				throw new HTTPError(401, 'Unauthorized');
-			}
-			const conn = await pool.getConnection();
+		const jwtPayload = await jwt.verify(bearer);
+		if (!jwtPayload) {
+			throw new HTTPError(401, 'Unauthorized');
+		}
+		const conn = await pool.getConnection();
 
-			const stmt = 'SELECT * FROM users WHERE id=?';
-			const [results] = await conn.execute<UserRow[]>(stmt, [jwtPayload.sub]);
-			conn.release();
+		const stmt = 'SELECT * FROM users WHERE id=?';
+		const [results] = await conn.execute<UserRow[]>(stmt, [jwtPayload.sub]);
+		conn.release();
 
-			if (!results.length) {
-				throw new HTTPError(401, 'Unauthorized');
-			}
-			const user = results[0];
+		if (!results.length) {
+			throw new HTTPError(401, 'Unauthorized');
+		}
+		const user = results[0];
 
-			// const user = await findUserById(data.sub);
-			// if (!user) {
-			// 	throw new HTTPError(401, 'Unauthorized');
-			// }
+		// const user = await findUserById(data.sub);
+		// if (!user) {
+		// 	throw new HTTPError(401, 'Unauthorized');
+		// }
 
-			return { user };
-		});
+		return { user };
+	});
 
 export const superuser = () =>
 	new Elysia({ name: 'superuser' })

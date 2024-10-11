@@ -371,7 +371,7 @@ export const router = new Elysia({ prefix: '/users', tags: ['users'] })
 	.guard(
 		(app) =>
 			app
-				.use(currentUser())
+				.use(currentUser)
 				.get('/me', async ({ user }) => user, {
 					response: {
 						200: UserMePublic,
