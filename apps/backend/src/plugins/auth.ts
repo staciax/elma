@@ -36,7 +36,7 @@ export const currentUser = new Elysia({ name: 'current-user' })
 
 		const jwtPayload = await jwt.verify(bearer);
 		if (!jwtPayload) {
-			throw new HTTPError(401, 'Not authenticated');
+			throw new HTTPError(403, 'Could not validate credentials');
 		}
 
 		// get user
@@ -71,7 +71,7 @@ export const superuser = () =>
 			}
 			const jwtPayload = await jwt.verify(bearer);
 			if (!jwtPayload) {
-				throw new HTTPError(401, 'Not authenticated');
+				throw new HTTPError(403, 'Could not validate credentials');
 			}
 			const conn = await pool.getConnection();
 
