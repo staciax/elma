@@ -31,12 +31,12 @@ export const currentUser = new Elysia({ name: 'current-user' })
 		// validate token
 		if (!bearer) {
 			set.headers['WWW-Authenticate'] = 'Bearer';
-			throw new HTTPError(401, 'Unauthorized');
+			throw new HTTPError(401, 'Not authenticated');
 		}
 
 		const jwtPayload = await jwt.verify(bearer);
 		if (!jwtPayload) {
-			throw new HTTPError(401, 'Unauthorized');
+			throw new HTTPError(401, 'Not authenticated');
 		}
 
 		// get user
@@ -62,14 +62,16 @@ export const superuser = () =>
 	new Elysia({ name: 'superuser' })
 		.use(bearer())
 		.use(security)
-		.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
+		.derive({ as: 'scoped' }, async ({ jwt, bearer }) => {
+			// validate token
 			if (!bearer) {
-				set.headers['WWW-Authenticate'] = 'Bearer';
-				throw new HTTPError(401, 'Unauthorized');
+				throw new HTTPError(401, 'Not authenticated', {
+					'WWW-Authenticate': 'Bearer',
+				});
 			}
 			const jwtPayload = await jwt.verify(bearer);
 			if (!jwtPayload) {
-				throw new HTTPError(401, 'Unauthorized');
+				throw new HTTPError(401, 'Not authenticated');
 			}
 			const conn = await pool.getConnection();
 
