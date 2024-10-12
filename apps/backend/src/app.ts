@@ -29,6 +29,12 @@ export const app = new Elysia()
 				if (error.headers) {
 					set.headers = error.headers;
 				}
+				if (typeof error.detail === 'string') {
+					return { message: error.detail };
+				}
+				if (typeof error.detail === 'object') {
+					return error.detail;
+				}
 				return { message: error.message };
 			case 'INTERNAL_SERVER_ERROR':
 			case 'UNKNOWN':
