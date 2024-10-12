@@ -6,6 +6,7 @@ import type { UserRow } from '@/types/users';
 
 import { bearer } from '@elysiajs/bearer';
 import { type Context, Elysia } from 'elysia';
+import type { PoolConnection } from 'mysql2/promise';
 
 // async function _findUserById(_userId: string) {
 // 	// return prisma.user.findUnique({
@@ -27,11 +28,12 @@ import { type Context, Elysia } from 'elysia';
 export const currentUser = new Elysia({ name: 'current-user' })
 	.use(bearer())
 	.use(security)
-	.derive({ as: 'scoped' }, async ({ set, jwt, bearer }) => {
+	.derive({ as: 'scoped' }, async ({ jwt, bearer }) => {
 		// validate token
 		if (!bearer) {
-			set.headers['WWW-Authenticate'] = 'Bearer';
-			throw new HTTPError(401, 'Not authenticated');
+			throw new HTTPError(401, 'Not authenticated', {
+				'WWW-Authenticate': 'Bearer',
+			});
 		}
 
 		const jwtPayload = await jwt.verify(bearer);
@@ -94,15 +96,3 @@ export const superuser = () =>
 
 			return { user };
 		});
-
-// export const hasPermission = (
-// 	userRoles: Role | Role[],
-// 	requiredRoles: Role | Role[],
-// ) => {
-// 	const userRolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-// 	const requiredRolesArray = Array.isArray(requiredRoles)
-// 		? requiredRoles
-// 		: [requiredRoles];
-
-// 	return requiredRolesArray.some((role) => userRolesArray.includes(role));
-// };
