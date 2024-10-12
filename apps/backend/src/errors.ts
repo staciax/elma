@@ -6,6 +6,7 @@ type ErrorDetail = string | Record<string, unknown>;
 
 export class HTTPError extends Error {
 	public readonly status: Status;
+	public readonly detail: ErrorDetail;
 	public readonly headers?: Headers;
 
 	constructor(status: Status, detail?: ErrorDetail, headers?: Headers) {
