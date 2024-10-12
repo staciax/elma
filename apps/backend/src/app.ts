@@ -14,8 +14,8 @@ export const app = new Elysia()
 		as: 'global',
 		response: {
 			400: Message,
-			401: Message,
-			403: Message,
+			// 401: Message,
+			// 403: Message,
 			404: Message,
 			500: Message,
 		},

@@ -73,10 +73,6 @@ export const router = new Elysia({
 			params: t.Object({
 				id: t.String({ format: 'uuid' }),
 			}),
-			query: t.Object({
-				limit: t.Optional(t.Number({ default: 100 })),
-				offset: t.Optional(t.Number({ default: 0, minimum: 0 })),
-			}),
 			response: {
 				200: AuthorPublic,
 			},
@@ -92,20 +88,32 @@ export const router = new Elysia({
 
 					// TODO: transaction
 
-					const stmt = `
-					INSERT INTO authors
-					(	
-						id,
-						name
-					)
-					VALUES
-					(	
-						?,
-						?
-					);
-					`;
-					await conn.execute<ResultSetHeader>(stmt, [uuidv7(), name]);
-					conn.release();
+					try {
+						const stmt = `
+						INSERT INTO authors
+						(	
+							id,
+							name
+						)
+						VALUES
+						(	
+							?,
+							?
+						);
+						`;
+						await conn.execute<ResultSetHeader>(stmt, [uuidv7(), name]);
+					} catch (error) {
+						if (error instanceof Error) {
+							const code = 'code' in error ? error.code : undefined;
+							if (code === 'ER_DUP_ENTRY') {
+								throw new HTTPError(409, 'Author already exists');
+							}
+						}
+
+						throw error;
+					} finally {
+						conn.release();
+					}
 
 					set.status = 201;
 					return { message: 'Author created' };
@@ -116,6 +124,7 @@ export const router = new Elysia({
 					}),
 					response: {
 						201: Message,
+						409: Message,
 					},
 				},
 			)
@@ -160,7 +169,15 @@ export const router = new Elysia({
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
-						// TODO: error handling
+
+						// TODO: remove duplicate code
+						if (error instanceof Error) {
+							const code = 'code' in error ? error.code : undefined;
+							if (code === 'ER_DUP_ENTRY') {
+								throw new HTTPError(409, 'Author already exists');
+							}
+						}
+
 						throw error;
 					} finally {
 						conn.release();
@@ -177,6 +194,7 @@ export const router = new Elysia({
 					}),
 					response: {
 						200: Message,
+						409: Message,
 					},
 				},
 			)
