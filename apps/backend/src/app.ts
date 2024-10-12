@@ -14,6 +14,8 @@ export const app = new Elysia()
 		as: 'global',
 		response: {
 			400: Message,
+			401: Message,
+			403: Message,
 			404: Message,
 			500: Message,
 		},
@@ -22,24 +24,15 @@ export const app = new Elysia()
 	// Error handlers
 	.error({ HTTPError })
 	.onError(({ code, error, set }) => {
-		//{ as: 'global' },
-		switch (code) {
-			case 'HTTPError':
-				set.status = error.status;
-				if (error.headers) {
-					set.headers = error.headers;
-				}
-				if (typeof error.detail === 'string') {
-					return { message: error.detail };
-				}
-				if (typeof error.detail === 'object') {
-					return error.detail;
-				}
-				return { message: error.message };
-			case 'INTERNAL_SERVER_ERROR':
-			case 'UNKNOWN':
-				set.status = 500;
-				return { message: error.toString() };
+		if (code === 'HTTPError') {
+			set.status = error.status;
+			if (error.headers) {
+				set.headers = error.headers;
+			}
+			if (typeof error.detail === 'object') {
+				return error.detail;
+			}
+			return { message: error.detail };
 		}
 		// TODO: https://github.com/elysiajs/elysia/releases/tag/1.1.18
 	})
