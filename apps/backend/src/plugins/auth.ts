@@ -5,8 +5,7 @@ import { security } from '@/security';
 import type { UserRow } from '@/types/users';
 
 import { bearer } from '@elysiajs/bearer';
-import { type Context, Elysia } from 'elysia';
-import type { PoolConnection } from 'mysql2/promise';
+import { Elysia } from 'elysia';
 
 // async function _findUserById(_userId: string) {
 // 	// return prisma.user.findUnique({
