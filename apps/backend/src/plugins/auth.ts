@@ -88,8 +88,7 @@ export const superuser = () =>
 				throw new HTTPError(400, 'Inactive user');
 			}
 
-			// TODO: user?.role or user.role
-			if (user?.role !== UserRoles.SUPERUSER) {
+			if (user.role !== UserRoles.SUPERUSER) {
 				throw new HTTPError(403, 'Forbidden');
 			}
 

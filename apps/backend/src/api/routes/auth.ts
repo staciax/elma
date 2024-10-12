@@ -51,8 +51,7 @@ export const router = new Elysia({ prefix: '/auth', tags: ['auth'] })
 			}
 			const user = results[0];
 
-			// TODO: user?.hashed_password or user.hashed_password
-			const isMatch = await verifyPassword(password, user?.hashed_password);
+			const isMatch = await verifyPassword(password, user.hashed_password);
 
 			if (!isMatch) {
 				throw new HTTPError(400, 'Invalid credentials');
