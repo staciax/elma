@@ -296,11 +296,12 @@ export const router = new Elysia({
 					book_authors AS book_author ON book.id = book_author.book_id
 				LEFT JOIN
 					authors AS author ON book_author.author_id = author.id
+				WHERE
+					category.id = ?
 				GROUP BY
 					book.id
-				HAVING
-					JSON_CONTAINS(category, JSON_OBJECT('id', ?))
-				LIMIT ? OFFSET ?;
+				LIMIT ?
+				OFFSET ?;
 				`;
 				const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
 					category_id,

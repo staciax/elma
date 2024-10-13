@@ -329,11 +329,12 @@ export const router = new Elysia({
 					book_authors AS book_author ON book.id = book_author.book_id
 				LEFT JOIN
 					authors AS author ON book_author.author_id = author.id
+				WHERE
+					author.id = ?
 				GROUP BY
 					book.id
-				HAVING
-					JSON_CONTAINS(authors, JSON_OBJECT('id', ?))
-				LIMIT ? OFFSET ?;
+				LIMIT ?
+				OFFSET ?;
 				`;
 				// TODO: can i where author_id = ? instead of having?
 				const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
