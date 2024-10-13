@@ -510,6 +510,7 @@ export const router = new Elysia({
 						if (!deleted) {
 							throw new HTTPError(500, 'Book not deleted');
 						}
+						await conn.commit();
 					} catch (error) {
 						// TODO: error handling
 						await conn.rollback();
