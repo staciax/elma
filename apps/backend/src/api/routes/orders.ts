@@ -204,10 +204,9 @@ export const router = new Elysia({
 							status,
 						]);
 
-						set.status = 201;
-
 						await conn.commit();
 
+						set.status = 201;
 						return { message: 'Order created' };
 					} catch (error) {
 						await conn.rollback();
