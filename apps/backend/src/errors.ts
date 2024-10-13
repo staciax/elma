@@ -9,6 +9,7 @@ export class HTTPError extends Error {
 	public readonly detail: ErrorDetail;
 	public readonly headers?: Headers;
 
+	// TODO: named constructor
 	constructor(status: Status, detail?: ErrorDetail, headers?: Headers) {
 		super();
 		if (!detail) {
