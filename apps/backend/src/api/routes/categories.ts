@@ -184,7 +184,6 @@ export const router = new Elysia({
 							[id],
 						);
 						if (!deleteCategory.length) {
-							conn.release();
 							throw new HTTPError(404, 'Category not found');
 						}
 
@@ -195,7 +194,6 @@ export const router = new Elysia({
 							id = ?
 						`;
 						await conn.execute<ResultSetHeader>(deleteCategoryStmt, [id]);
-						conn.release();
 						await conn.commit();
 					} catch (error) {
 						await conn.rollback();
