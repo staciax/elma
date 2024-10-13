@@ -335,6 +335,7 @@ export const router = new Elysia({
 					JSON_CONTAINS(authors, JSON_OBJECT('id', ?))
 				LIMIT ? OFFSET ?;
 				`;
+				// TODO: can i where author_id = ? instead of having?
 				const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
 					author_id,
 					limit.toString(),
