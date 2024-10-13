@@ -21,15 +21,13 @@ import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
-const _session = new Elysia({ name: 'session' })
+const _dbSession = new Elysia({ name: 'db-session' })
 	.derive({ as: 'scoped' }, async () => {
 		const conn = await pool.getConnection();
 		await conn.beginTransaction();
-		console.log('get conn');
 		return { session: conn };
 	})
 	.onAfterResponse({ as: 'scoped' }, ({ session }) => {
-		console.log('release conn');
 		session.release();
 	});
 
