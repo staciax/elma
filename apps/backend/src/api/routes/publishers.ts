@@ -241,101 +241,100 @@ export const router = new Elysia({
 
 			const conn = await pool.getConnection();
 
-			const publisher_stmt = `
-			SELECT
-				*
-			FROM
-				publishers
-			WHERE
-				id = ?;
-			`;
-			const [publisher_results] = await conn.execute<BookRow[]>(
-				publisher_stmt,
-				[publisher_id],
-			);
+			try {
+				await conn.beginTransaction();
 
-			if (!publisher_results.length) {
-				conn.release();
+				const publisher_stmt = `
+				SELECT
+					*
+				FROM
+					publishers
+				WHERE
+					id = ?;
+				`;
+				const [publisher_results] = await conn.execute<BookRow[]>(
+					publisher_stmt,
+					[publisher_id],
+				);
 
-				throw new HTTPError(404, 'Publisher not found');
-			}
+				if (!publisher_results.length) {
+					throw new HTTPError(404, 'Publisher not found');
+				}
 
-			await conn.beginTransaction();
+				// TODO: set isolation level
 
-			// TODO: set isolation level
+				const count_stmt = 'SELECT COUNT(*) AS count FROM books';
+				const [count_results] =
+					await conn.execute<(RowDataPacket & { count: number })[]>(count_stmt);
+				if (!count_results.length) {
+					throw new HTTPError(404, 'Book not found');
+				}
+				const count = count_results[0].count;
 
-			const count_stmt = 'SELECT COUNT(*) AS count FROM books';
-			const [count_results] =
-				await conn.execute<(RowDataPacket & { count: number })[]>(count_stmt);
-			if (!count_results.length) {
-				throw new HTTPError(404, 'Book not found');
-			}
-			const count = count_results[0].count;
-
-			const book_stmt = `
-			SELECT
-				book.id AS id,
-				book.title AS title,
-				book.description AS description,
-				book.isbn AS isbn,
-				book.price AS price,
-				book.physical_price AS physical_price,
-				book.published_date AS published_date,
-				book.cover_image AS cover_image,
-				book.is_active AS is_active,
-
-				IF(publisher.id IS NULL, NULL,
-					JSON_OBJECT(
-						'id', publisher.id,
-						'name', publisher.name
-					)
-				) AS publisher,
-
-				IF(category.id IS NULL, NULL, 
-					JSON_OBJECT(
-						'id', category.id,
-						'name', category.name
-					)
-				) AS category, 
-
-				IF(COUNT(author.id) = 0, NULL,
-					JSON_ARRAYAGG(
+				const book_stmt = `
+				SELECT
+					book.id AS id,
+					book.title AS title,
+					book.description AS description,
+					book.isbn AS isbn,
+					book.price AS price,
+					book.physical_price AS physical_price,
+					book.published_date AS published_date,
+					book.cover_image AS cover_image,
+					book.is_active AS is_active,
+	
+					IF(publisher.id IS NULL, NULL,
 						JSON_OBJECT(
-							'id', author.id,
-							'name', author.name
+							'id', publisher.id,
+							'name', publisher.name
 						)
-					)
-				) AS authors
-			FROM
-				books as book
-			LEFT JOIN
-				publishers AS publisher ON book.publisher_id = publisher.id
-			LEFT JOIN
-				categories AS category ON book.category_id = category.id
-			LEFT JOIN
-				book_authors AS book_author ON book.id = book_author.book_id
-			LEFT JOIN
-				authors AS author ON book_author.author_id = author.id
-			GROUP BY
-				book.id
-			HAVING
-				JSON_CONTAINS(publisher, JSON_OBJECT('id', ?))
-			LIMIT ? OFFSET ?;
-			`;
+					) AS publisher,
+	
+					IF(category.id IS NULL, NULL, 
+						JSON_OBJECT(
+							'id', category.id,
+							'name', category.name
+						)
+					) AS category, 
+	
+					IF(COUNT(author.id) = 0, NULL,
+						JSON_ARRAYAGG(
+							JSON_OBJECT(
+								'id', author.id,
+								'name', author.name
+							)
+						)
+					) AS authors
+				FROM
+					books as book
+				LEFT JOIN
+					publishers AS publisher ON book.publisher_id = publisher.id
+				LEFT JOIN
+					categories AS category ON book.category_id = category.id
+				LEFT JOIN
+					book_authors AS book_author ON book.id = book_author.book_id
+				LEFT JOIN
+					authors AS author ON book_author.author_id = author.id
+				GROUP BY
+					book.id
+				HAVING
+					JSON_CONTAINS(publisher, JSON_OBJECT('id', ?))
+				LIMIT ? OFFSET ?;
+				`;
 
-			const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
-				publisher_id,
-				limit.toString(),
-				offset.toString(),
-			]);
+				const [book_results] = await conn.execute<BookRow[]>(book_stmt, [
+					publisher_id,
+					limit.toString(),
+					offset.toString(),
+				]);
 
-			await conn.commit();
-			conn.release();
-
-			return {
-				count: count,
-				data: book_results,
-			};
+				return {
+					count: count,
+					data: book_results,
+				};
+			} finally {
+				conn.release();
+			}
 		},
 		{
 			params: t.Object({
