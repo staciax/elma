@@ -15,6 +15,7 @@ export type BookPublic = {
 	category: CategoryPublic | null;
 	publisher: PublisherPublic | null;
 	authors: AuthorPublic[] | null;
+	// TODO: add created at for sorting new books
 };
 
 export type BooksPublic = {
