@@ -140,10 +140,14 @@ export default function Page() {
 	useEffect(() => {
 		const fetchData = async () => {
 			const results = await getShoppingCartMe();
-			setCartItems(results);
+			setCartItems(results.data);
 		};
 		fetchData();
 	}, []);
+
+	useEffect(() => {
+		setSelectedItems(cartItems.map((item) => item.id));
+	}, [cartItems]);
 
 	const toggleSelectAll = () => {
 		if (selectedItems.length === cartItems.length) {
