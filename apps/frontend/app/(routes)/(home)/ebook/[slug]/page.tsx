@@ -9,19 +9,19 @@ import { Suspense } from 'react';
 
 // TODO: remove duplicate code
 
-export async function generateMetadata({ params }: Props) {
-	const slug = params.slug;
+// export async function generateMetadata({ params }: Props) {
+// 	const slug = params.slug;
 
-	const results = await getBook(slug);
-	if (!results) {
-		return null;
-	}
-	const product = results[0];
+// 	const results = await getBook(slug);
+// 	if (!results) {
+// 		return null;
+// 	}
+// 	const product = results[0];
 
-	return {
-		title: product.title,
-	};
-}
+// 	return {
+// 		title: product.title,
+// 	};
+// }
 
 type Props = {
 	params: { slug: string };
@@ -30,18 +30,17 @@ type Props = {
 export default async function Page({ params }: Props) {
 	const slug = params.slug;
 
-	const results = await getBook(slug);
-	if (!results) {
+	const book = await getBook(slug);
+	if (!book) {
 		return notFound();
 	}
-	const product = results[0];
 
 	return (
 		<main className="container flex flex-col items-center">
 			<Suspense fallback={<div>Loading...</div>}>
-				<BookDetail book={product} />
+				<BookDetail book={book} />
 			</Suspense>
-			<section>TEST</section>
+			{/* <section>TEST</section> */}
 		</main>
 	);
 }
