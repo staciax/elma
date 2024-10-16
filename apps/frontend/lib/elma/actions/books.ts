@@ -4,8 +4,7 @@ import axios from '@/lib/axios';
 import type { BookPublic, BooksPublic } from '../types/books';
 
 // TODO: remove array of book instead of single book object in getBook from backend
-export const getBook = async (id: string): Promise<BookPublic[] | null> => {
-	console.log('book id:', id);
+export const getBook = async (id: string): Promise<BookPublic | null> => {
 	try {
 		const response = await axios.get(`/v1/books/${id}/`);
 		return response.data;
