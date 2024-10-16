@@ -5,7 +5,7 @@ import { AxiosError, type AxiosResponse, isAxiosError } from 'axios';
 import type { BookPublic } from '../types';
 import type { ShoppingCart } from '../types/shopping-carts';
 
-export const getShoppingCartMe = async (): Promise<BookPublic[]> => {
+export const getShoppingCartMe = async (): Promise<{ data: BookPublic[] }> => {
 	try {
 		// cache busting
 		// ?timestamp=${new Date().getTime()}
