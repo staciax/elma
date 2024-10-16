@@ -1,64 +1,18 @@
 import { Button } from '@/components/ui/button';
-
-interface Book {
-	id: string;
-	title: string;
-	author: string;
-	cover_image: string;
-	price: number;
-}
-
-const books: Book[] = [
-	{
-		id: '1',
-		title: 'Little Mermaid แห่งท้องทะเลสีฟ้า',
-		author: 'Author 1',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 250,
-	},
-	{
-		id: '2',
-		title: 'SHINSUI',
-		author: 'Author 2',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 180,
-	},
-	{
-		id: '3',
-		title: 'วันไหนที่คุณหายไป',
-		author: 'Author 3',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 200,
-	},
-	{
-		id: '4',
-		title: 'บัตรเครดิต',
-		author: 'Author 4',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 150,
-	},
-	{
-		id: '5',
-		title: 'ฟุตบอลโลก',
-		author: 'Author 5',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 220,
-	},
-	{
-		id: '6',
-		title: 'Book 6',
-		author: 'Author 6',
-		cover_image: 'https://ui.shadcn.com/placeholder.svg?height=200&width=150',
-		price: 190,
-	},
-];
+import type { BookPublic } from '@/lib/elma/types/books';
+import Link from 'next/link';
 
 interface BookSectionProps {
 	title: string;
 	subtitle?: string;
+	books: BookPublic[];
 }
 
-export default function BookSection({ title, subtitle }: BookSectionProps) {
+export default function BookSection({
+	title,
+	subtitle,
+	books,
+}: BookSectionProps) {
 	return (
 		<section className="mb-8">
 			<div className="flex justify-between items-center mb-4">
@@ -71,15 +25,30 @@ export default function BookSection({ title, subtitle }: BookSectionProps) {
 			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
 				{books.map((book) => (
 					<div key={book.id} className="bg-white p-4 rounded-lg shadow">
-						<img
-							src={book.cover_image}
-							alt={book.title}
-							className="w-full h-48 object-cover mb-2 rounded"
-						/>
-						<h4 className="font-semibold text-sm mb-1 truncate">
-							{book.title}
-						</h4>
-						<p className="text-gray-600 text-xs mb-2">{book.author}</p>
+						<Link href={`/ebook/${book.id}`}>
+							<img
+								src={book.cover_image || ''}
+								alt={book.title}
+								className="w-full h-56 object-cover mb-2 rounded"
+							/>
+						</Link>
+						<Link href={`/ebook/${book.id}`}>
+							<h4 className="font-semibold text-sm mb-1 truncate">
+								{book.title}
+							</h4>
+						</Link>
+						{/* <p className="text-gray-600 text-xs mb-2">{book.author}</p> */}
+						<span className="text-gray-600 text-xs mb-2">
+							{/* {productAuthors.map((author) => (
+									<Link key={author.author_id} href={'#'}>
+										{author.author_name}
+									</Link>
+								))} */}
+							{/* TODO: how to join tag a */}
+							{book.authors
+								? book.authors.map((author) => author.name).join(', ')
+								: ''}
+						</span>
 						<p className="text-sm font-bold">{book.price} บาท</p>
 					</div>
 				))}
