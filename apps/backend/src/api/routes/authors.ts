@@ -12,6 +12,24 @@ import { Elysia, t } from 'elysia';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { v7 as uuidv7 } from 'uuid';
 
+import { PageBasedPagination } from '@/schemas/query';
+
+const paginationPlugin = new Elysia({
+	name: 'page-based-pagination',
+})
+	.guard({
+		as: 'scoped',
+		query: PageBasedPagination,
+	})
+	.resolve({ as: 'scoped' }, ({ query: { page, per_page, sort_by } }) => ({
+		q: {
+			limit: per_page,
+			offset: (page - 1) * per_page,
+			sort_by,
+		},
+	}));
+// .derive(async ({ query: { page, per_page, sort_by } }) => {});
+
 export const router = new Elysia({
 	prefix: '/authors',
 	tags: ['authors'],
