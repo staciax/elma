@@ -2,7 +2,7 @@
 	"workbench.editor.customLabels.patterns": {
 		// "**/frontend/app/**/{page,layout}.{ts,tsx}": "${dirname} - ${filename}.ts",
 		// "**/backend/src/**/{schemas,models,routes}/**/*.ts": "${dirname} - ${filename}.ts"
-		"app/**/{page,layout}.{ts,tsx}": "${dirname} - ${filename}.ts"
+		"**/app/**/{page,layout}.{ts,tsx}": "${dirname} - ${filename}.ts"
 	},
 
 	// Editor settings
