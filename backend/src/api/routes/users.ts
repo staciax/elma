@@ -1,0 +1,616 @@
+import { pool } from "@/db";
+import { UserRoles } from "@/enums";
+import { HTTPError } from "@/errors";
+import { currentUser, superuser } from "@/plugins/auth";
+import { Message } from "@/schemas/message";
+import { OffsetBasedPagination } from "@/schemas/query";
+import { UserRegiser } from "@/schemas/users";
+import {
+	UpdatePassword,
+	UserCreate,
+	UserMePublic,
+	UserMeUpdate,
+	UserPublic,
+	UserUpdate,
+	UsersPublic
+} from "@/schemas/users";
+import { getPasswordHash, verifyPassword } from "@/security";
+import type { UserRow } from "@/types/users";
+
+import { Elysia, t } from "elysia";
+import type { ResultSetHeader, RowDataPacket } from "mysql2";
+import { v7 as uuidv7 } from "uuid";
+
+const _dbSession = new Elysia({ name: "db-session" })
+	.derive({ as: "scoped" }, async () => {
+		const conn = await pool.getConnection();
+		await conn.beginTransaction();
+		return { session: conn };
+	})
+	.onAfterResponse({ as: "scoped" }, ({ session }) => {
+		session.release();
+	});
+
+// TODO: try catch every query // finally always release connection
+// or release connection in onAfterHandle
+// https://stackoverflow.com/a/57121491/19394867
+// https://medium.com/@havus.it/understanding-connection-pooling-for-mysql-28be6c9e2dc0
+// TODO: check conn not release
+// TODO: signup/register schema
+
+export const router = new Elysia({ prefix: "/users", tags: ["users"] })
+	// .use(session)
+	// .onAfterHandle(async ({ conn }) => {
+	// 	conn.release();
+	// 	console.log('release conn');
+	// })
+	.guard((app) =>
+		app
+			.use(superuser())
+			.get(
+				"/",
+				async ({ query: { limit, offset } }) => {
+					const conn = await pool.getConnection();
+
+					try {
+						const countStmt = "SELECT COUNT(*) AS count FROM users;";
+						const [count] =
+							await conn.execute<(RowDataPacket & { count: number })[]>(
+								countStmt
+							);
+
+						const stmt = `
+						SELECT
+							users.id AS id,
+							users.email AS email,
+							users.first_name AS first_name,
+							users.last_name AS last_name,
+							users.phone_number AS phone_number,
+							-- users.hashed_password AS hashed_password,
+							users.role AS role,
+							users.is_active AS is_active,
+							users.created_at AS created_at,
+							users.updated_at AS updated_at
+						FROM
+							users
+						LIMIT ?
+						OFFSET ?;
+						`;
+						// TODO: join ?
+						const [results] = await conn.execute<UserRow[]>(stmt, [
+							limit.toString(),
+							offset.toString()
+						]);
+
+						return {
+							count: count[0].count,
+							data: results
+						};
+					} finally {
+						conn.release();
+					}
+				},
+				{
+					query: OffsetBasedPagination,
+					response: {
+						200: UsersPublic
+					}
+				}
+			)
+			.get(
+				"/:id",
+				async ({ params: { id } }) => {
+					const conn = await pool.getConnection();
+
+					try {
+						const stmt = `
+						SELECT
+							users.id AS id,
+							users.email AS email,
+							users.first_name AS first_name,
+							users.last_name AS last_name,
+							users.phone_number AS phone_number,
+							-- users.hashed_password AS hashed_password,
+							users.role AS role,
+							users.is_active AS is_active,
+							users.created_at AS created_at,
+							users.updated_at AS updated_at
+						FROM
+							users
+						WHERE
+							id = ?;
+						`;
+						// TODO: join ?
+						const [results] = await conn.execute<UserRow[]>(stmt, [id]);
+						if (!results.length) {
+							throw new HTTPError(404, "User not found");
+						}
+						return results[0];
+					} finally {
+						conn.release();
+					}
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: "uuid" })
+					}),
+					response: {
+						200: UserPublic
+					}
+				}
+			)
+			.post(
+				"/",
+				async ({
+					set,
+					body: {
+						email,
+						first_name,
+						last_name,
+						phone_number,
+						password,
+						role,
+						is_active
+					}
+				}) => {
+					const conn = await pool.getConnection();
+
+					try {
+						await conn.beginTransaction();
+
+						// check email if exists
+						const checkStmt = "SELECT * FROM users WHERE email = ?";
+						const [checkUser] = await conn.execute<RowDataPacket[]>(checkStmt, [
+							email.toLowerCase()
+						]);
+
+						if (checkUser.length) {
+							throw new HTTPError(400, "Email already exists");
+						}
+
+						const hashedPassword = await getPasswordHash(password);
+
+						const stmt = `
+						INSERT INTO users
+						(
+							id,
+							email,
+							first_name,
+							last_name,
+							phone_number,
+							hashed_password,
+							role,
+							is_active
+						)
+						VALUES
+						(
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?
+						);
+						`;
+						await conn.execute<ResultSetHeader>(stmt, [
+							uuidv7(),
+							email.toLowerCase(),
+							first_name,
+							last_name,
+							phone_number,
+							hashedPassword,
+							role,
+							is_active
+						]);
+
+						const [userCreated] = await conn.execute<UserRow[]>(
+							"SELECT * FROM users WHERE email = ?",
+							[email]
+						);
+
+						if (!userCreated.length) {
+							throw new HTTPError(500, "User not created");
+						}
+
+						await conn.commit();
+
+						set.status = 201;
+						return userCreated[0];
+					} catch (error) {
+						await conn.rollback();
+						// TODO: error handling
+						throw error;
+					} finally {
+						conn.release();
+					}
+				},
+				{
+					body: UserCreate,
+					response: {
+						201: UserPublic
+					}
+				}
+			)
+			.patch(
+				"/:id",
+				async ({ params: { id }, body }) => {
+					if (!Object.keys(body).length) {
+						throw new HTTPError(400, "No data to update");
+					}
+
+					const conn = await pool.getConnection();
+
+					try {
+						await conn.beginTransaction();
+
+						const stmt = "SELECT * FROM users WHERE id = ?";
+						const [updateUser] = await conn.execute<RowDataPacket[]>(stmt, [
+							id
+						]);
+						if (!updateUser.length) {
+						}
+
+						const {
+							email,
+							password,
+							first_name,
+							last_name,
+							phone_number,
+							role,
+							is_active
+						} = body;
+
+						const columns = [];
+						const values = [];
+
+						if (email) {
+							columns.push("email = ?");
+							values.push(email.toLowerCase());
+						}
+
+						if (password) {
+							const hashedPassword = await getPasswordHash(password);
+							columns.push("hashed_password = ?");
+							values.push(hashedPassword);
+						}
+
+						if (first_name) {
+							columns.push("first_name = ?");
+							values.push(first_name);
+						}
+
+						if (last_name) {
+							columns.push("last_name = ?");
+							values.push(last_name);
+						}
+
+						if (phone_number) {
+							columns.push("phone_number = ?");
+							values.push(phone_number);
+						}
+
+						if (role) {
+							columns.push("role = ?");
+							values.push(role);
+						}
+
+						if (is_active !== undefined) {
+							columns.push("is_active = ?");
+							values.push(is_active);
+						}
+
+						if (!columns.length || !values.length) {
+							throw new HTTPError(400, "No data to update");
+						}
+
+						const updateStmt = `
+						UPDATE
+							users
+						SET
+							${columns.join(", ")}
+						WHERE
+							id = ?;
+						`;
+
+						await conn.execute<ResultSetHeader>(updateStmt, [...values, id]);
+						await conn.commit();
+					} catch (error) {
+						// TODO: error handling
+						await conn.rollback();
+						throw error;
+					} finally {
+						conn.release();
+					}
+
+					return { message: "User updated successfully" };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: "uuid" })
+					}),
+					body: UserUpdate,
+					response: {
+						200: Message
+					}
+				}
+			)
+			.delete(
+				"/:id",
+				async ({ params: { id } }) => {
+					const conn = await pool.getConnection();
+
+					try {
+						await conn.beginTransaction();
+
+						const userStmt = "SELECT * FROM users WHERE id = ?";
+						const [deleteUser] = await conn.execute<RowDataPacket[]>(userStmt, [
+							id
+						]);
+						if (!deleteUser.length) {
+							throw new HTTPError(404, "User not found");
+						}
+
+						// delete user
+						const deleteUserStmt = "DELETE FROM users WHERE id = ?";
+						await conn.execute<ResultSetHeader>(deleteUserStmt, [id]);
+
+						await conn.commit();
+					} catch (error) {
+						await conn.rollback();
+						throw error;
+					} finally {
+						conn.release();
+					}
+
+					return { message: "User deleted successfully" };
+				},
+				{
+					params: t.Object({
+						id: t.String({ format: "uuid" })
+					}),
+					response: {
+						200: Message
+					}
+				}
+			)
+	)
+	.guard(
+		(app) =>
+			app
+				.use(currentUser)
+				.get("/me", async ({ user }) => user, {
+					response: {
+						200: UserMePublic
+					}
+				})
+				.patch(
+					"/me",
+					async ({ user, body }) => {
+						if (!Object.keys(body).length) {
+							throw new HTTPError(400, "No data to update");
+						}
+
+						const { email, first_name, last_name, phone_number } = body;
+
+						const columns = [];
+						const values = [];
+
+						// for (const [key, value] of Object.entries(body)) {
+						// 	columns.push(`${key} = ?`);
+						// 	values.push(value);
+						// }
+
+						if (email) {
+							columns.push("email = ?");
+							values.push(email.toLowerCase());
+						}
+
+						if (first_name) {
+							columns.push("first_name = ?");
+							values.push(first_name);
+						}
+
+						if (last_name) {
+							columns.push("last_name = ?");
+							values.push(last_name);
+						}
+
+						if (phone_number) {
+							columns.push("phone_number = ?");
+							values.push(phone_number);
+						}
+
+						if (!columns.length || !values.length) {
+							throw new HTTPError(400, "No data to update");
+						}
+
+						const conn = await pool.getConnection();
+
+						try {
+							await conn.beginTransaction();
+
+							const stmt = `
+							UPDATE
+								users
+							SET
+								${columns.join(", ")}
+							WHERE
+								id = ?;
+							`;
+
+							await conn.execute<ResultSetHeader>(stmt, [...values, user.id]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: "User updated successfully" };
+					},
+					{
+						body: UserMeUpdate,
+						response: { 200: Message }
+					}
+				)
+				.patch(
+					"/me/password",
+					async ({ user, body: { current_password, new_password } }) => {
+						// TODO: check password is same as current password?
+						const passwordIsValid = await verifyPassword(
+							current_password,
+							user.hashed_password
+						);
+
+						if (!passwordIsValid) {
+							throw new HTTPError(400, "Invalid password");
+						}
+
+						if (current_password === new_password) {
+							throw new HTTPError(400, "New password must be different");
+						}
+
+						const conn = await pool.getConnection();
+
+						try {
+							await conn.beginTransaction();
+
+							const hashedPassword = await getPasswordHash(new_password);
+
+							const stmt = `
+							UPDATE
+								users
+							SET
+								hashed_password = ?
+							WHERE
+								id = ?;
+							`;
+							await conn.execute<ResultSetHeader>(stmt, [
+								hashedPassword,
+								user.id
+							]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: "User updated successfully" };
+					},
+					{
+						body: UpdatePassword,
+						response: {
+							200: Message
+						}
+					}
+				)
+				.delete(
+					"/me",
+					async ({ user }) => {
+						if (user.role === UserRoles.SUPERUSER) {
+							throw new HTTPError(
+								403,
+								"Super user are not allowed to delete themselves"
+							);
+						}
+
+						const conn = await pool.getConnection();
+
+						try {
+							await conn.beginTransaction();
+							const stmt = "DELETE FROM users WHERE id = ?";
+							await conn.execute<ResultSetHeader>(stmt, [user.id]);
+							await conn.commit();
+						} catch (error) {
+							// TODO: error handling
+							await conn.rollback();
+							throw error;
+						} finally {
+							conn.release();
+						}
+
+						return { message: "User deleted successfully" };
+					},
+					{
+						response: {
+							200: Message
+						}
+					}
+				)
+		// TODO: me update password
+	)
+	.post(
+		"/signup",
+		async ({ set, body }) => {
+			const conn = await pool.getConnection();
+
+			try {
+				await conn.beginTransaction();
+
+				const { email, password, first_name, last_name } = body;
+
+				const stmt = "SELECT * FROM users WHERE email = ?";
+				const [user] = await conn.execute<RowDataPacket[]>(stmt, [email]);
+				if (user.length) {
+					throw new HTTPError(400, "Email already exists");
+				}
+				// TODO: หรือ insert ไปเลย แล้้วค่อย check ว่า insert ได้ไหม แบบ catch error ว่า email ซ้ำไหม
+
+				const insertStmt = `
+				INSERT INTO users
+				(
+					id,
+					email,
+					first_name,
+					last_name,
+					hashed_password,
+					role,
+					is_active
+				)
+				VALUES
+				(
+					?,
+					?,
+					?,
+					?,
+					?,
+					?,
+					?
+				);
+				`;
+				const hashedPassword = await getPasswordHash(password);
+				await conn.execute<ResultSetHeader>(insertStmt, [
+					uuidv7(),
+					email,
+					first_name,
+					last_name,
+					hashedPassword,
+					UserRoles.MEMBER, // default role
+					true // TODO: to false wehn email verification is implemented
+				]);
+				await conn.commit();
+			} catch (error) {
+				await conn.rollback();
+				// TODO: error handling
+				throw error;
+			} finally {
+				conn.release();
+			}
+
+			set.status = 201;
+			return { message: "User created successfully" };
+		},
+		{
+			body: UserRegiser,
+			response: {
+				201: Message
+			}
+		}
+	);

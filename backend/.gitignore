@@ -1,0 +1,16 @@
+# dependencies
+/node_modules
+
+# build
+/dist
+*.bun-build
+server
+
+# migrations
+migrations/*.json
+
+# log
+*.log
+
+# mics
+.DS_Store
